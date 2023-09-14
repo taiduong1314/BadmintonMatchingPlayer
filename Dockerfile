@@ -8,6 +8,9 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["BadmintonMatching/BadmintonMatching.csproj", "BadmintonMatching/"]
+COPY ["Services/Services.csproj", "Services/"]
+COPY ["Entities/Entities.csproj", "Entities/"]
+COPY ["Repositories/Repositories.csproj", "Repositories/"]
 RUN dotnet restore "BadmintonMatching/BadmintonMatching.csproj"
 COPY . .
 WORKDIR "/src/BadmintonMatching"
