@@ -1,6 +1,8 @@
-﻿namespace Repositories.Intefaces
+﻿using Entities.Models;
+
+namespace Repositories.Intefaces
 {
-    public interface ISubscriptionRepository
+    public interface ISubscriptionRepository : IRepositoryBase<Subscription>
     {
     }
 }

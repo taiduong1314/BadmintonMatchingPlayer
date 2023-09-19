@@ -1,6 +1,8 @@
-﻿namespace Repositories.Intefaces
+﻿using Entities.Models;
+
+namespace Repositories.Intefaces
 {
-    public interface IWishlistRepository
+    public interface IWishlistRepository : IRepositoryBase<Wishlist>
     {
     }
 }

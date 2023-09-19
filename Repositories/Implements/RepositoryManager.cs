@@ -25,6 +25,7 @@ namespace Repositories.Implements
         private IUserRepository _user;
         private IWalletRepository _wallet;
         private IWishlistRepository _wishlist;
+
         public RepositoryManager(DataContext context)
         {
             _context = context;

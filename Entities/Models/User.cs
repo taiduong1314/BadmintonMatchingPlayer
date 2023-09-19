@@ -22,6 +22,7 @@
         public double? Rate { get; set; }
         public int? UserRole { get; set; }
         public string? DeviceToken { get; set; }
+        public string? Email { get; set; }
 
         public virtual Role? UserRoleNavigation { get; set; }
         public virtual ICollection<Post> Posts { get; set; }

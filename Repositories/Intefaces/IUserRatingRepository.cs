@@ -1,6 +1,8 @@
-﻿namespace Repositories.Intefaces
+﻿using Entities.Models;
+
+namespace Repositories.Intefaces
 {
-    public interface IUserRatingRepository
+    public interface IUserRatingRepository : IRepositoryBase<UserRating>
     {
     }
 }
