@@ -27,6 +27,7 @@ namespace Entities
         public virtual DbSet<UserRating> UserRatings { get; set; } = null!;
         public virtual DbSet<Wallet> Wallets { get; set; } = null!;
         public virtual DbSet<Wishlist> Wishlists { get; set; } = null!;
+        public virtual DbSet<VerifyToken> VerifyToken { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -174,6 +175,16 @@ namespace Entities
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.RoleName).HasColumnName("roleName");
+            });
+
+            modelBuilder.Entity<VerifyToken>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Tokens)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_Tokens_Users");
             });
 
             modelBuilder.Entity<Slot>(entity =>

@@ -1,5 +1,13 @@
 ﻿namespace Entities.Models
 {
+    public enum Skills
+    {
+        Beginer = 1,
+        Junior = 2,
+        Middle = 3,
+        Expert = 4,
+        Athlete = 5
+    }
     public partial class User
     {
         public User()
@@ -8,6 +16,7 @@
             Transactions = new HashSet<Transaction>();
             UserRatings = new HashSet<UserRating>();
             Wallets = new HashSet<Wallet>();
+            Tokens = new HashSet<VerifyToken>();
         }
 
         public int Id { get; set; }
@@ -23,9 +32,14 @@
         public int? UserRole { get; set; }
         public string? DeviceToken { get; set; }
         public string? Email { get; set; }
+        public string? PlayingArea { get; set; }
+        public int PlayingLevel { get; set; }
+        public string? PlayingWay { get; set; }
+        public string? SortProfile { get; set; }
 
         public virtual Role? UserRoleNavigation { get; set; }
         public virtual ICollection<Post> Posts { get; set; }
+        public virtual ICollection<VerifyToken> Tokens { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
         public virtual ICollection<UserRating> UserRatings { get; set; }
         public virtual ICollection<Wallet> Wallets { get; set; }

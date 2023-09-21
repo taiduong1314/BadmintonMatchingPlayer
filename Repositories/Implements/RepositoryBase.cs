@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace Repositories.Implements
 {
-    internal class RepositoryBase<T> : IRepositoryBase<T> where T : class
+    public class RepositoryBase<T> : IRepositoryBase<T> where T : class
     {
         private readonly DataContext _context;
 

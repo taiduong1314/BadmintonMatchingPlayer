@@ -21,6 +21,7 @@ namespace Repositories.Intefaces
         IUserRepository User { get; }
         IWalletRepository Wallet { get; }
         IWishlistRepository Wishlist { get; }
+        IVerifyTokenRepository VerifyToken { get; }
         Task SaveAsync();
     }
 }
