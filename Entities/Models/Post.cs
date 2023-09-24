@@ -10,6 +10,7 @@
         public int Id { get; set; }
         public int? IdType { get; set; }
         public int? IdUserTo { get; set; }
+        public string? Title { get; set; }
         public string? AddressSlot { get; set; }
         public DateTime? TimeStart { get; set; }
         public decimal? PriceSlot { get; set; }

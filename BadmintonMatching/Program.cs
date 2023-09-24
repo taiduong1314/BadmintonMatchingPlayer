@@ -29,6 +29,7 @@ builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IHasingServices, HasingServices>();
 builder.Services.AddScoped<IJwtSupport, JwtServices>();
 builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<IPostServices, PostServices>();
 
 var app = builder.Build();
 
