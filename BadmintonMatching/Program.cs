@@ -11,6 +11,18 @@ var builder = WebApplication.CreateBuilder(args);
 var conString = builder.Configuration.GetConnectionString("sqlConnection");
 builder.Services.AddDbContext<DataContext>(opts => opts.UseSqlServer(conString));
 
+var acceptAllCors = "AcceptAllCors";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: acceptAllCors,
+                      policy =>
+                      {
+                          policy.AllowAnyHeader();
+                          policy.AllowAnyMethod();
+                          policy.AllowAnyOrigin();
+                      });
+});
+
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true;
@@ -50,7 +62,8 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
+app.UseRouting(); 
+app.UseCors(acceptAllCors);
 
 app.UseAuthorization();
 
