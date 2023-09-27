@@ -4,6 +4,7 @@ using Entities.ResponseObject;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
+using Services.Util;
 
 namespace Services.Implements
 {
@@ -18,44 +19,13 @@ namespace Services.Implements
 
         public int CreatePost(int user_id, NewPostInfo info)
         {
-            DateTime startTime = DateTime.UtcNow;
-            var startH = string.Empty;
-            if (info.StartTime != null)
-            {
-                foreach (var item in info.StartTime.Split(":"))
-                {
-                    if (startH == string.Empty)
-                    {
-                        startH = item.Replace(":", "");
-                    }
-                    else
-                    {
-                        startTime = new DateTime(info.Year, info.Month, info.Day, int.Parse(startH), int.Parse(item), 0);
-                    }
-                }
-            }
-            DateTime endTime = DateTime.UtcNow;
-            var endH = string.Empty;
-            if (info.EndTime != null)
-            {
-                foreach (var item in info.EndTime.Split(":"))
-                {
-                    if (endH == string.Empty)
-                    {
-                        endH = item.Replace(":", "");
-                    }
-                    else
-                    {
-                        endTime = new DateTime(info.Year, info.Month, info.Day, int.Parse(startH), int.Parse(item), 0);
-                    }
-                }
-            }
             var newPost = new Post
             {
                 Title = info.Title,
                 AddressSlot = info.Address,
-                TimeStart = startTime,
-                TimeEnd = endTime,
+                Days = $"{info.Day}:{info.Month}:{info.Year}",
+                StartTime = info.StartTime,
+                EndTime = info.EndTime,
                 PriceSlot = decimal.Parse(info.Price),
                 QuantitySlot = info.AvailableSlot,
                 ContentPost = info.Description
@@ -70,19 +40,21 @@ namespace Services.Implements
             var res = _repositoryManager.Post.FindByCondition(
                 x => x.AddressSlot != null
                     && x.QuantitySlot > 0
-                    && x.TimeStart > DateTime.UtcNow.AddHours(12), true)
+                    && ServicesUtil.IsInTimePost(x)
+                    , true)
                 .Select(x => x.AddressSlot).ToList();
             return res;
         }
 
         public List<PostInfomation> GetPostByPlayGround(string play_ground)
         {
+            var targetTime = DateTime.UtcNow.AddHours(2);
             var res = new List<PostInfomation>();
             res = _repositoryManager.Post.FindByCondition(
                 x => x.AddressSlot != null
                 && x.AddressSlot == play_ground
                 && x.QuantitySlot > 0
-                && x.TimeStart > DateTime.UtcNow.AddHours(12)
+                    && ServicesUtil.IsInTimePost(x)
                     , true)
                 .Include(x => x.IdUserToNavigation)
                 .Select(x => new PostInfomation
@@ -92,7 +64,7 @@ namespace Services.Implements
                     PostId = x.Id,
                     PostImgUrl = x.ImgUrl,
                     SortDescript = x.ContentPost,
-                    Time = $"{x.TimeStart} - {x.TimeEnd}",
+                    Time = $"{x.StartTime} - {x.EndTime}",
                     UserId = x.IdUserTo,
                     UserImgUrl = x.IdUserToNavigation.ImgUrl,
                     UserName = x.IdUserToNavigation.UserName
@@ -110,7 +82,7 @@ namespace Services.Implements
                     x => x.AddressSlot != null
                     && user.PlayingArea.Contains(x.AddressSlot)
                     && x.QuantitySlot > 0
-                    && x.TimeStart > DateTime.UtcNow.AddHours(12)
+                    && ServicesUtil.IsInTimePost(x)
                         , true)
                     .Include(x => x.IdUserToNavigation)
                     .Select(x => new PostInfomation
@@ -120,7 +92,7 @@ namespace Services.Implements
                         PostId = x.Id,
                         PostImgUrl = x.ImgUrl,
                         SortDescript = x.ContentPost,
-                        Time = $"{x.TimeStart} - {x.TimeEnd}",
+                        Time = $"{x.StartTime} - {x.EndTime}",
                         UserId = x.IdUserTo,
                         UserImgUrl = x.IdUserToNavigation.ImgUrl,
                         UserName = x.IdUserToNavigation.UserName

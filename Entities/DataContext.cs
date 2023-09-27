@@ -28,6 +28,7 @@ namespace Entities
         public virtual DbSet<Wallet> Wallets { get; set; } = null!;
         public virtual DbSet<Wishlist> Wishlists { get; set; } = null!;
         public virtual DbSet<VerifyToken> VerifyToken { get; set; } = null!;
+        public virtual DbSet<Notification> Notifications { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -125,14 +126,6 @@ namespace Entities
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
-                entity.Property(e => e.TimeEnd)
-                    .HasColumnType("datetime")
-                    .HasColumnName("timeEnd");
-
-                entity.Property(e => e.TimeStart)
-                    .HasColumnType("datetime")
-                    .HasColumnName("timeStart");
-
                 entity.HasOne(d => d.IdTypeNavigation)
                     .WithMany(p => p.Posts)
                     .HasForeignKey(d => d.IdType)
@@ -175,6 +168,14 @@ namespace Entities
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.RoleName).HasColumnName("roleName");
+            });
+
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Notifications)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_User_Notifications");
             });
 
             modelBuilder.Entity<VerifyToken>(entity =>
