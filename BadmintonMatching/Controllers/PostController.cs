@@ -5,10 +5,15 @@ using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
 {
+
     [ApiController]
     [Route("api/posts")]
     public class PostController : ControllerBase
     {
+        private List<string> PlaceList = new List<string>
+        {
+
+        };
         private readonly IPostServices _postServices;
         private readonly IUserServices _userServices;
 

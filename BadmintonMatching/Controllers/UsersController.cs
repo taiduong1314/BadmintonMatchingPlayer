@@ -161,14 +161,34 @@ namespace BadmintonMatching.Controllers
                 return Ok(new { ErrorCode = "Can't found user" });
             }
 
-            if(info.NewPassword != info.ReEnterPassword)
+            if (info.NewPassword != info.ReEnterPassword)
             {
                 return Ok(new { ErrorCode = "Password verify not matches" });
             }
 
             bool success = _userServices.UpdatePassword(email, info);
 
-            return Ok(success ? new { Message = "Update Success" } : new {ErrorCode = "Update fail"});
+            return Ok(success ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
         }
+
+        //[HttpGet]
+        //[Route("{user_id}/profile")]
+        //public IActionResult GetProfileOfUser(int user_id)
+        //{
+        //    if (!_userServices.ExistUserId(user_id))
+        //    {
+        //        return Ok(new { ErrorCode = "Can't found user" });
+        //    }
+
+        //    UserDetialInfo info = _userServices.GetUserProfile(user_id);
+        //    if(info != null)
+        //    {
+        //        return Ok(info);
+        //    }
+        //    else
+        //    {
+        //        return Ok(new { ErrorCode = "Can't found user" });
+        //    }
+        //}
     }
 }
