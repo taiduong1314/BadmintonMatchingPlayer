@@ -110,7 +110,7 @@ namespace Services.Implements
                 {
                     if (_repositoryManager.VerifyToken.FindByCondition(x => x.Token == token && x.UserId == user_id, true) == null)
                     {
-                        break;
+                        continue;
                     }
                     _repositoryManager.VerifyToken.Create(new VerifyToken
                     {
@@ -118,6 +118,7 @@ namespace Services.Implements
                         UserId = user_id
                     });
                     _repositoryManager.SaveAsync().Wait();
+                    break;
                 }
             }
             return token;
@@ -263,6 +264,7 @@ namespace Services.Implements
                 FullName = info.FullName,
                 PhoneNumber = info.PhoneNum,
                 UserPassword = info.Password,
+                UserName = info.UserName
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();

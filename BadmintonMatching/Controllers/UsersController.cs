@@ -135,7 +135,7 @@ namespace BadmintonMatching.Controllers
             }
 
             string token = _userServices.CreateVerifyToken(email);
-            return Ok(token);
+            return Ok(new { Token = token });
         }
 
         [HttpPost]
@@ -149,7 +149,7 @@ namespace BadmintonMatching.Controllers
 
             bool success = _userServices.CheckRemoveVefToken(info);
 
-            return Ok(success ? "Verify Success" : new { ErrorCode = "Invalid token" });
+            return Ok(success ? new { Message = "Verify Success" } : new { ErrorCode = "Invalid token" });
         }
 
         [HttpPut]
@@ -168,7 +168,7 @@ namespace BadmintonMatching.Controllers
 
             bool success = _userServices.UpdatePassword(email, info);
 
-            return Ok(success ? "Update success" : new {ErrorCode = "Update fail"});
+            return Ok(success ? new { Message = "Update Success" } : new {ErrorCode = "Update fail"});
         }
     }
 }
