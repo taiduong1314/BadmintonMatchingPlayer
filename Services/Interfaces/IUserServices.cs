@@ -24,5 +24,7 @@ namespace Services.Interfaces
         List<CommentInfos> GetComments(int user_id);
         int SaveComment(int user_id, int user_id_receive_comment, AddCommentToUser comment);
         List<BandedUsers> GetBandedUsers(int user_id);
+        bool BanUnband(int user_id, int user_effect);
+        bool IsAdmin(int user_id);
     }
 }

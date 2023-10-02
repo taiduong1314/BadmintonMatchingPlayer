@@ -26,5 +26,6 @@
         public virtual TypePost? IdTypeNavigation { get; set; }
         public virtual User? IdUserToNavigation { get; set; }
         public virtual ICollection<Slot> Slots { get; set; }
+        public DateTime SavedDate { get; set; }
     }
 }

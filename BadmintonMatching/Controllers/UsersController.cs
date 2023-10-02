@@ -213,5 +213,14 @@ namespace BadmintonMatching.Controllers
             return Ok(bandedLs);
         }
 
+        [HttpPut]
+        [Route("{user_id}/ban_unban/{user_effect}")]
+        public IActionResult BanUnban(int user_id, int user_effect)
+        {
+            bool updateSuccess = _userServices.BanUnband(user_id, user_effect);
+
+            return Ok(updateSuccess ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
+        }
+
     }
 }

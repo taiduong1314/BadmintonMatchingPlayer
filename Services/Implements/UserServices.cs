@@ -12,6 +12,12 @@ using System.Threading.Tasks;
 
 namespace Services.Implements
 {
+    public enum UserRole
+    {
+        Admin = 1,
+        User = 0
+    }
+
     public class UserServices : IUserServices
     {
         private readonly IRepositoryManager _repositoryManager;
@@ -73,6 +79,29 @@ namespace Services.Implements
                     _repositoryManager.SaveAsync().Wait();
                 }
             }
+        }
+
+        public bool BanUnband(int user_id, int user_effect)
+        {
+            var subcipt = _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id && x.UserSubId == user_effect, false).FirstOrDefault();
+
+            if (subcipt != null)
+            {
+                subcipt.IsBanded = !subcipt.IsBanded;
+                _repositoryManager.Subscription.Update(subcipt);
+            }
+            else
+            {
+                subcipt = new Subscription
+                {
+                    IsBanded = true,
+                    UserId = user_id,
+                    UserSubId = user_effect
+                };
+                _repositoryManager.Subscription.Create(subcipt);
+            }
+            _repositoryManager.SaveAsync().Wait();
+            return true;
         }
 
         public bool CheckRemoveVefToken(UserVerifyToken info)
@@ -287,6 +316,17 @@ namespace Services.Implements
             if (user != null)
             {
                 res = user.PlayingLevel;
+            }
+            return res;
+        }
+
+        public bool IsAdmin(int user_id)
+        {
+            var res = false;
+            var user = _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).FirstOrDefault();
+            if (user != null && user.UserRole != null)
+            {
+                res = user.UserRole == (int)UserRole.Admin;
             }
             return res;
         }

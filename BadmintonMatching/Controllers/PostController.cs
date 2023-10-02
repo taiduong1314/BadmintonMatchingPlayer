@@ -69,5 +69,29 @@ namespace BadmintonMatching.Controllers
             List<PostInfomation> res = _postServices.GetPostByPlayGround(play_ground);
             return Ok(res);
         }
+
+        [HttpGet]
+        [Route("{user_id}/managed_all_post")]
+        public IActionResult GetPostByPlayGround(int user_id)
+        {
+            if (!_userServices.ExistUserId(user_id))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
+
+            List<PostInfomation> res = new List<PostInfomation>();
+
+            if (_userServices.IsAdmin(user_id))
+            {
+                res = _postServices.GetManagedPostAdmin(user_id);
+            }
+            else
+            {
+                res = _postServices.GetManagedPost(user_id);
+            }
+
+
+            return Ok(res);
+        }
     }
 }

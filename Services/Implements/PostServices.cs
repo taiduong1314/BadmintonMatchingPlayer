@@ -28,7 +28,8 @@ namespace Services.Implements
                 EndTime = info.EndTime,
                 PriceSlot = decimal.Parse(info.Price),
                 QuantitySlot = info.AvailableSlot,
-                ContentPost = info.Description
+                ContentPost = info.Description,
+                SavedDate = DateTime.UtcNow
             };
             _repositoryManager.Post.Create(newPost);
             _repositoryManager.SaveAsync().Wait();
@@ -53,6 +54,44 @@ namespace Services.Implements
             }
 
             return res;
+        }
+
+        public List<PostInfomation> GetManagedPost(int user_id)
+        {
+            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id, true)
+                .OrderByDescending(x => x.SavedDate)
+                .Include(x => x.IdUserToNavigation)
+                .Select(x => new PostInfomation
+            {
+                Address = x.AddressSlot,
+                AvailableSlot = x.QuantitySlot,
+                PostId = x.Id,
+                PostImgUrl = x.ImgUrl,
+                SortDescript = x.ContentPost,
+                Time = $"{x.StartTime} - {x.EndTime}",
+                UserId = x.IdUserTo,
+                UserImgUrl = x.IdUserToNavigation.ImgUrl,
+                UserName = x.IdUserToNavigation.UserName
+            }).ToList();
+        }
+
+        public List<PostInfomation> GetManagedPostAdmin(int user_id)
+        {
+            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id, true)
+                .OrderByDescending(x => x.SavedDate)
+                .Include(x => x.IdUserToNavigation)
+                .Select(x => new PostInfomation
+                {
+                    Address = x.AddressSlot,
+                    AvailableSlot = x.QuantitySlot,
+                    PostId = x.Id,
+                    PostImgUrl = x.ImgUrl,
+                    SortDescript = x.ContentPost,
+                    Time = $"{x.StartTime} - {x.EndTime}",
+                    UserId = x.IdUserTo,
+                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
+                    UserName = x.IdUserToNavigation.UserName
+                }).ToList();
         }
 
         public List<PostInfomation> GetPostByPlayGround(string play_ground)
