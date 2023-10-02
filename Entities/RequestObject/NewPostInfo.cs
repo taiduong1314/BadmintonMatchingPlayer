@@ -8,6 +8,7 @@ namespace Entities.RequestObject
 {
     public class NewPostInfo
     {
+        public int idType {  get; set; }
         public string? Title { get; set; }
         public string? Address { get; set; }
         public string? Day { get; set; }

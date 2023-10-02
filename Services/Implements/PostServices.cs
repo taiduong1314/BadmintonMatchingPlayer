@@ -21,6 +21,7 @@ namespace Services.Implements
         {
             var newPost = new Post
             {
+                IdType = info.idType,
                 Title = info.Title,
                 AddressSlot = info.Address,
                 Days = $"{info.Day}:{info.Month}:{info.Year}",
