@@ -37,12 +37,21 @@ namespace Services.Implements
 
         public List<string?> GetAllPlayGround()
         {
-            var res = _repositoryManager.Post.FindByCondition(
+            var posts = _repositoryManager.Post.FindByCondition(
                 x => x.AddressSlot != null
                     && x.QuantitySlot > 0
-                    && ServicesUtil.IsInTimePost(x)
                     , true)
-                .Select(x => x.AddressSlot).ToList();
+                .ToList();
+
+            var res = new List<string?>();
+            foreach (var item in posts)
+            {
+                if (ServicesUtil.IsInTimePost(item))
+                {
+                    res.Add(item.AddressSlot);
+                }
+            }
+
             return res;
         }
 
@@ -50,25 +59,32 @@ namespace Services.Implements
         {
             var targetTime = DateTime.UtcNow.AddHours(2);
             var res = new List<PostInfomation>();
-            res = _repositoryManager.Post.FindByCondition(
+            var posts = _repositoryManager.Post.FindByCondition(
                 x => x.AddressSlot != null
                 && x.AddressSlot == play_ground
                 && x.QuantitySlot > 0
-                    && ServicesUtil.IsInTimePost(x)
-                    , true)
-                .Include(x => x.IdUserToNavigation)
-                .Select(x => new PostInfomation
+                , true)
+                .Include(x => x.IdUserToNavigation).ToList();
+
+            foreach (var item in posts)
+            {
+                if (ServicesUtil.IsInTimePost(item))
                 {
-                    Address = x.AddressSlot,
-                    AvailableSlot = x.QuantitySlot,
-                    PostId = x.Id,
-                    PostImgUrl = x.ImgUrl,
-                    SortDescript = x.ContentPost,
-                    Time = $"{x.StartTime} - {x.EndTime}",
-                    UserId = x.IdUserTo,
-                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                    UserName = x.IdUserToNavigation.UserName
-                }).ToList();
+                    res.Add(new PostInfomation
+                    {
+                        Address = item.AddressSlot,
+                        AvailableSlot = item.QuantitySlot,
+                        PostId = item.Id,
+                        PostImgUrl = item.ImgUrl,
+                        SortDescript = item.ContentPost,
+                        Time = $"{item.StartTime} - {item.EndTime}",
+                        UserId = item.IdUserTo,
+                        UserImgUrl = item.IdUserToNavigation.ImgUrl,
+                        UserName = item.IdUserToNavigation.UserName
+                    });
+                }
+            }
+
             return res;
         }
 
@@ -78,25 +94,33 @@ namespace Services.Implements
             var user = _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).FirstOrDefault();
             if (user != null && user.PlayingArea != null)
             {
-                res = _repositoryManager.Post.FindByCondition(
+                var posts = _repositoryManager.Post.FindByCondition(
                     x => x.AddressSlot != null
                     && user.PlayingArea.Contains(x.AddressSlot)
                     && x.QuantitySlot > 0
                     && ServicesUtil.IsInTimePost(x)
                         , true)
                     .Include(x => x.IdUserToNavigation)
-                    .Select(x => new PostInfomation
+                    .ToList();
+
+                foreach (var item in posts)
+                {
+                    if (ServicesUtil.IsInTimePost(item))
                     {
-                        Address = x.AddressSlot,
-                        AvailableSlot = x.QuantitySlot,
-                        PostId = x.Id,
-                        PostImgUrl = x.ImgUrl,
-                        SortDescript = x.ContentPost,
-                        Time = $"{x.StartTime} - {x.EndTime}",
-                        UserId = x.IdUserTo,
-                        UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                        UserName = x.IdUserToNavigation.UserName
-                    }).ToList();
+                        res.Add(new PostInfomation
+                        {
+                            Address = x.AddressSlot,
+                            AvailableSlot = x.QuantitySlot,
+                            PostId = x.Id,
+                            PostImgUrl = x.ImgUrl,
+                            SortDescript = x.ContentPost,
+                            Time = $"{x.StartTime} - {x.EndTime}",
+                            UserId = x.IdUserTo,
+                            UserImgUrl = x.IdUserToNavigation.ImgUrl,
+                            UserName = x.IdUserToNavigation.UserName
+                        });
+                    }
+                }
             }
             return res;
         }

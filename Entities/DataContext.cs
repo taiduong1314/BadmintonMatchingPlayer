@@ -29,6 +29,7 @@ namespace Entities
         public virtual DbSet<Wishlist> Wishlists { get; set; } = null!;
         public virtual DbSet<VerifyToken> VerifyToken { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
+        public virtual DbSet<Comment> Comments { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
