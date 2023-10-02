@@ -100,7 +100,7 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new { ErrorCode = "Can't found user" });
             }
-            List<string> areas = _userServices.GetUserAreas(user_id);
+            var areas = _userServices.GetUserAreas(user_id);
             var res = new List<UserSuggestion>();
             if (areas.Count() > 0)
             {
@@ -134,7 +134,7 @@ namespace BadmintonMatching.Controllers
                 return Ok(new { ErrorCode = "Can't found user" });
             }
 
-            string token = _userServices.CreateVerifyToken(email);
+            var token = _userServices.CreateVerifyToken(email);
             return Ok(new { Token = token });
         }
 
@@ -147,7 +147,7 @@ namespace BadmintonMatching.Controllers
                 return Ok(new { ErrorCode = "Can't found user" });
             }
 
-            bool success = _userServices.CheckRemoveVefToken(info);
+            var success = _userServices.CheckRemoveVefToken(info);
 
             return Ok(success ? new { Message = "Verify Success" } : new { ErrorCode = "Invalid token" });
         }
@@ -166,29 +166,37 @@ namespace BadmintonMatching.Controllers
                 return Ok(new { ErrorCode = "Password verify not matches" });
             }
 
-            bool success = _userServices.UpdatePassword(email, info);
+            var success = _userServices.UpdatePassword(email, info);
 
             return Ok(success ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
         }
 
-        //[HttpGet]
-        //[Route("{user_id}/profile")]
-        //public IActionResult GetProfileOfUser(int user_id)
-        //{
-        //    if (!_userServices.ExistUserId(user_id))
-        //    {
-        //        return Ok(new { ErrorCode = "Can't found user" });
-        //    }
+        [HttpGet]
+        [Route("{user_id}/comments")]
+        public IActionResult GetComments (int user_id)
+        {
+            if (!_userServices.ExistUserId(user_id))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
 
-        //    UserDetialInfo info = _userServices.GetUserProfile(user_id);
-        //    if(info != null)
-        //    {
-        //        return Ok(info);
-        //    }
-        //    else
-        //    {
-        //        return Ok(new { ErrorCode = "Can't found user" });
-        //    }
-        //}
+            var res = _userServices.GetComments(user_id);
+
+            return Ok(res);
+        }
+
+        [HttpPost]
+        [Route("{user_id}/comments/{user_id_receive_comment}")]
+        public IActionResult AddComment(int user_id, int user_id_receive_comment, AddCommentToUser comment)
+        {
+            if (!_userServices.ExistUserId(user_id) || !_userServices.ExistUserId(user_id_receive_comment))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
+
+            int commentId = _userServices.SaveComment(user_id, user_id_receive_comment, comment);
+
+            return Ok(commentId > 0 ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
+        }
     }
 }

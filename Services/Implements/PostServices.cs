@@ -109,15 +109,15 @@ namespace Services.Implements
                     {
                         res.Add(new PostInfomation
                         {
-                            Address = x.AddressSlot,
-                            AvailableSlot = x.QuantitySlot,
-                            PostId = x.Id,
-                            PostImgUrl = x.ImgUrl,
-                            SortDescript = x.ContentPost,
-                            Time = $"{x.StartTime} - {x.EndTime}",
-                            UserId = x.IdUserTo,
-                            UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                            UserName = x.IdUserToNavigation.UserName
+                            Address = item.AddressSlot,
+                            AvailableSlot = item.QuantitySlot,
+                            PostId = item.Id,
+                            PostImgUrl = item.ImgUrl,
+                            SortDescript = item.ContentPost,
+                            Time = $"{item.StartTime} - {item.EndTime}",
+                            UserId = item.IdUserTo,
+                            UserImgUrl = item.IdUserToNavigation.ImgUrl,
+                            UserName = item.IdUserToNavigation.UserName
                         });
                     }
                 }

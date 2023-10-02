@@ -26,6 +26,7 @@ namespace Repositories.Implements
         private IWalletRepository _wallet;
         private IWishlistRepository _wishlist;
         private IVerifyTokenRepository _verifyToken;
+        private ICommentRepository _comment;
 
         public RepositoryManager(DataContext context)
         {
@@ -44,6 +45,7 @@ namespace Repositories.Implements
             _wallet = new WalletRepository(_context);
             _wishlist = new WishlistRepository(_context);
             _verifyToken = new VerifyTokenRepository(_context);
+            _comment = new CommentRepository(_context);
         }
         public IHistoryTransactionRepository HistoryTransaction
         {
@@ -141,6 +143,13 @@ namespace Repositories.Implements
             get
             {
                 return _verifyToken;
+            }
+        }
+        public ICommentRepository Comment
+        {
+            get
+            {
+                return _comment;
             }
         }
         public Task SaveAsync() => _context.SaveChangesAsync();

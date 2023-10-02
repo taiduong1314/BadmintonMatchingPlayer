@@ -21,5 +21,6 @@ namespace Services.Interfaces
         string CreateVerifyToken(string? email);
         bool CheckRemoveVefToken(UserVerifyToken info);
         bool UpdatePassword(string email, UpdatePassword info);
+        List<CommentInfos> GetComments(int user_id);
     }
 }

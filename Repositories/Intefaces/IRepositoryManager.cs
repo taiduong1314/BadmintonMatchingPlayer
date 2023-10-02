@@ -22,6 +22,7 @@ namespace Repositories.Intefaces
         IWalletRepository Wallet { get; }
         IWishlistRepository Wishlist { get; }
         IVerifyTokenRepository VerifyToken { get; }
+        ICommentRepository Comment { get; }
         Task SaveAsync();
     }
 }

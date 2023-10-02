@@ -189,6 +189,31 @@ namespace Services.Implements
             return res;
         }
 
+        public List<CommentInfos> GetComments(int user_id)
+        {
+            var comments = _repositoryManager.Comment.FindByCondition(x => x.TargetTo == "User" && x.IdTarget == user_id, true)
+                .Select(x => new CommentInfos
+                {
+                    Content = x.Content,
+                    SavedDate = x.SavedDate,
+                    UserId = user_id
+                }).ToList();
+
+            for(var i = 0; i < comments.Count; i++)
+            {
+                var comment = comments[i];
+                var userCmt = _repositoryManager.User.FindByCondition(x => x.Id == comment.UserId, true).FirstOrDefault();
+                if (userCmt != null)
+                {
+                    comment.UserName = userCmt.UserName;
+                    comment.TotalRate = userCmt.TotalRate;
+                    comment.UserAvatar = userCmt.ImgUrl;
+                    comments[i] = comment;
+                }
+            }
+            return comments;
+        }
+
         public UserInformation GetExistUser(LoginInformation info)
         {
             var res = new UserInformation();
@@ -269,6 +294,22 @@ namespace Services.Implements
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();
             return user.Id;
+        }
+
+        public int SaveComment(int user_id, int user_id_receive_comment, AddCommentToUser comment)
+        {
+            var saveComment = new Comment
+            {
+                Content = comment.Content,
+                IdTarget = user_id_receive_comment,
+                UserId = user_id,
+                SavedDate = DateTime.UtcNow,
+                TargetTo = "User"
+            };
+
+            _repositoryManager.Comment.Create(saveComment);
+            _repositoryManager.SaveAsync().Wait();
+            return saveComment.Id;
         }
 
         public bool UpdatePassword(string email, UpdatePassword info)
