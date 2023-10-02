@@ -22,5 +22,7 @@ namespace Services.Interfaces
         bool CheckRemoveVefToken(UserVerifyToken info);
         bool UpdatePassword(string email, UpdatePassword info);
         List<CommentInfos> GetComments(int user_id);
+        int SaveComment(int user_id, int user_id_receive_comment, AddCommentToUser comment);
+        List<BandedUsers> GetBandedUsers(int user_id);
     }
 }

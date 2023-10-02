@@ -198,5 +198,20 @@ namespace BadmintonMatching.Controllers
 
             return Ok(commentId > 0 ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
         }
+
+        [HttpGet]
+        [Route("{user_id}/banded_users")]
+        public IActionResult GetBandedUsers(int user_id)
+        {
+            if (!_userServices.ExistUserId(user_id))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
+
+            List<BandedUsers> bandedLs = _userServices.GetBandedUsers(user_id);
+
+            return Ok(bandedLs);
+        }
+
     }
 }

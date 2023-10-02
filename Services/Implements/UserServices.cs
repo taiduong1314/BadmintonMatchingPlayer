@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
 using System;
@@ -187,6 +188,20 @@ namespace Services.Implements
                 res.AddRange(users);
             }
             return res;
+        }
+
+        public List<BandedUsers> GetBandedUsers(int user_id)
+        {
+            var banded_user = _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id && x.IsBanded, true)
+                .Include(x => x.UserSub)
+                .Select(x => new BandedUsers
+                {
+                    UserId = x.UserSubId,
+                    ImgUrl = x.UserSub.ImgUrl,
+                    UserName = x.UserSub.UserName
+                })
+                .ToList();
+            return banded_user;
         }
 
         public List<CommentInfos> GetComments(int user_id)
