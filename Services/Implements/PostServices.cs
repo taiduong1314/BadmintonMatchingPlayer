@@ -98,7 +98,6 @@ namespace Services.Implements
                     x => x.AddressSlot != null
                     && user.PlayingArea.Contains(x.AddressSlot)
                     && x.QuantitySlot > 0
-                    && ServicesUtil.IsInTimePost(x)
                         , true)
                     .Include(x => x.IdUserToNavigation)
                     .ToList();
