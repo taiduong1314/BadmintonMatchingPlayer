@@ -26,5 +26,10 @@ namespace Services.Interfaces
         List<BandedUsers> GetBandedUsers(int user_id);
         bool BanUnband(int user_id, int user_effect);
         bool IsAdmin(int user_id);
+        UserProfile GetUserProfileSetting(int user_id);
+        double? GetHelpful(int user_id);
+        double? GetFriendly(int user_id);
+        double? GetTrusted(int user_id);
+        double? GetLevelSkill(int user_id);
     }
 }

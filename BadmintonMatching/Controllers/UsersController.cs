@@ -221,6 +221,22 @@ namespace BadmintonMatching.Controllers
 
             return Ok(updateSuccess ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
         }
+        [HttpGet]
+        [Route("{user_id}/profile")]
+        public IActionResult GetUserProfile(int user_id)
+        {
+            if (!_userServices.ExistUserId(user_id))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
+            var res = _userServices.GetUserProfileSetting(user_id);
+            res.Helpful = _userServices.GetHelpful(user_id);
+            res.Friendly = _userServices.GetFriendly(user_id);
+            res.Trusted = _userServices.GetTrusted(user_id);
+            res.LevelSkill = _userServices.GetLevelSkill(user_id);
+
+            return Ok(res);
+        }
 
     }
 }

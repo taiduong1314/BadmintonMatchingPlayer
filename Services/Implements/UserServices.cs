@@ -7,6 +7,7 @@ using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -275,6 +276,30 @@ namespace Services.Implements
             return res;
         }
 
+        public double? GetFriendly(int user_id)
+        {
+            var res = _repositoryManager.UserRating.FindByCondition(x=> x.IdUserRated == user_id, true).Select(x => x.Friendly).Average();
+            return res;
+        }
+
+        public double? GetHelpful(int user_id)
+        {
+            var res = _repositoryManager.UserRating.FindByCondition(x => x.IdUserRated == user_id, true).Select(x => x.Helpful).Average();
+            return res;
+        }
+
+        public double? GetLevelSkill(int user_id)
+        {
+            var res = _repositoryManager.UserRating.FindByCondition(x => x.IdUserRated == user_id, true).Select(x => x.LevelSkill).Average();
+            return res;
+        }
+
+        public double? GetTrusted(int user_id)
+        {
+            var res = _repositoryManager.UserRating.FindByCondition(x => x.IdUserRated == user_id, true).Select(x => x.Trusted).Average();
+            return res;
+        }
+
         public List<string> GetUserAreas(int user_id)
         {
             var res = new List<string>();
@@ -307,6 +332,19 @@ namespace Services.Implements
                 }
             }
             return res;
+        }
+
+        public UserProfile GetUserProfileSetting(int user_id)
+        {
+            var res = _repositoryManager.User.FindByCondition(x => x.Id == user_id, false)
+                .Select(x => new UserProfile
+                {
+                    ImgUrl = x.ImgUrl,
+                    FullName = x.FullName,
+                    TotalRate = x.TotalRate,
+                    SortProfile = x.SortProfile,
+                });
+            return (UserProfile)res;
         }
 
         public int GetUserSkill(int user_id)
