@@ -343,8 +343,8 @@ namespace Services.Implements
                     FullName = x.FullName,
                     TotalRate = x.TotalRate,
                     SortProfile = x.SortProfile,
-                });
-            return (UserProfile)res;
+                }).FirstOrDefault();
+            return res;
         }
 
         public int GetUserSkill(int user_id)
