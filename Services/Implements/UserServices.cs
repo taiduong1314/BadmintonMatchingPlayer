@@ -269,7 +269,11 @@ namespace Services.Implements
                     Avatar = user.ImgUrl,
                     Id = user.Id,
                     UserName = user.FullName,
-                    Token = _jwtSupport.CreateToken(1, user.Id)
+                    Token = _jwtSupport.CreateToken(1, user.Id),
+                    PlayingArea = user.PlayingArea,
+                    PlayingLevel = user.PlayingLevel,
+                    PlayingWay = user.PlayingWay,
+                    IsNewUser = user.PlayingArea == null || user.PlayingLevel == 0 || user.PlayingWay == null
                 };
             }
             return res;
