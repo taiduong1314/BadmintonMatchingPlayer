@@ -1,4 +1,5 @@
-﻿using Entities.RequestObject;
+﻿using Entities.Models;
+using Entities.RequestObject;
 using Entities.ResponseObject;
 
 namespace Services.Interfaces
@@ -31,5 +32,6 @@ namespace Services.Interfaces
         double? GetFriendly(int user_id);
         double? GetTrusted(int user_id);
         double? GetLevelSkill(int user_id);
+        Task<List<User>> GetAllAccount();
     }
 }

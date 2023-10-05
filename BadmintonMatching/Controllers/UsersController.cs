@@ -1,7 +1,9 @@
-﻿using Entities.RequestObject;
+﻿using Entities.RequestFeatures;
+using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Mvc;
+using Repositories.Intefaces;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -11,6 +13,7 @@ namespace BadmintonMatching.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserServices _userServices;
+        private readonly IRepositoryManager _repository;
 
         public UsersController(IUserServices userServices)
         {
@@ -237,6 +240,14 @@ namespace BadmintonMatching.Controllers
 
             return Ok(res);
         }
-
+        #region Get all user
+        [HttpGet]
+        [Route("GetListUser")]
+        public async Task<IActionResult> GetAllAccount()
+        {
+            var res = await _userServices.GetAllAccount();
+            return Ok(res);
+        }
+        #endregion
     }
 }

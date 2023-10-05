@@ -220,6 +220,35 @@ namespace Services.Implements
             return res;
         }
 
+        public async Task<List<User>> GetAllAccount()
+        {
+            var res = await _repositoryManager.User.FindAll(false)
+                .Select( x => new User
+                {
+                    Id= x.Id,
+                    DeviceToken = x.DeviceToken,
+                    Email = x.Email,
+                    FullName = x.FullName,
+                    ImgUrl = x.ImgUrl,
+                    IsActive = x.IsActive,
+                    Notifications = x.Notifications,
+                    PhoneNumber = x.PhoneNumber,
+                    PlayingArea = x.PlayingArea,
+                    PlayingLevel = x.PlayingLevel,
+                    PlayingWay = x.PlayingWay,
+                    Posts = x.Posts,
+                    Rate = x.Rate,
+                    SortProfile = x.SortProfile,Tokens = x.Tokens,
+                    TotalRate = x.TotalRate,
+                    Transactions = x.Transactions,
+                    UserAddress = x.UserAddress,
+                    UserName = x.UserName,
+                    UserPassword = x.UserPassword,
+                    UserRatings = x.UserRatings
+                }).ToListAsync();
+            return res;
+        }
+
         public List<BandedUsers> GetBandedUsers(int user_id)
         {
             var banded_user = _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id && x.IsBanded, true)
