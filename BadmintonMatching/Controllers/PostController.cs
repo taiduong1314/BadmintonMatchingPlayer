@@ -93,5 +93,26 @@ namespace BadmintonMatching.Controllers
 
             return Ok(res);
         }
+        [HttpGet]
+        [Route("{post_id}/details")]
+        public IActionResult GetDetailPost(int id_post)
+        {
+           var res = _postServices.GetPostDetail(id_post);
+           return Ok(res);
+        }
+        [HttpGet]
+        [Route("{user_id}/post_suggestion")]
+        public IActionResult GetListOptionalPost()
+        {
+            var res = _postServices.GetListOptionalPost();
+            return Ok(res);
+        }
+        [HttpGet]
+        [Route("GetListPost")]
+        public async Task<IActionResult> GetListPost()
+        {
+            var res = await _postServices.GetAllPost();
+            return Ok(res);
+        }
     }
 }

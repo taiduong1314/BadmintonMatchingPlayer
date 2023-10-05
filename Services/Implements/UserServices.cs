@@ -7,8 +7,10 @@ using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Implements
 {
@@ -120,6 +122,20 @@ namespace Services.Implements
             return false;
         }
 
+        public int CreateReport(int user_id, int userreport_id, AddReport report)
+        {
+            var saveReport = new Report
+            {
+                reportContent = report.Content,
+                IdUserTo = user_id,
+                IdUserFrom = userreport_id,
+                TimeReport = DateTime.UtcNow,
+            };
+            _repositoryManager.Report.Create(saveReport);
+            _repositoryManager.SaveAsync().Wait();
+            return saveReport.Id;
+        }
+
         public string CreateVerifyToken(string? email)
         {
             var random = new Random();
@@ -219,6 +235,35 @@ namespace Services.Implements
             return res;
         }
 
+        public async Task<List<User>> GetAllAccount()
+        {
+            var res = await _repositoryManager.User.FindAll(false)
+                .Select( x => new User
+                {
+                    Id= x.Id,
+                    DeviceToken = x.DeviceToken,
+                    Email = x.Email,
+                    FullName = x.FullName,
+                    ImgUrl = x.ImgUrl,
+                    IsActive = x.IsActive,
+                    Notifications = x.Notifications,
+                    PhoneNumber = x.PhoneNumber,
+                    PlayingArea = x.PlayingArea,
+                    PlayingLevel = x.PlayingLevel,
+                    PlayingWay = x.PlayingWay,
+                    Posts = x.Posts,
+                    Rate = x.Rate,
+                    SortProfile = x.SortProfile,Tokens = x.Tokens,
+                    TotalRate = x.TotalRate,
+                    Transactions = x.Transactions,
+                    UserAddress = x.UserAddress,
+                    UserName = x.UserName,
+                    UserPassword = x.UserPassword,
+                    UserRatings = x.UserRatings
+                }).ToListAsync();
+            return res;
+        }
+
         public List<BandedUsers> GetBandedUsers(int user_id)
         {
             var banded_user = _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id && x.IsBanded, true)
@@ -279,6 +324,45 @@ namespace Services.Implements
             return res;
         }
 
+        public double? GetFriendly(int user_id)
+        {
+            var res = _repositoryManager.UserRating.FindByCondition(x=> x.IdUserRated == user_id, true).Select(x => x.Friendly).Average();
+            return res;
+        }
+
+        public double? GetHelpful(int user_id)
+        {
+            var res = _repositoryManager.UserRating.FindByCondition(x => x.IdUserRated == user_id, true).Select(x => x.Helpful).Average();
+            return res;
+        }
+
+        public double? GetLevelSkill(int user_id)
+        {
+            var res = _repositoryManager.UserRating.FindByCondition(x => x.IdUserRated == user_id, true).Select(x => x.LevelSkill).Average();
+            return res;
+        }
+
+        public SelfProfile GetSelfProfile(int user_id)
+        {
+            var res = _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).Select(x => new SelfProfile
+            {
+                FullName = x.FullName,
+                ImgUrl = x.ImgUrl,
+                PhoneNumber = x.PhoneNumber,
+                SortProfile =x.SortProfile,
+                UserAddress = x.UserAddress,
+                UserName = x.UserName
+            }).FirstOrDefault();
+           return res;
+
+        }
+
+        public double? GetTrusted(int user_id)
+        {
+            var res = _repositoryManager.UserRating.FindByCondition(x => x.IdUserRated == user_id, true).Select(x => x.Trusted).Average();
+            return res;
+        }
+
         public List<string> GetUserAreas(int user_id)
         {
             var res = new List<string>();
@@ -310,6 +394,19 @@ namespace Services.Implements
                     }
                 }
             }
+            return res;
+        }
+
+        public UserProfile GetUserProfileSetting(int user_id)
+        {
+            var res = _repositoryManager.User.FindByCondition(x => x.Id == user_id, false)
+                .Select(x => new UserProfile
+                {
+                    ImgUrl = x.ImgUrl,
+                    FullName = x.FullName,
+                    TotalRate = x.TotalRate,
+                    SortProfile = x.SortProfile,
+                }).FirstOrDefault();
             return res;
         }
 
@@ -382,6 +479,29 @@ namespace Services.Implements
                 return true;
             }
             return false;
+        }
+
+        public async Task<ObjectResult> UpdateProfile(int user_id, UpdateProfileUser param, bool trackChanges)
+        {
+            var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, trackChanges)
+                .FirstOrDefaultAsync();
+            if(user != null)
+            {
+                user.UserName = param.UserName;
+                user.FullName = param.FullName;
+                user.ImgUrl = param.ImgUrl;
+                user.PhoneNumber = param.PhoneNumber;
+                user.UserAddress = param.UserAddress;
+                user.SortProfile = param.SortProfile;
+                await _repositoryManager.SaveAsync();
+
+                return new OkObjectResult(new { message = "Profile updated successfully" });
+            }
+            else
+            {
+                return new NotFoundObjectResult(new { message = "User with the specified ID not found" });
+
+            }
         }
     }
 }

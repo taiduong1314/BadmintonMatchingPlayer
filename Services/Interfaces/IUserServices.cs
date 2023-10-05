@@ -1,5 +1,7 @@
-﻿using Entities.RequestObject;
+﻿using Entities.Models;
+using Entities.RequestObject;
 using Entities.ResponseObject;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Interfaces
 {
@@ -26,5 +28,14 @@ namespace Services.Interfaces
         List<BandedUsers> GetBandedUsers(int user_id);
         bool BanUnband(int user_id, int user_effect);
         bool IsAdmin(int user_id);
+        UserProfile GetUserProfileSetting(int user_id);
+        double? GetHelpful(int user_id);
+        double? GetFriendly(int user_id);
+        double? GetTrusted(int user_id);
+        double? GetLevelSkill(int user_id);
+        Task<List<User>> GetAllAccount();
+        Task<ObjectResult> UpdateProfile(int user_id, UpdateProfileUser param, bool trackChanges);
+        int CreateReport(int user_id, int userreport_id, AddReport report);
+        SelfProfile GetSelfProfile(int user_id);
     }
 }

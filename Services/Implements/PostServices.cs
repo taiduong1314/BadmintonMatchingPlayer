@@ -56,6 +56,54 @@ namespace Services.Implements
             return res;
         }
 
+        public async Task<List<Post>> GetAllPost()
+        {
+            var res = await _repositoryManager.Post.FindAll(false)
+                .Select(x => new Post
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    AddressSlot = x.AddressSlot,
+                    CategorySlot = x.CategorySlot,
+                    ContentPost = x.ContentPost, SavedDate = DateTime.UtcNow,
+                    Days = x.Days,
+                    EndTime = x.EndTime,
+                    StartTime = x.StartTime,
+                    IdType = x.IdType,
+                    IdTypeNavigation = x.IdTypeNavigation,
+                    IdUserTo = x.IdUserTo,
+                    IdUserToNavigation = x.IdUserToNavigation,
+                    ImgUrl = x.ImgUrl,
+                    LevelSlot = x.LevelSlot,
+                    PriceSlot = x.PriceSlot,
+                    QuantitySlot = x.QuantitySlot,
+                    Slots = x.Slots,
+                    Status = x.Status
+                    
+                }).ToListAsync();
+            return res;
+        }
+
+        public List<PostOptional> GetListOptionalPost()
+        {
+            return _repositoryManager.Post.FindByCondition(x => x.QuantitySlot > 0,true)
+                .OrderByDescending(x => x.SavedDate)
+                .Include(x => x.IdUserToNavigation)
+                .Select(x=> new PostOptional
+                {
+                    AddressSlot = x.AddressSlot,
+                    ContentPost = x.ContentPost,
+                    Days = x.Days,
+                    ImgUrlPost = x.ImgUrl,                   
+                    EndTime = x.EndTime,
+                    StartTime = x.StartTime,
+                    QuantitySlot = x.QuantitySlot,
+                    FullName = x.IdUserToNavigation.FullName,                  
+                    UserImgUrl = x.IdUserToNavigation.ImgUrl
+
+                }).ToList();
+        }
+
         public List<PostInfomation> GetManagedPost(int user_id)
         {
             return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id, true)
@@ -124,6 +172,29 @@ namespace Services.Implements
                 }
             }
 
+            return res;
+        }
+
+        public PostDetail GetPostDetail(int id_post)
+        {
+            var res = _repositoryManager.Post.FindByCondition(x => x.Id == id_post, false).Include(x => x.IdUserToNavigation)
+                .Select(x => new PostDetail
+                {
+                    AddressSlot = x.AddressSlot,
+                    CategorySlot = x.CategorySlot,
+                    ContentPost = x.ContentPost,
+                    Days = x.Days,
+                    EndTime = x.EndTime,
+                    FullName = x.IdUserToNavigation.FullName,
+                    ImgUrl = x.ImgUrl,
+                    LevelSlot = x.LevelSlot,
+                    PriceSlot = x.PriceSlot,
+                    QuantitySlot = x.QuantitySlot,
+                    ImgUrlUser = x.IdUserToNavigation.ImgUrl,
+                    SortProfile = x.IdUserToNavigation.SortProfile,
+                    StartTime = x.StartTime,
+                    TotalRate = x.IdUserToNavigation.TotalRate
+                }).FirstOrDefault();
             return res;
         }
 

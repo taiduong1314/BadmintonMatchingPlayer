@@ -1,7 +1,10 @@
-﻿using Entities.RequestObject;
+﻿using Entities.Models;
+using Entities.RequestFeatures;
+using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Mvc;
+using Repositories.Intefaces;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -11,10 +14,12 @@ namespace BadmintonMatching.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserServices _userServices;
+        private readonly IRepositoryManager _repository;
 
-        public UsersController(IUserServices userServices)
+        public UsersController(IUserServices userServices, IRepositoryManager repository)
         {
             _userServices = userServices;
+            _repository = repository;
         }
 
         [HttpPost]
@@ -221,6 +226,79 @@ namespace BadmintonMatching.Controllers
 
             return Ok(updateSuccess ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
         }
+        #region Get User Profile
+        [HttpGet]
+        [Route("{user_id}/profile")]
+        public IActionResult GetUserProfile(int user_id)
+        {
+            if (!_userServices.ExistUserId(user_id))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
+            var res = _userServices.GetUserProfileSetting(user_id);
+            res.Helpful = _userServices.GetHelpful(user_id);
+            res.Friendly = _userServices.GetFriendly(user_id);
+            res.Trusted = _userServices.GetTrusted(user_id);
+            res.LevelSkill = _userServices.GetLevelSkill(user_id);
 
+            return Ok(res);
+        }
+        #endregion
+        #region Get all user
+        [HttpGet]
+        [Route("GetListUser")]
+        public async Task<IActionResult> GetAllAccount()
+        {
+            var res = await _userServices.GetAllAccount();
+            return Ok(res);
+        }
+        #endregion
+
+        #region Update User's Profile
+        /// <summary>
+        /// Update user profile (Role: Customer)
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="user_id"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("{user_id}")]
+        public async Task<IActionResult> UpdateUserProfile(UpdateProfileUser param, int user_id, bool trackChanges)
+        {
+          return  await _userServices.UpdateProfile(user_id, param, trackChanges);
+            //await _repository.SaveAsync();
+            //return Ok();
+        }
+
+        #endregion
+
+        #region Report
+        [HttpPost]
+        [Route("report/{user_id}")]
+        public IActionResult CreateReport(int user_id, int userreport_id, AddReport report)
+        {
+            if (!_userServices.ExistUserId(user_id) || !_userServices.ExistUserId(userreport_id))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
+
+            int commentId = _userServices.CreateReport(user_id, userreport_id, report);
+
+            return Ok(commentId > 0 ? new { Message = "Report Successfull" } : new { ErrorCode = "Report fail" });
+        }
+        #endregion
+        #region Get User Profile
+        [HttpGet]
+        [Route("user_id")]
+        public IActionResult GetSelfProfile(int user_id)
+        {
+            if (!_userServices.ExistUserId(user_id))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
+            var res = _userServices.GetSelfProfile(user_id);
+            return Ok(res);
+        }
+        #endregion
     }
 }
