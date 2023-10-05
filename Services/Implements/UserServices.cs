@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Implements
 {
@@ -119,6 +120,20 @@ namespace Services.Implements
                 }
             }
             return false;
+        }
+
+        public int CreateReport(int user_id, int userreport_id, AddReport report)
+        {
+            var saveReport = new Report
+            {
+                reportContent = report.Content,
+                IdUserTo = user_id,
+                IdUserFrom = userreport_id,
+                TimeReport = DateTime.UtcNow,
+            };
+            _repositoryManager.Report.Create(saveReport);
+            _repositoryManager.SaveAsync().Wait();
+            return saveReport.Id;
         }
 
         public string CreateVerifyToken(string? email)
@@ -323,6 +338,21 @@ namespace Services.Implements
             return res;
         }
 
+        public SelfProfile GetSelfProfile(int user_id)
+        {
+            var res = _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).Select(x => new SelfProfile
+            {
+                FullName = x.FullName,
+                ImgUrl = x.ImgUrl,
+                PhoneNumber = x.PhoneNumber,
+                SortProfile =x.SortProfile,
+                UserAddress = x.UserAddress,
+                UserName = x.UserName
+            }).FirstOrDefault();
+           return res;
+
+        }
+
         public double? GetTrusted(int user_id)
         {
             var res = _repositoryManager.UserRating.FindByCondition(x => x.IdUserRated == user_id, true).Select(x => x.Trusted).Average();
@@ -445,6 +475,29 @@ namespace Services.Implements
                 return true;
             }
             return false;
+        }
+
+        public async Task<ObjectResult> UpdateProfile(int user_id, UpdateProfileUser param, bool trackChanges)
+        {
+            var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, trackChanges)
+                .FirstOrDefaultAsync();
+            if(user != null)
+            {
+                user.UserName = param.UserName;
+                user.FullName = param.FullName;
+                user.ImgUrl = param.ImgUrl;
+                user.PhoneNumber = param.PhoneNumber;
+                user.UserAddress = param.UserAddress;
+                user.SortProfile = param.SortProfile;
+                await _repositoryManager.SaveAsync();
+
+                return new OkObjectResult(new { message = "Profile updated successfully" });
+            }
+            else
+            {
+                return new NotFoundObjectResult(new { message = "User with the specified ID not found" });
+
+            }
         }
     }
 }

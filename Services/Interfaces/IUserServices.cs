@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Services.Interfaces
 {
@@ -33,5 +34,8 @@ namespace Services.Interfaces
         double? GetTrusted(int user_id);
         double? GetLevelSkill(int user_id);
         Task<List<User>> GetAllAccount();
+        Task<ObjectResult> UpdateProfile(int user_id, UpdateProfileUser param, bool trackChanges);
+        int CreateReport(int user_id, int userreport_id, AddReport report);
+        SelfProfile GetSelfProfile(int user_id);
     }
 }
