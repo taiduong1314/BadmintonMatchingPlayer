@@ -289,6 +289,7 @@ namespace BadmintonMatching.Controllers
             return Ok(commentId > 0 ? new { Message = "Report Successfull" } : new { ErrorCode = "Report fail" });
         }
         #endregion
+
         #region Get User Profile
         [HttpGet]
         [Route("user_id")]
