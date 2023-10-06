@@ -40,12 +40,12 @@ namespace BadmintonMatching.Controllers
         {
             if (info.Password != info.ReEnterPass)
             {
-                return Ok("Password not matches");
+                return Ok(new { ErrorCode = "Password not matches" });
             }
 
             if (_userServices.IsUserExist(info.Email))
             {
-                return Ok("Email already exist");
+                return Ok(new { ErrorCode = "Email already exist" });
             }
 
             var userId = _userServices.RegistUser(info);
@@ -64,7 +64,7 @@ namespace BadmintonMatching.Controllers
             {
                 _userServices.AddPlayingArea(user_id, info);
             }
-            return Ok("Playing Area is saved");
+            return Ok(new { Message = "Playing Area is saved" });
         }
 
         [HttpPost]
@@ -79,7 +79,7 @@ namespace BadmintonMatching.Controllers
             {
                 _userServices.AddPlayingLevel(user_id, info);
             }
-            return Ok("Playing Level is saved");
+            return Ok(new { Message = "Playing Level is saved" });
         }
 
         [HttpPost]
@@ -94,7 +94,7 @@ namespace BadmintonMatching.Controllers
             {
                 _userServices.AddPlayingWay(user_id, info);
             }
-            return Ok("Playing Way is saved");
+            return Ok(new { Message = "Playing Way is saved" });
         }
 
         [HttpGet]
@@ -226,6 +226,7 @@ namespace BadmintonMatching.Controllers
 
             return Ok(updateSuccess ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
         }
+
         #region Get User Profile
         [HttpGet]
         [Route("{user_id}/profile")]
@@ -244,6 +245,7 @@ namespace BadmintonMatching.Controllers
             return Ok(res);
         }
         #endregion
+
         #region Get all user
         [HttpGet]
         [Route("GetListUser")]
