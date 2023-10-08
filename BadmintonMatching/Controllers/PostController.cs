@@ -95,9 +95,9 @@ namespace BadmintonMatching.Controllers
         }
         [HttpGet]
         [Route("{post_id}/details")]
-        public IActionResult GetDetailPost(int id_post)
+        public IActionResult GetDetailPost(int post_id)
         {
-           var res = _postServices.GetPostDetail(id_post);
+           var res = _postServices.GetPostDetail(post_id);
            return Ok(res);
         }
         [HttpGet]

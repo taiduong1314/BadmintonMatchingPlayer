@@ -14,12 +14,12 @@ namespace BadmintonMatching.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserServices _userServices;
-        private readonly IRepositoryManager _repository;
+        private readonly IJwtSupport _jwtServices;
 
-        public UsersController(IUserServices userServices, IRepositoryManager repository)
+        public UsersController(IUserServices userServices, IJwtSupport jwtServices)
         {
             _userServices = userServices;
-            _repository = repository;
+            _jwtServices = jwtServices;
         }
 
         [HttpPost]
@@ -30,15 +30,11 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new { ErrorEmail = "Tài khoản không tồn tại" });
             }
-            if (!_userServices.IsUserExist(info.Password))
-            {
-                return Ok(new { ErrorPassword = "Mật khẩu không đúng" });
-            }
-            //if (userInfo.Id == 0)
-            //{
-            //    return Unauthorized();
-            //}
             var userInfo = _userServices.GetExistUser(info);
+            if (userInfo.Id == 0)
+            {
+                return Ok(new { LoginError = "Tài khoản hoặc mật khẩu không đúng" });
+            }
             return Ok(userInfo);
         }
 
@@ -147,7 +143,8 @@ namespace BadmintonMatching.Controllers
                 return Ok(new { ErrorCode = "Can't found user" });
             }
 
-            var token = _userServices.CreateVerifyToken(email);
+            var otp = _userServices.CreateVerifyToken(email);
+            var token = _jwtServices.CreateToken(otp);
             return Ok(new { Token = token });
         }
 

@@ -309,16 +309,17 @@ namespace Services.Implements
             var user = _repositoryManager.User.FindByCondition(x => x.Email == info.Email && x.UserPassword == info.Password, false).FirstOrDefault();
             if (user != null)
             {
+                var isNewUser = user.PlayingArea == null || user.PlayingLevel == 0 || user.PlayingWay == null;
                 res = new UserInformation
                 {
                     Avatar = user.ImgUrl,
                     Id = user.Id,
                     UserName = user.FullName,
-                    Token = _jwtSupport.CreateToken(1, user.Id),
+                    Token = _jwtSupport.CreateToken(1, user.Id, isNewUser),
                     PlayingArea = user.PlayingArea,
                     PlayingLevel = user.PlayingLevel,
                     PlayingWay = user.PlayingWay,
-                    IsNewUser = user.PlayingArea == null || user.PlayingLevel == 0 || user.PlayingWay == null
+                    IsNewUser = isNewUser
                 };
             }
             return res;
