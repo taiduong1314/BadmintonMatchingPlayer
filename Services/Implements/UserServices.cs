@@ -306,11 +306,13 @@ namespace Services.Implements
         public UserInformation GetExistUser(LoginInformation info)
         {
             var res = new UserInformation();
-            var user = _repositoryManager.User.FindByCondition(x => x.Email == info.Email && x.UserPassword == info.Password, false).FirstOrDefault();
+            var user = _repositoryManager.User.FindByCondition(x => x.Email == info.Email && x.UserPassword == info.Password, false).Include(x => x.UserRoleNavigation)
+                .FirstOrDefault();
             if (user != null)
             {
                 res = new UserInformation
                 {
+                    roleName = user.UserRoleNavigation.RoleName,
                     Avatar = user.ImgUrl,
                     Id = user.Id,
                     UserName = user.FullName,
@@ -437,11 +439,14 @@ namespace Services.Implements
         {
             var user = new Entities.Models.User
             {
+                
                 Email = info.Email,
                 FullName = info.FullName,
                 PhoneNumber = info.PhoneNum,
                 UserPassword = info.Password,
-                UserName = info.UserName
+                UserName = info.UserName,
+                UserRole = 2
+                
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();

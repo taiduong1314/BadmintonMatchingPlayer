@@ -8,6 +8,7 @@ namespace Entities.RequestObject
 {
     public class RegisInfomation
     {
+        public int? role {  get; set; }
         public string? FullName { get; set; }
         public string? PhoneNum { get; set; }
         public string? Email { get; set; }
