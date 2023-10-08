@@ -25,12 +25,20 @@ namespace BadmintonMatching.Controllers
         [HttpPost]
         [Route("email_login")]
         public IActionResult GetUserByEmail(LoginInformation info)
-        {
-            var userInfo = _userServices.GetExistUser(info);
-            if (userInfo.Id == 0)
+        {          
+            if (!_userServices.IsUserExist(info.Email))
             {
-                return Unauthorized();
+                return Ok(new { ErrorEmail = "Tài khoản không tồn tại" });
             }
+            if (!_userServices.IsUserExist(info.Password))
+            {
+                return Ok(new { ErrorPassword = "Mật khẩu không đúng" });
+            }
+            //if (userInfo.Id == 0)
+            //{
+            //    return Unauthorized();
+            //}
+            var userInfo = _userServices.GetExistUser(info);
             return Ok(userInfo);
         }
 
@@ -40,12 +48,12 @@ namespace BadmintonMatching.Controllers
         {
             if (info.Password != info.ReEnterPass)
             {
-                return Ok(new { ErrorCode = "Password not matches" });
+                return Ok(new { ErrorPassword = "Mật khẩu không trùng khớp" });
             }
 
             if (_userServices.IsUserExist(info.Email))
             {
-                return Ok(new { ErrorCode = "Email already exist" });
+                return Ok(new { ErrorEmail = "Email này đã tồn tại" });
             }
 
             var userId = _userServices.RegistUser(info);
