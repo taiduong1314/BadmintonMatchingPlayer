@@ -147,6 +147,19 @@ namespace BadmintonMatching.Controllers
             var token = _jwtServices.CreateToken(otp);
             return Ok(new { Token = token });
         }
+        [HttpGet]
+        [Route("{email}/verify_otp")]
+        public IActionResult GetVerifyOtp(string email)
+        {
+            if (!_userServices.IsUserExist(email))
+            {
+                return Ok(new { ErrorCode = "Can't found user" });
+            }
+
+            var otp = _userServices.CreateVerifyToken(email);
+            var token = _jwtServices.CreateToken(otp);
+            return Ok(new { Token = token });
+        }
 
         [HttpPost]
         [Route("verify_token")]
@@ -308,5 +321,6 @@ namespace BadmintonMatching.Controllers
             return Ok(res);
         }
         #endregion
+        
     }
 }

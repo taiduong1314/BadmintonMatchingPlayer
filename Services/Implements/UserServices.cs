@@ -105,7 +105,6 @@ namespace Services.Implements
             _repositoryManager.SaveAsync().Wait();
             return true;
         }
-
         public bool CheckRemoveVefToken(UserVerifyToken info)
         {
             var user_id = _repositoryManager.User.FindByCondition(x => x.Email == info.Email, true).Select(x => x.Id).FirstOrDefault();

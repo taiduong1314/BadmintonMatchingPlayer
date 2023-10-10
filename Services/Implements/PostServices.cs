@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
@@ -34,6 +35,18 @@ namespace Services.Implements
             _repositoryManager.Post.Create(newPost);
             _repositoryManager.SaveAsync().Wait();
             return newPost.Id;
+        }
+
+        public bool DeletePost(int post_id)
+        {
+            var post = _repositoryManager.Post.FindByCondition(x=> x.Id == post_id, true).FirstOrDefault();
+            if(post != null)
+            {
+                post.IsDeleted = true;
+                _repositoryManager.SaveAsync();
+                return true;
+            }
+            return false;
         }
 
         public List<string?> GetAllPlayGround()
@@ -102,6 +115,11 @@ namespace Services.Implements
                     UserImgUrl = x.IdUserToNavigation.ImgUrl
 
                 }).ToList();
+        }
+
+        public object GetListPostByAdmin(int admin_id)
+        {
+            throw new NotImplementedException();
         }
 
         public List<PostInfomation> GetManagedPost(int user_id)

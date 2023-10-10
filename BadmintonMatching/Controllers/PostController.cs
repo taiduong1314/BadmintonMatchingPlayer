@@ -44,9 +44,9 @@ namespace BadmintonMatching.Controllers
                 return Ok(new { ErrorCode = "Can't found user" });
             }
             var postId = _postServices.CreatePost(user_id, info);
-            if(postId != 0)
+            if (postId != 0)
             {
-                return Ok(new {PostId = postId});
+                return Ok(new { PostId = postId });
             }
             else
             {
@@ -97,8 +97,8 @@ namespace BadmintonMatching.Controllers
         [Route("{post_id}/details")]
         public IActionResult GetDetailPost(int post_id)
         {
-           var res = _postServices.GetPostDetail(post_id);
-           return Ok(res);
+            var res = _postServices.GetPostDetail(post_id);
+            return Ok(res);
         }
         [HttpGet]
         [Route("{user_id}/post_suggestion")]
@@ -114,5 +114,40 @@ namespace BadmintonMatching.Controllers
             var res = await _postServices.GetAllPost();
             return Ok(res);
         }
+        #region List Post at role Admin
+        [HttpGet]
+        [Route("{admin_id}/post")]
+        public IActionResult GetListPostByAdmin(int admin_id)
+        {
+            
+            var checkadmin = _userServices.IsAdmin(admin_id);
+            if (checkadmin)
+            {
+                var res = _postServices.GetListPostByAdmin(admin_id);
+                return Ok(res);                
+            }
+
+            return Ok();
+        }
+        #endregion
+        #region Delete Post byAdmin
+        [HttpPut]
+        [Route("{admin_id}/delete/{post_id}")]
+        public IActionResult DeletePost(int post_id,int admin_id)
+        {
+            if(_userServices.IsAdmin(admin_id) == false)
+            {
+                return Ok(new { ErrorAdmin = "Not admin" });
+            }
+            
+                var res = _postServices.DeletePost(post_id);
+            return Ok(res ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
+
+
+
+        }
+
+        
+        #endregion
     }
 }
