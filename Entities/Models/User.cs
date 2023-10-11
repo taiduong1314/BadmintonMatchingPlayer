@@ -26,7 +26,6 @@
         public string? FullName { get; set; }
         public string? Gender { get; set; }
         public string? PhoneNumber { get; set; }
-        public string? UserAddress { get; set; }
         public bool? IsActive { get; set; }
         public string? ImgUrl { get; set; }
         public int? TotalRate { get; set; }

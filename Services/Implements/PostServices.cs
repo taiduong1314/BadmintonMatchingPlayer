@@ -195,7 +195,9 @@ namespace Services.Implements
 
         public PostDetail GetPostDetail(int id_post)
         {
-            var res = _repositoryManager.Post.FindByCondition(x => x.Id == id_post, false).Include(x => x.IdUserToNavigation)
+            var res = _repositoryManager.Post.FindByCondition(x => x.Id == id_post && x.QuantitySlot - x.Slots.Count() > 0 && !x.IsDeleted, false)
+                .Include(x => x.IdUserToNavigation)
+                .Include(x => x.Slots)
                 .Select(x => new PostDetail
                 {
                     AddressSlot = x.AddressSlot,
@@ -211,7 +213,9 @@ namespace Services.Implements
                     ImgUrlUser = x.IdUserToNavigation.ImgUrl,
                     SortProfile = x.IdUserToNavigation.SortProfile,
                     StartTime = x.StartTime,
-                    TotalRate = x.IdUserToNavigation.TotalRate
+                    TotalRate = x.IdUserToNavigation.TotalRate,
+                    AvailableSlot = x.QuantitySlot - x.Slots.Count(),
+                    UserId = x.IdUserTo.Value
                 }).FirstOrDefault();
             return res;
         }

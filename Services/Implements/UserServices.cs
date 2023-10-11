@@ -255,7 +255,6 @@ namespace Services.Implements
                     SortProfile = x.SortProfile,Tokens = x.Tokens,
                     TotalRate = x.TotalRate,
                     Transactions = x.Transactions,
-                    UserAddress = x.UserAddress,
                     UserName = x.UserName,
                     UserPassword = x.UserPassword,
                     UserRatings = x.UserRatings
@@ -318,7 +317,10 @@ namespace Services.Implements
                     PlayingArea = user.PlayingArea,
                     PlayingLevel = user.PlayingLevel,
                     PlayingWay = user.PlayingWay,
-                    IsNewUser = isNewUser
+                    IsNewUser = isNewUser,
+                    FullName = user.FullName,
+                    PhoneNumber = user.PhoneNumber,
+                    SortProfile = user.SortProfile,
                 };
             }
             return res;
@@ -350,7 +352,6 @@ namespace Services.Implements
                 ImgUrl = x.ImgUrl,
                 PhoneNumber = x.PhoneNumber,
                 SortProfile =x.SortProfile,
-                UserAddress = x.UserAddress,
                 UserName = x.UserName
             }).FirstOrDefault();
            return res;
@@ -491,7 +492,6 @@ namespace Services.Implements
                 user.FullName = param.FullName;
                 user.ImgUrl = param.ImgUrl;
                 user.PhoneNumber = param.PhoneNumber;
-                user.UserAddress = param.UserAddress;
                 user.SortProfile = param.SortProfile;
                 await _repositoryManager.SaveAsync();
 

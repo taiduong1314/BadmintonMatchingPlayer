@@ -301,8 +301,6 @@ namespace Entities
 
                 entity.Property(e => e.TotalRate).HasColumnName("totalRate");
 
-                entity.Property(e => e.UserAddress).HasColumnName("userAddress");
-
                 entity.Property(e => e.UserName).HasColumnName("userName");
 
                 entity.Property(e => e.UserPassword).HasColumnName("userPassword");

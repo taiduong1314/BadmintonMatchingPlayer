@@ -11,6 +11,7 @@ namespace Entities.ResponseObject
         public string? AddressSlot { get; set; }
         public decimal? PriceSlot { get; set; }
         public int? QuantitySlot { get; set; }
+        public int? AvailableSlot { get; set; }
         public string? LevelSlot { get; set; }
         public string? CategorySlot { get; set; }
         public string? ContentPost { get; set; }
@@ -22,5 +23,6 @@ namespace Entities.ResponseObject
         public int? TotalRate { get; set; }
         public string? ImgUrlUser { get; set; }
         public string? SortProfile { get; set; }
+        public int UserId { get; set; }
     }
 }
