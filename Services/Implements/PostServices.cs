@@ -39,7 +39,7 @@ namespace Services.Implements
 
         public bool DeletePost(int post_id)
         {
-            var post = _repositoryManager.Post.FindByCondition(x=> x.Id == post_id, true).FirstOrDefault();
+            var post = _repositoryManager.Post.FindByCondition(x=> x.Id == post_id && !x.IsDeleted, true).FirstOrDefault();
             if(post != null)
             {
                 post.IsDeleted = true;
@@ -54,6 +54,7 @@ namespace Services.Implements
             var posts = _repositoryManager.Post.FindByCondition(
                 x => x.AddressSlot != null
                     && x.QuantitySlot > 0
+                    && !x.IsDeleted
                     , true)
                 .ToList();
 
@@ -117,9 +118,21 @@ namespace Services.Implements
                 }).ToList();
         }
 
-        public object GetListPostByAdmin(int admin_id)
+        public List<ListPostByAdmin> GetListPostByAdmin()
         {
-            throw new NotImplementedException();
+            return _repositoryManager.Post.FindAll(true)
+                .OrderByDescending(x => x.SavedDate)
+                .Include(x => x.IdUserToNavigation).ThenInclude(x => x.UserRoleNavigation)
+                .Select(x => new ListPostByAdmin
+            {
+                CreatedDate = x.SavedDate,
+                FullName = x.IdUserToNavigation.FullName,
+                IdUser = x.IdUserTo,
+                RoleUser = x.IdUserToNavigation.UserRoleNavigation.RoleName,
+                Status = x.Status,
+                TotalViewer = x.TotalViewer
+                
+            }).ToList();
         }
 
         public List<PostInfomation> GetManagedPost(int user_id)
@@ -143,7 +156,7 @@ namespace Services.Implements
 
         public List<PostInfomation> GetManagedPostAdmin(int user_id)
         {
-            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id, true)
+            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
                 .Select(x => new PostInfomation

@@ -123,7 +123,7 @@ namespace BadmintonMatching.Controllers
             var checkadmin = _userServices.IsAdmin(admin_id);
             if (checkadmin)
             {
-                var res = _postServices.GetListPostByAdmin(admin_id);
+                var res = _postServices.GetListPostByAdmin();
                 return Ok(res);                
             }
 
@@ -142,9 +142,6 @@ namespace BadmintonMatching.Controllers
             
                 var res = _postServices.DeletePost(post_id);
             return Ok(res ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
-
-
-
         }
 
         

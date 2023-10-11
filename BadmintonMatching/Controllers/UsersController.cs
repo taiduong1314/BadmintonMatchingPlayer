@@ -15,6 +15,7 @@ namespace BadmintonMatching.Controllers
     {
         private readonly IUserServices _userServices;
         private readonly IJwtSupport _jwtServices;
+        
 
         public UsersController(IUserServices userServices, IJwtSupport jwtServices)
         {
@@ -158,7 +159,7 @@ namespace BadmintonMatching.Controllers
 
             var otp = _userServices.CreateVerifyToken(email);
             var token = _jwtServices.CreateToken(otp);
-            return Ok(new { Token = token });
+            return Ok(new VerifyEmail { Token = token,Otp = otp}); 
         }
 
         [HttpPost]

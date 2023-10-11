@@ -11,7 +11,7 @@ namespace Services.Interfaces
         List<string?> GetAllPlayGround();
         Task<List<Post>> GetAllPost();
         List<PostOptional> GetListOptionalPost();
-        object GetListPostByAdmin(int admin_id);
+        List<ListPostByAdmin> GetListPostByAdmin();
         List<PostInfomation> GetManagedPost(int user_id);
         List<PostInfomation> GetManagedPostAdmin(int user_id);
         List<PostInfomation> GetPostByPlayGround(string play_ground);
