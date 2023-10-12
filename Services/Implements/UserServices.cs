@@ -493,6 +493,7 @@ namespace Services.Implements
                 user.ImgUrl = param.ImgUrl;
                 user.PhoneNumber = param.PhoneNumber;
                 user.SortProfile = param.SortProfile;
+                _repositoryManager.User.Update(user);
                 await _repositoryManager.SaveAsync();
 
                 return new OkObjectResult(new { message = "Profile updated successfully" });
