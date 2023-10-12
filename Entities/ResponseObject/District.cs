@@ -11,7 +11,7 @@ namespace Entities.ResponseObject
         public int Id { get; set; }
         public string Name { get; set; }
         public int CityId { get; set; }
-        public List<Ward> Wards { get; set; }
+        //public List<Ward> Wards { get; set; }
         // Các thông tin khác về quận
     }
 }

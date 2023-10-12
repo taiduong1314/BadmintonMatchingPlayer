@@ -42,26 +42,6 @@ namespace BadmintonMatching.Controllers
             return Ok(districts);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetDistrict(int id)
-        {
-            var district = districts.FirstOrDefault(d => d.Id == id);
-            if (district == null)
-            {
-                return NotFound();
-            }
-            return Ok(district);
-        }
-        [HttpGet("{id}/wards")]
-        public IActionResult GetWardsInDistrict(int id)
-        {
-            var district = districts.FirstOrDefault(x => x.Id == id);
-            if (district == null)
-            {
-                return NotFound();
-            }
-            return Ok(district.Wards);
-        }
         [HttpGet("city/{cityId}")]
         public IActionResult GetDistrictsInCity(int cityId)
         {
