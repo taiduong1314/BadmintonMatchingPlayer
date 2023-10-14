@@ -27,6 +27,7 @@
         public string? Gender { get; set; }
         public string? PhoneNumber { get; set; }
         public bool? IsActive { get; set; }
+        public bool? IsBannedPost {  get; set; }
         public string? ImgUrl { get; set; }
         public int? TotalRate { get; set; }
         public double? Rate { get; set; }

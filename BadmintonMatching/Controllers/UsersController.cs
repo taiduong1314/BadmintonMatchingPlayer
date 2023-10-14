@@ -322,6 +322,18 @@ namespace BadmintonMatching.Controllers
             return Ok(res);
         }
         #endregion
-        
+        #region Banned User
+        [HttpPut]
+        [Route("{admin_id}/banded_post/{user_id}")]
+        public IActionResult BanUnbanPost(int admin_id, int user_id)
+        {
+            if (_userServices.IsAdmin(admin_id) == false)
+            {
+                return Ok(new { ErrorAdmin = "Not admin" });
+            }
+            bool banSuccess = _userServices.BanPost(user_id);
+            return Ok(banSuccess ? new { Message = " Success" } : new { ErrorCode = " fail" });
+        }
+        #endregion
     }
 }

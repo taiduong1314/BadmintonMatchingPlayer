@@ -11,6 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Services.Implements
 {
@@ -81,6 +82,18 @@ namespace Services.Implements
                     _repositoryManager.SaveAsync().Wait();
                 }
             }
+        }
+
+        public bool BanPost(int user_id)
+        {
+            var ban = _repositoryManager.User.FindByCondition(x => x.Id == user_id,true).FirstOrDefault();
+            if (ban.IsBannedPost == true)
+            {
+                ban.IsBannedPost = false;                
+            }
+            else ban.IsBannedPost = true;
+            _repositoryManager.SaveAsync();
+            return true;
         }
 
         public bool BanUnband(int user_id, int user_effect)
@@ -433,6 +446,14 @@ namespace Services.Implements
             return res;
         }
 
+        public bool IsBannedPost(int user_id)
+        {
+            var checkBan = _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).FirstOrDefault();
+            if (checkBan.IsBannedPost == true) { return true; }
+                else
+                return false;               
+        }
+    
         public bool IsUserExist(string? email)
         {
             return _repositoryManager.User.FindByCondition(x => x.Email == email, false).FirstOrDefault() != null;
@@ -446,7 +467,8 @@ namespace Services.Implements
                 FullName = info.FullName,
                 PhoneNumber = info.PhoneNum,
                 UserPassword = info.Password,
-                UserName = info.UserName
+                UserName = info.UserName,
+                IsBannedPost = true
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();

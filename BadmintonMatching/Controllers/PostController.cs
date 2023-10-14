@@ -43,6 +43,10 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new { ErrorCode = "Can't found user" });
             }
+            if(_userServices.IsBannedPost(user_id) == false)
+            {
+                return Ok(new { ErrorCode = "Banned" });
+            }
             var postId = _postServices.CreatePost(user_id, info);
             if (postId != 0)
             {

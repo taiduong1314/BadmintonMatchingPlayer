@@ -12,6 +12,7 @@ namespace Services.Interfaces
         public bool ExistUserId(int userId);
         bool IsUserExist(string? email);
         int RegistUser(RegisInfomation info);
+        bool IsBannedPost(int user_id);
         void AddPlayingLevel(int user_id, NewPlayingLevel info);
         void AddPlayingWay(int user_id, NewPlayingWay info);
         List<string> GetUserAreas(int user_id);
@@ -37,5 +38,6 @@ namespace Services.Interfaces
         Task<ObjectResult> UpdateProfile(int user_id, UpdateProfileUser param, bool trackChanges);
         int CreateReport(int user_id, int userreport_id, AddReport report);
         SelfProfile GetSelfProfile(int user_id);
+        bool BanPost(int user_id);
     }
 }
