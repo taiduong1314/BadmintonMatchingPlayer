@@ -18,5 +18,6 @@ namespace Entities.ResponseObject
         public string? FullName { get; set; }
         public string? UserImgUrl { get; set; }
         public string? HighlightUrl { get; set; }
+        public string? Price { get; set; }
     }
 }

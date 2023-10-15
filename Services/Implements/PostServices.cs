@@ -121,7 +121,8 @@ namespace Services.Implements
                     QuantitySlot = x.QuantitySlot,
                     FullName = x.IdUserToNavigation.FullName,                  
                     UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                    HighlightUrl = x.ImgUrl
+                    HighlightUrl = x.ImgUrl,
+                    Price = x.PriceSlot.ToString()
                 }).ToList();
         }
 
