@@ -246,6 +246,20 @@ namespace BadmintonMatching.Controllers
             return Ok(updateSuccess ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
         }
 
+        [HttpGet]
+        [Route("managed/{user_id}")]
+        public IActionResult GetAllUserForManaged(int user_id)
+        {
+            if (!_userServices.IsAdmin(user_id))
+            {
+                return Ok(new { Error = "Not admin for get" });
+            }
+
+            var users = _userServices.GetUserForManaged();
+
+            return Ok(users);
+        }
+
         #region Get User Profile
         [HttpGet]
         [Route("{user_id}/profile")]

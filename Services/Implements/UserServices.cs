@@ -381,6 +381,11 @@ namespace Services.Implements
             return res;
         }
 
+        public List<UserManaged> GetUserForManaged()
+        {
+            var res = _repositoryManager.User.FindAll(false).OrderByDescending(x => x.Id).ToList();
+        }
+
         public List<string> GetUserPlayWay(int user_id)
         {
             var res = new List<string>();

@@ -37,5 +37,6 @@ namespace Services.Interfaces
         Task<ObjectResult> UpdateProfile(int user_id, UpdateProfileUser param, bool trackChanges);
         int CreateReport(int user_id, int userreport_id, AddReport report);
         SelfProfile GetSelfProfile(int user_id);
+        List<UserManaged> GetUserForManaged();
     }
 }
