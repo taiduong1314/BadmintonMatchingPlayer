@@ -31,5 +31,6 @@
         public virtual User? IdUserToNavigation { get; set; }
         public virtual ICollection<Slot> Slots { get; set; }
         public DateTime SavedDate { get; set; }
+        public string? ImageUrls { get; set; }
     }
 }

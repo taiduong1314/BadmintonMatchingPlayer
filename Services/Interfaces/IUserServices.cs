@@ -38,5 +38,7 @@ namespace Services.Interfaces
         int CreateReport(int user_id, int userreport_id, AddReport report);
         SelfProfile GetSelfProfile(int user_id);
         List<UserManaged> GetUserForManaged();
+        bool BanUnbandLogin(int user_id);
+        List<UserReport> GetReports(int user_id);
     }
 }

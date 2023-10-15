@@ -1,10 +1,6 @@
-﻿using Entities.Models;
-using Entities.RequestFeatures;
-using Entities.RequestObject;
+﻿using Entities.RequestObject;
 using Entities.ResponseObject;
-using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Mvc;
-using Repositories.Intefaces;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -15,7 +11,7 @@ namespace BadmintonMatching.Controllers
     {
         private readonly IUserServices _userServices;
         private readonly IJwtSupport _jwtServices;
-        
+
 
         public UsersController(IUserServices userServices, IJwtSupport jwtServices)
         {
@@ -26,13 +22,18 @@ namespace BadmintonMatching.Controllers
         [HttpPost]
         [Route("email_login")]
         public IActionResult GetUserByEmail(LoginInformation info)
-        {          
+        {
             if (!_userServices.IsUserExist(info.Email))
             {
                 return Ok(new { ErrorEmail = "Tài khoản không tồn tại" });
             }
             var userInfo = _userServices.GetExistUser(info);
-            if (userInfo.Id == 0)
+
+            if(userInfo.Id == -1)
+            {
+                return Ok(new { LoginError = "UserId is banded by admin from login" });
+            }
+            else if (userInfo.Id == 0)
             {
                 return Ok(new { LoginError = "Tài khoản hoặc mật khẩu không đúng" });
             }
@@ -159,7 +160,7 @@ namespace BadmintonMatching.Controllers
 
             var otp = _userServices.CreateVerifyToken(email);
             var token = _jwtServices.CreateToken(otp);
-            return Ok(new VerifyEmail { Token = token,Otp = otp}); 
+            return Ok(new VerifyEmail { Token = token, Otp = otp });
         }
 
         [HttpPost]
@@ -197,7 +198,7 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("{user_id}/comments")]
-        public IActionResult GetComments (int user_id)
+        public IActionResult GetComments(int user_id)
         {
             if (!_userServices.ExistUserId(user_id))
             {
@@ -260,6 +261,39 @@ namespace BadmintonMatching.Controllers
             return Ok(users);
         }
 
+        [HttpPut]
+        [Route("{admin_id}/banded/{user_id}")]
+        public IActionResult BanUnbanUser(int admin_id, int user_id)
+        {
+            if (!_userServices.IsAdmin(admin_id))
+            {
+                return Ok(new { Error = "Not admin for update" });
+            }
+
+            try
+            {
+                bool isBanded = _userServices.BanUnbandLogin(user_id);
+
+                return Ok(new { status = isBanded ? "Banded" : "Unbaded" });
+            }
+            catch (NotImplementedException)
+            {
+                return Ok(new { status = "not found user_id" });
+            }
+        }
+
+        [HttpGet]
+        [Route("{admin_id}/report/{user_id}")]
+        public IActionResult GetUserReports(int admin_id, int user_id)
+        {
+            if (!_userServices.IsAdmin(admin_id))
+            {
+                return Ok(new { Error = "Not admin for update" });
+            }
+            List<UserReport> reports = _userServices.GetReports(user_id);
+            return Ok(reports);
+        }
+
         #region Get User Profile
         [HttpGet]
         [Route("{user_id}/profile")]
@@ -300,7 +334,7 @@ namespace BadmintonMatching.Controllers
         [Route("{user_id}")]
         public async Task<IActionResult> UpdateUserProfile(UpdateProfileUser param, int user_id, bool trackChanges)
         {
-          return  await _userServices.UpdateProfile(user_id, param, trackChanges);
+            return await _userServices.UpdateProfile(user_id, param, trackChanges);
             //await _repository.SaveAsync();
             //return Ok();
         }
@@ -336,6 +370,6 @@ namespace BadmintonMatching.Controllers
             return Ok(res);
         }
         #endregion
-        
+
     }
 }

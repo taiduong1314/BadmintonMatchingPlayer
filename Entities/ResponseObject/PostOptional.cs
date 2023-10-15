@@ -17,5 +17,6 @@ namespace Entities.ResponseObject
         public int? QuantitySlot { get; set; }
         public string? FullName { get; set; }
         public string? UserImgUrl { get; set; }
+        public string? HighlightUrl { get; set; }
     }
 }

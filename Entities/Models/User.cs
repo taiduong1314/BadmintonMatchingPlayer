@@ -37,6 +37,9 @@
         public int PlayingLevel { get; set; }
         public string? PlayingWay { get; set; }
         public string? SortProfile { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public DateTime? LastLoginDate { get; set; }
+        public bool IsBanFromLogin { get; set; }
 
         public virtual Role? UserRoleNavigation { get; set; }
         public virtual ICollection<Post> Posts { get; set; }

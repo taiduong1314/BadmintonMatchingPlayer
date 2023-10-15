@@ -20,6 +20,11 @@ namespace Services.Implements
 
         public int CreatePost(int user_id, NewPostInfo info)
         {
+            var urls = "";
+            foreach(var url in info.ImgUrls)
+            {
+                urls += url;
+            }
             var newPost = new Post
             {
                 Title = info.Title,
@@ -30,7 +35,10 @@ namespace Services.Implements
                 PriceSlot = decimal.Parse(info.Price),
                 QuantitySlot = info.AvailableSlot,
                 ContentPost = info.Description,
-                SavedDate = DateTime.UtcNow
+                SavedDate = DateTime.UtcNow,
+                ImgUrl = info.HighlightUrl,
+                ImageUrls = urls,
+                IdUserTo = user_id
             };
             _repositoryManager.Post.Create(newPost);
             _repositoryManager.SaveAsync().Wait();
@@ -93,7 +101,6 @@ namespace Services.Implements
                     QuantitySlot = x.QuantitySlot,
                     Slots = x.Slots,
                     Status = x.Status
-                    
                 }).ToListAsync();
             return res;
         }
@@ -113,8 +120,8 @@ namespace Services.Implements
                     StartTime = x.StartTime,
                     QuantitySlot = x.QuantitySlot,
                     FullName = x.IdUserToNavigation.FullName,                  
-                    UserImgUrl = x.IdUserToNavigation.ImgUrl
-
+                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
+                    HighlightUrl = x.ImgUrl
                 }).ToList();
         }
 
@@ -209,7 +216,11 @@ namespace Services.Implements
 
         public PostDetail GetPostDetail(int id_post)
         {
-            var res = _repositoryManager.Post.FindByCondition(x => x.Id == id_post && x.QuantitySlot - x.Slots.Count() > 0 && !x.IsDeleted, false)
+            var res = _repositoryManager.Post
+                .FindByCondition(x => 
+                x.Id == id_post 
+                && x.QuantitySlot - x.Slots.Count() > 0 
+                && !x.IsDeleted, false)
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
                 .Select(x => new PostDetail

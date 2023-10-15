@@ -105,6 +105,19 @@ namespace Services.Implements
             _repositoryManager.SaveAsync().Wait();
             return true;
         }
+
+        public bool BanUnbandLogin(int user_id)
+        {
+            var user = _repositoryManager.User.FindByCondition(X => X.Id == user_id, true).FirstOrDefault();
+            if (user != null)
+            {
+                user.IsBanFromLogin = !user.IsBanFromLogin;
+                _repositoryManager.SaveAsync().Wait();
+                return user.IsBanFromLogin;
+            }
+            throw new NotImplementedException();
+        }
+
         public bool CheckRemoveVefToken(UserVerifyToken info)
         {
             var user_id = _repositoryManager.User.FindByCondition(x => x.Email == info.Email, true).Select(x => x.Id).FirstOrDefault();
@@ -304,7 +317,7 @@ namespace Services.Implements
         public UserInformation GetExistUser(LoginInformation info)
         {
             var res = new UserInformation();
-            var user = _repositoryManager.User.FindByCondition(x => x.Email == info.Email && x.UserPassword == info.Password, false).FirstOrDefault();
+            var user = _repositoryManager.User.FindByCondition(x => x.Email == info.Email && x.UserPassword == info.Password, true).FirstOrDefault();
             if (user != null)
             {
                 var isNewUser = user.PlayingArea == null || user.PlayingLevel == 0 || user.PlayingWay == null;
@@ -322,6 +335,14 @@ namespace Services.Implements
                     PhoneNumber = user.PhoneNumber,
                     SortProfile = user.SortProfile,
                 };
+
+                if(user.IsBanFromLogin)
+                {
+                    res.Id = -1;
+                }
+
+                user.LastLoginDate = DateTime.UtcNow;
+                _repositoryManager.SaveAsync().Wait();
             }
             return res;
         }
@@ -341,6 +362,20 @@ namespace Services.Implements
         public double? GetLevelSkill(int user_id)
         {
             var res = _repositoryManager.UserRating.FindByCondition(x => x.IdUserRated == user_id, true).Select(x => x.LevelSkill).Average();
+            return res;
+        }
+
+        public List<UserReport> GetReports(int user_id)
+        {
+            var res = _repositoryManager.Report.FindByCondition(x => x.IdUserTo == user_id, false)
+                .Select(X => new UserReport
+                {
+                    Content = X.reportContent,
+                    Id = X.Id,
+                    SaveDate = X.TimeReport.Value.ToString("dd/MM/yyyy"),
+                    Status = X.Status.Value ? "Đã xử lý" : "Chưa xử lý",
+                    Title = X.ReportTitle
+                }).ToList();
             return res;
         }
 
@@ -383,7 +418,19 @@ namespace Services.Implements
 
         public List<UserManaged> GetUserForManaged()
         {
-            var res = _repositoryManager.User.FindAll(false).OrderByDescending(x => x.Id).ToList();
+            var res = _repositoryManager.User.FindAll(false)
+                .OrderByDescending(x => x.LastLoginDate)
+                .Select(x => new UserManaged
+                {
+                    CreateDate = x.CreateDate.Value.ToString("dd/mm/yyyy"),
+                    FullName = x.FullName,
+                    LastLogin = x.LastLoginDate.Value.ToString("dd/mm/yyyy"),
+                    Role = x.UserRole == (int)UserRole.User ? "User" : "Admin",
+                    Status = "Active",
+                    UserId = x.Id
+                })
+                .ToList();
+            return res;
         }
 
         public List<string> GetUserPlayWay(int user_id)
@@ -451,7 +498,8 @@ namespace Services.Implements
                 FullName = info.FullName,
                 PhoneNumber = info.PhoneNum,
                 UserPassword = info.Password,
-                UserName = info.UserName
+                UserName = info.UserName,
+                CreateDate = DateTime.UtcNow,
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();

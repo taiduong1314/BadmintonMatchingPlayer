@@ -10,6 +10,7 @@
         public DateTime? TimeReport { get; set; }
         public bool? Status { get; set; }
         public string? reportContent {  get; set; }
+        public string? ReportTitle { get; set; }
 
         public virtual HistoryTransaction? IdHistoryNavigation { get; set; }
     }
