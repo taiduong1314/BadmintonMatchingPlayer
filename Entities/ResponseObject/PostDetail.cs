@@ -15,7 +15,8 @@ namespace Entities.ResponseObject
         public string? LevelSlot { get; set; }
         public string? CategorySlot { get; set; }
         public string? ContentPost { get; set; }
-        public string? ImgUrl { get; set; }
+        public string? HightLightImage { get; set; }
+        public List<string>? ImageUrls { get; set; }
         public string? Days { get; set; }
         public string? StartTime { get; set; }
         public string? EndTime { get; set; }
@@ -24,5 +25,6 @@ namespace Entities.ResponseObject
         public string? ImgUrlUser { get; set; }
         public string? SortProfile { get; set; }
         public int UserId { get; set; }
+        public string? Title { get; set; }
     }
 }

@@ -232,7 +232,8 @@ namespace Services.Implements
                     Days = x.Days,
                     EndTime = x.EndTime,
                     FullName = x.IdUserToNavigation.FullName,
-                    ImgUrl = x.ImgUrl,
+                    HightLightImage = x.ImgUrl,
+                    ImageUrls = x.ImageUrls.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList(),
                     LevelSlot = x.LevelSlot,
                     PriceSlot = x.PriceSlot,
                     QuantitySlot = x.QuantitySlot,
@@ -241,7 +242,8 @@ namespace Services.Implements
                     StartTime = x.StartTime,
                     TotalRate = x.IdUserToNavigation.TotalRate,
                     AvailableSlot = x.QuantitySlot - x.Slots.Count(),
-                    UserId = x.IdUserTo.Value
+                    UserId = x.IdUserTo.Value,
+                    Title = x.Title
                 }).FirstOrDefault();
             return res;
         }
