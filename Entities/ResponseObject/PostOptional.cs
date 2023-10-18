@@ -8,6 +8,8 @@ namespace Entities.ResponseObject
 {
     public class PostOptional
     {
+        public int? IdPost {  get; set; }
+        public string? Title {  get; set; }
         public string? ContentPost { get; set; }
         public string? ImgUrlPost { get; set; }
         public string? AddressSlot { get; set; }
@@ -18,6 +20,6 @@ namespace Entities.ResponseObject
         public string? FullName { get; set; }
         public string? UserImgUrl { get; set; }
         public string? HighlightUrl { get; set; }
-        public string? Price { get; set; }
+        public decimal? Price { get; set; }
     }
 }

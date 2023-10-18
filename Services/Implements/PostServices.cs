@@ -112,6 +112,8 @@ namespace Services.Implements
                 .Include(x => x.IdUserToNavigation)
                 .Select(x=> new PostOptional
                 {
+                    IdPost = x.Id,
+                    Title = x.Title,
                     AddressSlot = x.AddressSlot,
                     ContentPost = x.ContentPost,
                     Days = x.Days,
@@ -122,7 +124,7 @@ namespace Services.Implements
                     FullName = x.IdUserToNavigation.FullName,                  
                     UserImgUrl = x.IdUserToNavigation.ImgUrl,
                     HighlightUrl = x.ImgUrl,
-                    Price = x.PriceSlot.ToString()
+                    Price = x.PriceSlot
                 }).ToList();
         }
 
