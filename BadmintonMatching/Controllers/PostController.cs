@@ -100,6 +100,7 @@ namespace BadmintonMatching.Controllers
             var res = _postServices.GetPostDetail(post_id);
             return Ok(res);
         }
+
         [HttpGet]
         [Route("{user_id}/post_suggestion")]
         public IActionResult GetListOptionalPost()

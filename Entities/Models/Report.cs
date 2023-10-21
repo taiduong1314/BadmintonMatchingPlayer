@@ -3,7 +3,7 @@
     public partial class Report
     {
         public int Id { get; set; }
-        public int? IdHistory { get; set; }
+        public int? IdTransaction { get; set; }
         public int? IdUserFrom { get; set; }
         public int? IdUserTo { get; set; }
         public int? IdRoom { get; set; }
@@ -12,6 +12,6 @@
         public string? reportContent {  get; set; }
         public string? ReportTitle { get; set; }
 
-        public virtual HistoryTransaction? IdHistoryNavigation { get; set; }
+        public virtual Transaction? Transaction { get; set; }
     }
 }

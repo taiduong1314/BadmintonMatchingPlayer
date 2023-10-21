@@ -4,7 +4,6 @@
     {
         public HistoryTransaction()
         {
-            Reports = new HashSet<Report>();
             UserRatings = new HashSet<UserRating>();
         }
 
@@ -17,7 +16,6 @@
         public DateTime? Deadline { get; set; }
 
         public virtual Transaction? IdTransactionNavigation { get; set; }
-        public virtual ICollection<Report> Reports { get; set; }
         public virtual ICollection<UserRating> UserRatings { get; set; }
     }
 }

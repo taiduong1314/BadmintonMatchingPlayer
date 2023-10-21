@@ -144,8 +144,6 @@ namespace Entities
 
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.IdHistory).HasColumnName("idHistory");
-
                 entity.Property(e => e.IdRoom).HasColumnName("idRoom");
 
                 entity.Property(e => e.IdUserFrom).HasColumnName("idUserFrom");
@@ -158,10 +156,10 @@ namespace Entities
                     .HasColumnType("datetime")
                     .HasColumnName("timeReport");
 
-                entity.HasOne(d => d.IdHistoryNavigation)
+                entity.HasOne(d => d.Transaction)
                     .WithMany(p => p.Reports)
-                    .HasForeignKey(d => d.IdHistory)
-                    .HasConstraintName("FK_Report_HistoryTransaction");
+                    .HasForeignKey(d => d.IdTransaction)
+                    .HasConstraintName("FK_Transaction_Reports");
             });
 
             modelBuilder.Entity<Role>(entity =>
