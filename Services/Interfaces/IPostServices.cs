@@ -6,7 +6,7 @@ namespace Services.Interfaces
 {
     public interface IPostServices
     {
-        int CreatePost(int user_id, NewPostInfo info);
+        Task<int> CreatePost(int user_id, NewPostInfo info);
         bool DeletePost(int post_id);
         List<string?> GetAllPlayGround();
         Task<List<Post>> GetAllPost();

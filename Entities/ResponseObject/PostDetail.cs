@@ -26,5 +26,6 @@ namespace Entities.ResponseObject
         public string? SortProfile { get; set; }
         public int UserId { get; set; }
         public string? Title { get; set; }
+        public MemoryStream ImageStream { get; set; }
     }
 }

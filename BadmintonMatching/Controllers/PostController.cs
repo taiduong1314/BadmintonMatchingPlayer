@@ -37,14 +37,14 @@ namespace BadmintonMatching.Controllers
 
         [HttpPost]
         [Route("create_by/{user_id}")]
-        public IActionResult CreatePost(int user_id, NewPostInfo info)
+        public async Task<IActionResult> CreatePost(int user_id, NewPostInfo info)
         {
             if (!_userServices.ExistUserId(user_id))
             {
                 return Ok(new { ErrorCode = "Can't found user" });
             }
             var postId = _postServices.CreatePost(user_id, info);
-            if (postId != 0)
+            if (await postId != 0)
             {
                 return Ok(new { PostId = postId });
             }

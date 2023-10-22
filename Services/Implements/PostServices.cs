@@ -1,11 +1,13 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Firebase.Storage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
 using Services.Util;
+
 
 namespace Services.Implements
 {
@@ -18,8 +20,44 @@ namespace Services.Implements
             _repositoryManager = repositoryManager;
         }
 
-        public int CreatePost(int user_id, NewPostInfo info)
+        public async Task<string> HandleImg(string base64encodedstring)
         {
+            try
+            {
+                // Chuyển base64 thành mảng byte
+                var bytes = Convert.FromBase64String(base64encodedstring);
+
+                // Khởi tạo FirebaseStorage và cấu hình
+                FirebaseStorage storage = new FirebaseStorage("gs://castoneproject.appspot.com");
+
+                // Tạo tên tệp (ví dụ: unique_file_name.jpg)
+                string fileName = Guid.NewGuid().ToString() + ".jpg";
+
+                // Tải lên tệp lên Firebase Storage
+                var response = await storage
+                    .Child("picture") // Thư mục trên Firebase Storage
+                    .Child(fileName)  // Tên tệp
+                    .PutAsync(new MemoryStream(bytes));
+
+                // Lấy URL của tệp đã tải lên
+                string fileUrl = response;
+
+                // Trả về URL của tệp
+                return fileUrl;
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi tại đây (ví dụ: ghi vào log)
+                Console.WriteLine("Lỗi: " + ex.Message);
+                return string.Empty;
+            }
+
+        }
+
+
+        public async Task<int> CreatePost(int user_id, NewPostInfo info)
+        {
+            
             var urls = "";
             foreach(var url in info.ImgUrls)
             {
@@ -36,7 +74,7 @@ namespace Services.Implements
                 QuantitySlot = info.AvailableSlot,
                 ContentPost = info.Description,
                 SavedDate = DateTime.UtcNow,
-                ImgUrl = info.HighlightUrl,
+                ImgUrl = await HandleImg(info.HighlightUrl),
                 ImageUrls = urls,
                 IdUserTo = user_id
             };
@@ -219,6 +257,7 @@ namespace Services.Implements
 
         public PostDetail GetPostDetail(int id_post)
         {
+
             var res = _repositoryManager.Post
                 .FindByCondition(x => 
                 x.Id == id_post 
@@ -246,6 +285,7 @@ namespace Services.Implements
                     AvailableSlot = x.QuantitySlot - x.Slots.Count(),
                     UserId = x.IdUserTo.Value,
                     Title = x.Title
+
                 }).FirstOrDefault();
             return res;
         }
