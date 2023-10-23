@@ -1,10 +1,13 @@
-﻿using Entities.Models;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
 using Services.Util;
+
 
 namespace Services.Implements
 {
@@ -17,12 +20,46 @@ namespace Services.Implements
             _repositoryManager = repositoryManager;
         }
 
-        public int CreatePost(int user_id, NewPostInfo info)
+        public async Task<string> HandleImg(string base64encodedstring)
         {
+            var revertbase64 = base64encodedstring.Replace("data:image/jpeg;base64,", "");
+            try
+            {
+                var bytes = Convert.FromBase64String(revertbase64);
+                var contents = new StreamContent(new MemoryStream(bytes));
+                Account account = new Account(
+                    "dbjvirvym",
+                    "487892318776179",
+                    "txx6fF8ZVsT72id6ySvqNqwrN0E");
+                Cloudinary cloudinary = new Cloudinary(account);
+
+                string publicId = Guid.NewGuid().ToString();
+                var uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(publicId, new MemoryStream(bytes)),
+                    PublicId = publicId
+                };
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                return uploadResult.SecureUrl.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi: " + ex.Message);
+                return string.Empty;
+            }
+
+        }
+
+
+        public async Task<int> CreatePost(int user_id, NewPostInfo info)
+        {
+            
             var urls = "";
             foreach (var url in info.ImgUrls)
             {
-                urls += url;
+                urls += $"{HandleImg(url).Result};";
             }
             var newPost = new Post
             {
@@ -35,7 +72,7 @@ namespace Services.Implements
                 QuantitySlot = info.AvailableSlot,
                 ContentPost = info.Description,
                 SavedDate = DateTime.UtcNow,
-                ImgUrl = info.HighlightUrl,
+                ImgUrl = await HandleImg(info.HighlightUrl),
                 ImageUrls = urls,
                 IdUserTo = user_id
             };
@@ -219,6 +256,7 @@ namespace Services.Implements
 
         public PostDetail GetPostDetail(int id_post)
         {
+
             var res = _repositoryManager.Post
                 .FindByCondition(x =>
                 x.Id == id_post
@@ -246,6 +284,7 @@ namespace Services.Implements
                     AvailableSlot = GetAvailableSlot(x),
                     UserId = x.IdUserTo.Value,
                     Title = x.Title
+
                 }).FirstOrDefault();
             return res;
         }
