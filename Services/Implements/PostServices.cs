@@ -1,4 +1,6 @@
-﻿using Entities.Models;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Firebase.Storage;
@@ -22,28 +24,38 @@ namespace Services.Implements
 
         public async Task<string> HandleImg(string base64encodedstring)
         {
+            var revertbase64 = base64encodedstring.Replace("data:image/jpeg;base64,", "");
             try
             {
                 // Chuyển base64 thành mảng byte
-                var bytes = Convert.FromBase64String(base64encodedstring);
+                var bytes = Convert.FromBase64String(revertbase64);
+                var contents = new StreamContent(new MemoryStream(bytes));
+                //var contents = new StreamContent(new MemoryStream(bytes));
+                // KHởi tạo cấu hình cloudinary
+                Account account = new Account(
+                    "dbjvirvym",
+                    "487892318776179",
+                    "txx6fF8ZVsT72id6ySvqNqwrN0E");
+                Cloudinary cloudinary = new Cloudinary(account);
+                // làm sao để upload file lên cloudinary
 
-                // Khởi tạo FirebaseStorage và cấu hình
-                FirebaseStorage storage = new FirebaseStorage("gs://castoneproject.appspot.com");
+                string publicId = Guid.NewGuid().ToString();
+                // Tải tệp lên Cloudinary
+                var uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(publicId, new MemoryStream(bytes)),
+                    PublicId = publicId
+                };
+                
 
-                // Tạo tên tệp (ví dụ: unique_file_name.jpg)
-                string fileName = Guid.NewGuid().ToString() + ".jpg";
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
 
-                // Tải lên tệp lên Firebase Storage
-                var response = await storage
-                    .Child("picture") // Thư mục trên Firebase Storage
-                    .Child(fileName)  // Tên tệp
-                    .PutAsync(new MemoryStream(bytes));
+                // Lấy URL của tệp sau khi tải lên thành công
+                string imageUrl = uploadResult.SecureUrl.ToString();
 
-                // Lấy URL của tệp đã tải lên
-                string fileUrl = response;
+                // Trả về URL
+                return imageUrl;
 
-                // Trả về URL của tệp
-                return fileUrl;
             }
             catch (Exception ex)
             {
@@ -61,7 +73,7 @@ namespace Services.Implements
             var urls = "";
             foreach(var url in info.ImgUrls)
             {
-                urls += url;
+                urls += $"{HandleImg(url).Result};";
             }
             var newPost = new Post
             {

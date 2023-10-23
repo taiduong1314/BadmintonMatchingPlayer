@@ -43,8 +43,8 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new { ErrorCode = "Can't found user" });
             }
-            var postId = _postServices.CreatePost(user_id, info);
-            if (await postId != 0)
+            var postId = await _postServices.CreatePost(user_id, info);
+            if (postId != 0)
             {
                 return Ok(new { PostId = postId });
             }
