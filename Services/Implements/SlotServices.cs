@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Entities.Models;
+using Entities.RequestObject;
+using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
 using System;
@@ -18,28 +20,55 @@ namespace Services.Implements
             _repositoryManager = repositoryManager;
         }
 
-        public List<int> GetAvailable(int post_id, int num_slot)
+        public bool Discard(List<int> slotsId, int post_id)
         {
-            var post = _repositoryManager.Post
-                .FindByCondition(x => x.Id == post_id && x.QuantitySlot - x.Slots.Count() >= num_slot, true)
-                .Include(x => x.Slots)
-                .FirstOrDefault();
-            if(post != null)
+            var slots = _repositoryManager.Slot.FindByCondition(x => x.IdPost == post_id && slotsId.Contains(x.Id), true).ToList();
+            if(slots.Count == slotsId.Count)
             {
-                var res = new List<int>();
-                for(var i = 0; i < num_slot; i++)
+                foreach(var slot in slots)
                 {
-                    post.Slots.Add(new Entities.Models.Slot
-                    {
-
-                    });
+                    slot.IsDeleted = true;
                 }
-                return res;
+                _repositoryManager.SaveAsync().Wait();
+                return true;
             }
             else
             {
-                return new List<int>();
+                return false;
             }
+        }
+
+        public List<int> GetAvailable(CheckAvailableSlot info)
+        {
+            var slots = _repositoryManager.Slot
+                .FindByCondition(x => x.IdPost == info.PostId && x.ContentSlot == info.DateRegis && !x.IsDeleted, true)
+                .Include(x => x.IdPostNavigation)
+                .ToList();
+            if(slots.Count > 0)
+            {
+                if(slots[0].IdPostNavigation != null)
+                {
+                    var avaiSlot = slots[0].IdPostNavigation.QuantitySlot - info.NumSlot;
+                    if (avaiSlot >= 0)
+                    {
+                        var res = new List<int>();
+                        for(var i = 0; i <= info.NumSlot; i++)
+                        {
+                            var slot = new Slot
+                            {
+                                ContentSlot = info.DateRegis,
+                                IdPost = info.PostId,
+                                IdUser = info.UserId
+                            };
+                            _repositoryManager.Slot.Create(slot);
+                            _repositoryManager.SaveAsync().Wait();
+                            res.Add(slot.Id);
+                        }
+                        return res;
+                    }
+                }
+            }
+            return new List<int>();
         }
     }
 }

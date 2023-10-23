@@ -317,7 +317,9 @@ namespace Services.Implements
         public UserInformation GetExistUser(LoginInformation info)
         {
             var res = new UserInformation();
-            var user = _repositoryManager.User.FindByCondition(x => x.Email == info.Email && x.UserPassword == info.Password, true).FirstOrDefault();
+            var user = _repositoryManager.User.FindByCondition(x => x.Email == info.Email && x.UserPassword == info.Password, true)
+                .Include(x => x.Wallets)
+                .FirstOrDefault();
             if (user != null)
             {
                 var isNewUser = user.PlayingArea == null || user.PlayingLevel == 0 || user.PlayingWay == null;
@@ -334,6 +336,7 @@ namespace Services.Implements
                     FullName = user.FullName,
                     PhoneNumber = user.PhoneNumber,
                     SortProfile = user.SortProfile,
+                    Balance = user.Wallets.ToList()[0].Balance,
                 };
 
                 if(user.IsBanFromLogin)
@@ -503,6 +506,14 @@ namespace Services.Implements
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();
+            if(user.Id > 0)
+            {
+                _repositoryManager.Wallet.Create(new Wallet
+                {
+                    Balance = 0,
+                    IdUser = user.Id,
+                });
+            }
             return user.Id;
         }
 
