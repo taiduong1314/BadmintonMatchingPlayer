@@ -27,39 +27,27 @@ namespace Services.Implements
             var revertbase64 = base64encodedstring.Replace("data:image/jpeg;base64,", "");
             try
             {
-                // Chuyển base64 thành mảng byte
                 var bytes = Convert.FromBase64String(revertbase64);
                 var contents = new StreamContent(new MemoryStream(bytes));
-                //var contents = new StreamContent(new MemoryStream(bytes));
-                // KHởi tạo cấu hình cloudinary
                 Account account = new Account(
                     "dbjvirvym",
                     "487892318776179",
                     "txx6fF8ZVsT72id6ySvqNqwrN0E");
                 Cloudinary cloudinary = new Cloudinary(account);
-                // làm sao để upload file lên cloudinary
 
                 string publicId = Guid.NewGuid().ToString();
-                // Tải tệp lên Cloudinary
                 var uploadParams = new ImageUploadParams()
                 {
                     File = new FileDescription(publicId, new MemoryStream(bytes)),
                     PublicId = publicId
                 };
-                
-
                 var uploadResult = await cloudinary.UploadAsync(uploadParams);
 
-                // Lấy URL của tệp sau khi tải lên thành công
-                string imageUrl = uploadResult.SecureUrl.ToString();
-
-                // Trả về URL
-                return imageUrl;
+                return uploadResult.SecureUrl.ToString();
 
             }
             catch (Exception ex)
             {
-                // Xử lý lỗi tại đây (ví dụ: ghi vào log)
                 Console.WriteLine("Lỗi: " + ex.Message);
                 return string.Empty;
             }
