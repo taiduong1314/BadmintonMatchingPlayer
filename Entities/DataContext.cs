@@ -215,7 +215,7 @@ namespace Entities
 
             modelBuilder.Entity<Subscription>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => e.Id);
 
                 entity.ToTable("Subscription");
 

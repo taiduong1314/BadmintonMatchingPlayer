@@ -44,10 +44,11 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<IPostServices, PostServices>();
 builder.Services.AddScoped<IReportServices, ReportServices>();
 builder.Services.AddScoped<ISlotServices, SlotServices>();
+builder.Services.AddScoped<IWalletServices, WalletServices>();
 
 var app = builder.Build();
 var port = Environment.GetEnvironmentVariable("PORT");
-app.Urls.Add($"http://*:{port}");
+//app.Urls.Add($"http://*:{port}");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
