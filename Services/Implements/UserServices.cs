@@ -97,6 +97,7 @@ namespace Services.Implements
                 subcipt = new Subscription
                 {
                     IsBanded = true,
+                    IsSubcription = false,
                     UserId = user_id,
                     UserSubId = user_effect
                 };

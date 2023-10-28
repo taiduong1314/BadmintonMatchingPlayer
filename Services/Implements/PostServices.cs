@@ -257,36 +257,38 @@ namespace Services.Implements
         public PostDetail GetPostDetail(int id_post)
         {
 
-            var res = _repositoryManager.Post
+            var x = _repositoryManager.Post
                 .FindByCondition(x =>
                 x.Id == id_post
                 && x.QuantitySlot - x.Slots.Count() > 0
                 && !x.IsDeleted, false)
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
-                .Select(x => new PostDetail
-                {
-                    AddressSlot = x.AddressSlot,
-                    CategorySlot = x.CategorySlot,
-                    ContentPost = x.ContentPost,
-                    Days = x.Days,
-                    EndTime = x.EndTime,
-                    FullName = x.IdUserToNavigation.FullName,
-                    HightLightImage = x.ImgUrl,
-                    ImageUrls = x.ImageUrls.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList(),
-                    LevelSlot = x.LevelSlot,
-                    PriceSlot = x.PriceSlot,
-                    QuantitySlot = x.QuantitySlot,
-                    ImgUrlUser = x.IdUserToNavigation.ImgUrl,
-                    SortProfile = x.IdUserToNavigation.SortProfile,
-                    StartTime = x.StartTime,
-                    TotalRate = x.IdUserToNavigation.TotalRate,
-                    AvailableSlot = GetAvailableSlot(x),
-                    UserId = x.IdUserTo.Value,
-                    Title = x.Title
+                .FirstOrDefault();
 
-                }).FirstOrDefault();
-            return res;
+            var postDetail = new PostDetail
+            {
+                AddressSlot = x.AddressSlot,
+                CategorySlot = x.CategorySlot,
+                ContentPost = x.ContentPost,
+                Days = x.Days,
+                EndTime = x.EndTime,
+                FullName = x.IdUserToNavigation.FullName,
+                HightLightImage = x.ImgUrl,
+                LevelSlot = x.LevelSlot,
+                PriceSlot = x.PriceSlot,
+                QuantitySlot = x.QuantitySlot,
+                ImgUrlUser = x.IdUserToNavigation.ImgUrl,
+                SortProfile = x.IdUserToNavigation.SortProfile,
+                StartTime = x.StartTime,
+                TotalRate = x.IdUserToNavigation.TotalRate,
+                UserId = x.IdUserTo.Value,
+                Title = x.Title
+            };
+            postDetail.AvailableSlot = GetAvailableSlot(x);
+            postDetail.ImageUrls = x.ImageUrls.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            return postDetail;
         }
 
         private List<string> GetAvailableSlot(Post post)
