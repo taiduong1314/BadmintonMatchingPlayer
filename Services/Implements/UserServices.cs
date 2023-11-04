@@ -248,7 +248,7 @@ namespace Services.Implements
             return res;
         }
 
-        public async Task<List<User>> GetAllAccount()
+        public async Task<List<User>> GetAllAccount(int user_id)
         {
             var res = await _repositoryManager.User.FindAll(false)
                 .Select( x => new User
@@ -377,7 +377,7 @@ namespace Services.Implements
                     Content = X.reportContent,
                     Id = X.Id,
                     SaveDate = X.TimeReport.Value.ToString("dd/MM/yyyy"),
-                    Status = X.Status.Value ? "Đã xử lý" : "Chưa xử lý",
+                    Status = ((ReportStatus)X.Status).ToString(),
                     Title = X.ReportTitle
                 }).ToList();
             return res;

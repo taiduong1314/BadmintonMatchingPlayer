@@ -1,6 +1,5 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
-using Entities.ResponseObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +8,10 @@ using System.Threading.Tasks;
 
 namespace Services.Interfaces
 {
-    public interface IReportServices
+    public interface ITransactionServices
     {
-        Task<int> CreateFromTransaction(int tran_id, ReportContent info);
-        Task<List<Reports>> GetByStatus(ReportStatus status);
+        Task<int> CreateForBuySlot(TransactionCreateInfo info);
+        bool ExistTran(int tran_id);
+        Task UpdateStatus(int tran_id, TransactionStatus tranStatus);
     }
 }

@@ -1,5 +1,15 @@
 ﻿namespace Entities.Models
 {
+    public enum TransactionStatus
+    {
+        Processing = 0,
+        PaymentSuccess = 1,
+        PaymentFailure = 2,
+        Played = 3,
+        Reporting = 4,
+        ReportResolved = 5
+    }
+
     public partial class Transaction
     {
         public Transaction()
@@ -15,7 +25,7 @@
         public string? TypeTrans { get; set; }
         public decimal? MoneyTrans { get; set; }
         public int? IdSlot { get; set; }
-        public bool? Status { get; set; }
+        public int? Status { get; set; }
         public DateTime? DeadLine { get; set; }
 
         public virtual Slot? IdSlotNavigation { get; set; }
