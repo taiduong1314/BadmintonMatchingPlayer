@@ -29,10 +29,10 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
             var res = _postServices.GetSuggestionPost(user_id);
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpPost]
@@ -41,16 +41,16 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
             var postId = await _postServices.CreatePost(user_id, info);
             if (postId != 0)
             {
-                return Ok(new { PostId = postId });
+                return Ok(new SuccessObject { Data = new { PostId = postId }, Message = Message.SuccessMsg });
             }
             else
             {
-                return Ok(new { ErrorCode = "Save fail" });
+                return Ok(new ErrorObject { ErrorCode = "Save fail" });
             }
         }
 
@@ -59,7 +59,7 @@ namespace BadmintonMatching.Controllers
         public IActionResult GetPostPlayGround()
         {
             var res = _postServices.GetAllPlayGround();
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
@@ -67,7 +67,7 @@ namespace BadmintonMatching.Controllers
         public IActionResult GetPostByPlayGround(string play_ground)
         {
             List<PostInfomation> res = _postServices.GetPostByPlayGround(play_ground);
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
@@ -76,7 +76,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             List<PostInfomation> res = new List<PostInfomation>();
@@ -91,14 +91,14 @@ namespace BadmintonMatching.Controllers
             }
 
 
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
         [HttpGet]
         [Route("{post_id}/details")]
         public IActionResult GetDetailPost(int post_id)
         {
             var res = _postServices.GetPostDetail(post_id);
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
@@ -106,46 +106,50 @@ namespace BadmintonMatching.Controllers
         public IActionResult GetListOptionalPost()
         {
             var res = _postServices.GetListOptionalPost();
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
         [HttpGet]
         [Route("GetListPost")]
         public async Task<IActionResult> GetListPost()
         {
             var res = await _postServices.GetAllPost();
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
+
         #region List Post at role Admin
         [HttpGet]
         [Route("{admin_id}/post")]
         public IActionResult GetListPostByAdmin(int admin_id)
         {
-            
+
             var checkadmin = _userServices.IsAdmin(admin_id);
             if (checkadmin)
             {
                 var res = _postServices.GetListPostByAdmin();
-                return Ok(res);                
+                return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
             }
+            else
+            {
 
-            return Ok();
+                return Ok(new ErrorObject { ErrorCode = "Not admin" });
+            }
         }
         #endregion
         #region Delete Post byAdmin
         [HttpPut]
         [Route("{admin_id}/delete/{post_id}")]
-        public IActionResult DeletePost(int post_id,int admin_id)
+        public IActionResult DeletePost(int post_id, int admin_id)
         {
-            if(_userServices.IsAdmin(admin_id) == false)
+            if (_userServices.IsAdmin(admin_id) == false)
             {
-                return Ok(new { ErrorAdmin = "Not admin" });
+                return Ok(new ErrorObject { ErrorCode = "Not admin" });
             }
-            
-                var res = _postServices.DeletePost(post_id);
-            return Ok(res ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
+
+            var res = _postServices.DeletePost(post_id);
+            return Ok(res ? new SuccessObject { Data = null, Message = Message.SuccessMsg }: new ErrorObject { ErrorCode = "Update fail" });
         }
 
-        
+
         #endregion
     }
 }

@@ -27,9 +27,12 @@ namespace BadmintonMatching.Controllers
             var city = cities.FirstOrDefault(c => c.Id == id);
             if (city == null)
             {
-                return NotFound();
+                return Ok(new ErrorObject
+                {
+                    ErrorCode = "No cities found!"
+                });
             }
-            return Ok(city);
+            return Ok(new SuccessObject { Data = city, Message = Message.SuccessMsg});
         }
     }
 }

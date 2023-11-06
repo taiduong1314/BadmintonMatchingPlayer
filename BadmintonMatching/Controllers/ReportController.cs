@@ -1,5 +1,6 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
+using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 
@@ -24,10 +25,10 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsAdmin(admin_id))
             {
-                return Ok(new { Error = "Not admin to get" });
+                return Ok(new ErrorObject { ErrorCode = "Not admin" });
             }
             var reports = await _reportServices.GetByStatus((ReportStatus)status);
-            return Ok(reports);
+            return Ok(new SuccessObject { Data = reports, Message = Message.SuccessMsg });
         }
 
         [HttpPost]
@@ -37,11 +38,11 @@ namespace BadmintonMatching.Controllers
             var report_id = await _reportServices.CreateFromTransaction(tran_id, info);
             if (report_id == 0)
             {
-                return Ok(new { Error = "Fail to create" });
+                return Ok(new ErrorObject { ErrorCode = "Fail to create" });
             }
             else
             {
-                return Ok(new { ReportId = report_id });
+                return Ok(new SuccessObject { Data = new { ReportId = report_id }, Message = Message.SuccessMsg });
             }
         }
     }

@@ -25,19 +25,19 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsUserExist(info.Email))
             {
-                return Ok(new { ErrorEmail = "Tài khoản không tồn tại" });
+                return Ok(new ErrorObject { ErrorCode = "Tài khoản không tồn tại" });
             }
             var userInfo = _userServices.GetExistUser(info);
 
-            if(userInfo.Id == -1)
+            if (userInfo.Id == -1)
             {
-                return Ok(new { LoginError = "UserId is banded by admin from login" });
+                return Ok(new ErrorObject { ErrorCode = "UserId is banded by admin from login" });
             }
             else if (userInfo.Id == 0)
             {
-                return Ok(new { LoginError = "Tài khoản hoặc mật khẩu không đúng" });
+                return Ok(new ErrorObject { ErrorCode = "Tài khoản hoặc mật khẩu không đúng" });
             }
-            return Ok(userInfo);
+            return Ok(new SuccessObject { Data = userInfo, Message = Message.SuccessMsg });
         }
 
         [HttpPost]
@@ -46,16 +46,16 @@ namespace BadmintonMatching.Controllers
         {
             if (info.Password != info.ReEnterPass)
             {
-                return Ok(new { ErrorPassword = "Mật khẩu không trùng khớp" });
+                return Ok(new ErrorObject { ErrorCode = "Mật khẩu không trùng khớp" });
             }
 
             if (_userServices.IsUserExist(info.Email))
             {
-                return Ok(new { ErrorEmail = "Email này đã tồn tại" });
+                return Ok(new ErrorObject { ErrorCode = "Email này đã tồn tại" });
             }
 
             var userId = _userServices.RegistUser(info);
-            return Ok(new { UserId = userId });
+            return Ok(new SuccessObject { Data = new { UserId = userId }, Message = Message.SuccessMsg });
         }
 
         [HttpPost]
@@ -64,13 +64,13 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
             if (info.ListArea != null)
             {
                 _userServices.AddPlayingArea(user_id, info);
             }
-            return Ok(new { Message = "Playing Area is saved" });
+            return Ok(new SuccessObject { Message = "Playing Area is saved" });
         }
 
         [HttpPost]
@@ -79,13 +79,13 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
             if (info.Point > 0)
             {
                 _userServices.AddPlayingLevel(user_id, info);
             }
-            return Ok(new { Message = "Playing Level is saved" });
+            return Ok(new SuccessObject { Message = "Playing Level is saved" });
         }
 
         [HttpPost]
@@ -94,13 +94,13 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
             if (info.PlayingWays != null)
             {
                 _userServices.AddPlayingWay(user_id, info);
             }
-            return Ok(new { Message = "Playing Way is saved" });
+            return Ok(new SuccessObject { Message = "Playing Way is saved" });
         }
 
         [HttpGet]
@@ -109,7 +109,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
             var areas = _userServices.GetUserAreas(user_id);
             var res = new List<UserSuggestion>();
@@ -133,7 +133,7 @@ namespace BadmintonMatching.Controllers
                     res = _userServices.FindUserByPlayWays(ways, res);
                 }
             }
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
@@ -142,12 +142,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsUserExist(email))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             var otp = _userServices.CreateVerifyToken(email);
             var token = _jwtServices.CreateToken(otp);
-            return Ok(new { Token = token });
+            return Ok(new SuccessObject { Data = new { Token = token }, Message = Message.SuccessMsg });
         }
         [HttpGet]
         [Route("{email}/verify_otp")]
@@ -155,12 +155,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsUserExist(email))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             var otp = _userServices.CreateVerifyToken(email);
             var token = _jwtServices.CreateToken(otp);
-            return Ok(new VerifyEmail { Token = token, Otp = otp });
+            return Ok(new SuccessObject { Data = new VerifyEmail { Token = token, Otp = otp }, Message = Message.SuccessMsg });
         }
 
         [HttpPost]
@@ -169,12 +169,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsUserExist(info.Email))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             var success = _userServices.CheckRemoveVefToken(info);
 
-            return Ok(success ? new { Message = "Verify Success" } : new { ErrorCode = "Invalid token" });
+            return Ok(success ? new SuccessObject { Message = "Verify Success" } : new ErrorObject { ErrorCode = "Invalid token" });
         }
 
         [HttpPut]
@@ -183,17 +183,17 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsUserExist(email))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             if (info.NewPassword != info.ReEnterPassword)
             {
-                return Ok(new { ErrorCode = "Password verify not matches" });
+                return Ok(new ErrorObject { ErrorCode = "Password verify not matches" });
             }
 
             var success = _userServices.UpdatePassword(email, info);
 
-            return Ok(success ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
+            return Ok(success ? new SuccessObject { Message = "Update Success" } : new ErrorObject { ErrorCode = "Update fail" });
         }
 
         [HttpGet]
@@ -202,12 +202,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             var res = _userServices.GetComments(user_id);
 
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpPost]
@@ -216,12 +216,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id) || !_userServices.ExistUserId(user_id_receive_comment))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             int commentId = _userServices.SaveComment(user_id, user_id_receive_comment, comment);
 
-            return Ok(commentId > 0 ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
+            return Ok(commentId > 0 ? new SuccessObject { Message = "Update Success" } : new ErrorObject { ErrorCode = "Update fail" });
         }
 
         [HttpGet]
@@ -230,12 +230,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             List<BandedUsers> bandedLs = _userServices.GetBandedUsers(user_id);
 
-            return Ok(bandedLs);
+            return Ok(new SuccessObject { Data = bandedLs, Message = Message.SuccessMsg });
         }
 
         [HttpPut]
@@ -244,7 +244,7 @@ namespace BadmintonMatching.Controllers
         {
             bool updateSuccess = _userServices.BanUnband(user_id, user_effect);
 
-            return Ok(updateSuccess ? new { Message = "Update Success" } : new { ErrorCode = "Update fail" });
+            return Ok(updateSuccess ? new SuccessObject { Message = "Update Success" } : new ErrorObject { ErrorCode = "Update fail" });
         }
 
         [HttpGet]
@@ -253,12 +253,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsAdmin(user_id))
             {
-                return Ok(new { Error = "Not admin for get" });
+                return Ok(new ErrorObject { ErrorCode = "Not admin for get" });
             }
 
             var users = _userServices.GetUserForManaged();
 
-            return Ok(users);
+            return Ok(new SuccessObject { Data = users, Message = Message.SuccessMsg });
         }
 
         [HttpPut]
@@ -267,18 +267,18 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsAdmin(admin_id))
             {
-                return Ok(new { Error = "Not admin for update" });
+                return Ok(new ErrorObject { ErrorCode = "Not admin for update" });
             }
 
             try
             {
                 bool isBanded = _userServices.BanUnbandLogin(user_id);
 
-                return Ok(new { status = isBanded ? "Banded" : "Unbaded" });
+                return Ok(new SuccessObject { Data = new { status = isBanded ? "Banded" : "Unbaded" }, Message = Message.SuccessMsg });
             }
             catch (NotImplementedException)
             {
-                return Ok(new { status = "not found user_id" });
+                return Ok(new ErrorObject { ErrorCode = "not found user_id" });
             }
         }
 
@@ -288,10 +288,10 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsAdmin(admin_id))
             {
-                return Ok(new { Error = "Not admin for update" });
+                return Ok(new ErrorObject { ErrorCode = "Not admin for update" });
             }
             List<UserReport> reports = _userServices.GetReports(user_id);
-            return Ok(reports);
+            return Ok(new SuccessObject { Data = reports, Message = Message.SuccessMsg });
         }
 
         #region Get User Profile
@@ -309,7 +309,7 @@ namespace BadmintonMatching.Controllers
             res.Trusted = _userServices.GetTrusted(user_id);
             res.LevelSkill = _userServices.GetLevelSkill(user_id);
 
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
         #endregion
 
@@ -319,7 +319,7 @@ namespace BadmintonMatching.Controllers
         public async Task<IActionResult> GetAllAccount(int user_id)
         {
             var res = await _userServices.GetAllAccount(user_id);
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
         #endregion
 
@@ -334,7 +334,8 @@ namespace BadmintonMatching.Controllers
         [Route("{user_id}")]
         public async Task<IActionResult> UpdateUserProfile(UpdateProfileUser param, int user_id, bool trackChanges)
         {
-            return await _userServices.UpdateProfile(user_id, param, trackChanges);
+            var data = await _userServices.UpdateProfile(user_id, param, trackChanges);
+            return Ok(new SuccessObject { Data = data, Message = Message.SuccessMsg });
             //await _repository.SaveAsync();
             //return Ok();
         }
@@ -348,12 +349,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id) || !_userServices.ExistUserId(userreport_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
             int commentId = _userServices.CreateReport(user_id, userreport_id, report);
 
-            return Ok(commentId > 0 ? new { Message = "Report Successfull" } : new { ErrorCode = "Report fail" });
+            return Ok(commentId > 0 ? new SuccessObject { Message = "Report Successfull" } : new ErrorObject { ErrorCode = "Report fail" });
         }
         #endregion
 
@@ -364,10 +365,10 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new { ErrorCode = "Can't found user" });
+                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
             var res = _userServices.GetSelfProfile(user_id);
-            return Ok(res);
+            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
         #endregion
 

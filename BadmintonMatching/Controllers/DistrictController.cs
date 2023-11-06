@@ -47,7 +47,7 @@ namespace BadmintonMatching.Controllers
         {
             // Lọc danh sách quận dựa trên cityId
             var cityDistricts = districts.Where(d => d.CityId == cityId).ToList();
-            return Ok(cityDistricts);
+            return Ok(new SuccessObject { Data = cityDistricts, Message = Message.SuccessMsg });
         }
     }
 }

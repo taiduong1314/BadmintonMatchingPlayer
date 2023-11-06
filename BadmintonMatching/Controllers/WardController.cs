@@ -330,7 +330,7 @@ namespace BadmintonMatching.Controllers
         [HttpGet]
         public IActionResult GetWards()
         {
-            return Ok(wards);
+            return Ok(new SuccessObject { Data = wards, Message = Message.SuccessMsg });
         }
 
         [HttpGet("{id}")]
@@ -341,14 +341,14 @@ namespace BadmintonMatching.Controllers
             {
                 return NotFound();
             }
-            return Ok(ward);
+            return Ok(new SuccessObject { Data = ward, Message = Message.SuccessMsg });
         }
         [HttpGet("district/{districtId}")]
         public IActionResult GetDistrictsInCity(int districtId)
         {
             // Lọc danh sách quận dựa trên cityId
             var cityDistricts = wards.Where(d => d.DistrictId == districtId).ToList();
-            return Ok(cityDistricts);
+            return Ok(new SuccessObject { Data = cityDistricts, Message = Message.SuccessMsg });
         }
     }
 }

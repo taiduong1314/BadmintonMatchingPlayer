@@ -1,6 +1,8 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
+using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -23,11 +25,11 @@ namespace BadmintonMatching.Controllers
             var tranId = await _transactionRepository.CreateForBuySlot(info);
             if (tranId == 0)
             {
-                return Ok(new { Error = "Create not success" });
+                return Ok(new ErrorObject{ ErrorCode = "Create not success" });
             }
             else
             {
-                return Ok(new { TranSactionId = tranId });
+                return Ok(new SuccessObject { Data = new { TranSactionId = tranId }, Message = Message.SuccessMsg });
             }
         }
 
@@ -38,11 +40,11 @@ namespace BadmintonMatching.Controllers
             if (_transactionRepository.ExistTran(tran_id))
             {
                 await _transactionRepository.UpdateStatus(tran_id, (TransactionStatus)status_info);
-                return Ok(new {Message = "Update success"});
+                return Ok(new SuccessObject { Message = "Update success" });
             }
             else
             {
-                return Ok(new { Error = "Invalid transaction" });
+                return Ok(new ErrorObject{ ErrorCode = "Invalid transaction" });
             }
         }
 
