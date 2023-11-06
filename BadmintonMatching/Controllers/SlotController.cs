@@ -15,7 +15,7 @@ namespace BadmintonMatching.Controllers
             _slotServices = slotServices;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("available")]
         public IActionResult CheckAvailableAndCreateSlot(CheckAvailableSlot info)
         {
