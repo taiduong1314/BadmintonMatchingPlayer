@@ -318,10 +318,10 @@ namespace BadmintonMatching.Controllers
 
         #region Get all user
         [HttpGet]
-        [Route("GetListUser/{user_id}")]
-        public async Task<IActionResult> GetAllAccount(int user_id)
+        [Route("GetListUser")]
+        public async Task<IActionResult> GetAllAccount()
         {
-            var res = await _userServices.GetAllAccount(user_id);
+            var res = await _userServices.GetAllAccount();
             return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
         }
         #endregion

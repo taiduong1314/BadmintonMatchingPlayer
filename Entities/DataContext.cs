@@ -211,6 +211,11 @@ namespace Entities
                     .WithMany(p => p.Slots)
                     .HasForeignKey(d => d.IdPost)
                     .HasConstraintName("FK_Slot_Posts");
+
+                entity.HasOne(d => d.Transaction)
+                    .WithMany(p => p.Slots)
+                    .HasForeignKey(d => d.TransactionId)
+                    .HasConstraintName("FK_Slot_Transaction");
             });
 
             modelBuilder.Entity<Subscription>(entity =>
@@ -240,8 +245,6 @@ namespace Entities
             {
                 entity.Property(e => e.Id).HasColumnName("id");
 
-                entity.Property(e => e.IdSlot).HasColumnName("idSlot");
-
                 entity.Property(e => e.IdUser).HasColumnName("idUser");
 
                 entity.Property(e => e.MethodTrans).HasColumnName("methodTrans");
@@ -257,11 +260,6 @@ namespace Entities
                     .HasColumnName("timeTrans");
 
                 entity.Property(e => e.TypeTrans).HasColumnName("typeTrans");
-
-                entity.HasOne(d => d.IdSlotNavigation)
-                    .WithMany(p => p.Transactions)
-                    .HasForeignKey(d => d.IdSlot)
-                    .HasConstraintName("FK_Transactions_Slot");
 
                 entity.HasOne(d => d.IdUserNavigation)
                     .WithMany(p => p.Transactions)

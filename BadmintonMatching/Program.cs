@@ -45,6 +45,7 @@ builder.Services.AddScoped<IPostServices, PostServices>();
 builder.Services.AddScoped<IReportServices, ReportServices>();
 builder.Services.AddScoped<ISlotServices, SlotServices>();
 builder.Services.AddScoped<IWalletServices, WalletServices>();
+builder.Services.AddScoped<ITransactionServices, TransactionServices>();
 
 var app = builder.Build();
 var port = Environment.GetEnvironmentVariable("PORT");

@@ -12,10 +12,12 @@ namespace BadmintonMatching.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly ITransactionServices _transactionRepository;
+        private readonly IUserServices _userServices;
 
-        public TransactionController(ITransactionServices transactionRepository)
+        public TransactionController(ITransactionServices transactionRepository, IUserServices userServices)
         {
             _transactionRepository = transactionRepository;
+            _userServices = userServices;
         }
 
         [HttpPost]
@@ -46,6 +48,27 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject{ Message = "Invalid transaction" });
             }
+        }
+
+        [HttpGet]
+        [Route("user/{user_id}")]
+        public async Task<IActionResult> GetTransactionOfUser(int user_id)
+        {
+            if (!_userServices.ExistUserId(user_id))
+            {
+                return Ok(new SuccessObject { Message = "Invalid User" });
+            }
+
+            var data = await _transactionRepository.GetOfUser(user_id);
+            return Ok(new SuccessObject { Data= data, Message = Message.SuccessMsg });
+        }
+
+        [HttpGet]
+        [Route("{transaction_id}/detail")]
+        public async Task<IActionResult> GetTransactionDetail(int transaction_id)
+        {
+            var data = await _transactionRepository.GetDetail(transaction_id);
+            return Ok(new SuccessObject { Data= data, Message = Message.SuccessMsg });
         }
 
     }

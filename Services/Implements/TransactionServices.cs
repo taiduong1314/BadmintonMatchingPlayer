@@ -1,5 +1,6 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
+using Entities.ResponseObject;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
@@ -17,7 +18,7 @@ namespace Services.Implements
 
         public async Task<int> CreateForBuySlot(TransactionCreateInfo info)
         {
-            var slot = await _repositoryManager.Slot.FindByCondition(x => x.Id == info.IdSlot, false).FirstOrDefaultAsync();
+            var slot = await _repositoryManager.Slot.FindByCondition(x => x.Id == info.IdSlot[0], false).FirstOrDefaultAsync();
             if (slot == null || slot.ContentSlot == null)
             {
                 return 0;
@@ -27,21 +28,64 @@ namespace Services.Implements
             var tran = new Transaction
             {
                 DeadLine = new DateTime(int.Parse(date[2]), int.Parse(date[1]), int.Parse(date[0])).AddDays(1),
-                IdSlot = slot.Id,
                 IdUser = info.IdUser,
                 MoneyTrans = slot.Price,
                 MethodTrans = "buy_slot",
                 TypeTrans = "buy _slot",
+                TimeTrans = DateTime.UtcNow,
                 Status = (int)TransactionStatus.Processing,
             };
             _repositoryManager.Transaction.Create(tran);
             await _repositoryManager.SaveAsync();
+            if(tran.Id > 0)
+            {
+                var slots = _repositoryManager.Slot.FindByCondition(x => info.IdSlot.Contains(x.Id), true).ToList();
+                tran.Slots = slots;
+                _repositoryManager.Transaction.Update(tran);
+                await _repositoryManager.SaveAsync();
+            }
             return tran.Id;
         }
 
         public bool ExistTran(int tran_id)
         {
             return _repositoryManager.Transaction.FindByCondition(x => x.Id == tran_id, false).FirstOrDefault() != null;
+        }
+
+        public async Task<TransactionDetail> GetDetail(int transaction_id)
+        {
+            var tran = await _repositoryManager.Transaction.FindByCondition(x => x.Id ==  transaction_id, false)
+                .Select(x => new TransactionDetail
+                {
+                    Id = x.Id,
+                    BuyerName = x.IdUserNavigation.FullName,
+                    PayTime = x.TimeTrans.Value.ToString("f"),
+                    SlotCount = x.Slots.Count,
+                    Slots = x.Slots.Select(y => new SlotBuy
+                    {
+                        Id = y.Id,
+                        PlayDate = y.ContentSlot
+                    }).ToList(),
+                    Total = x.MoneyTrans.Value.ToString(),
+                }).FirstOrDefaultAsync();
+            return tran != null ? tran : new TransactionDetail { Id = 0 };
+        }
+
+        public async Task<List<TransactionInfo>> GetOfUser(int user_id)
+        {
+            var trans = await _repositoryManager.Transaction.FindByCondition(x => x.IdUser == user_id, false)
+                .Include(x => x.Slots)
+                .Select(x => new TransactionInfo
+                {
+                    Id = x.Id,
+                    MoneyPaied = x.MoneyTrans.ToString(),
+                    Slots = x.Slots.Select(y => new SlotBuy
+                    {
+                        Id = y.Id,
+                        PlayDate = y.ContentSlot
+                    }).ToList()
+                }).ToListAsync();
+            return trans;
         }
 
         public async Task UpdateStatus(int tran_id, TransactionStatus tranStatus)

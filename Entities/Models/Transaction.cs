@@ -16,6 +16,7 @@
         {
             HistoryTransactions = new HashSet<HistoryTransaction>();
             Reports = new HashSet<Report>();
+            Slots = new HashSet<Slot>();
         }
 
         public int Id { get; set; }
@@ -24,7 +25,6 @@
         public string? MethodTrans { get; set; }
         public string? TypeTrans { get; set; }
         public decimal? MoneyTrans { get; set; }
-        public int? IdSlot { get; set; }
         public int? Status { get; set; }
         public DateTime? DeadLine { get; set; }
 
@@ -32,5 +32,6 @@
         public virtual User? IdUserNavigation { get; set; }
         public virtual ICollection<HistoryTransaction> HistoryTransactions { get; set; }
         public virtual ICollection<Report> Reports { get; set; }
+        public virtual ICollection<Slot> Slots { get; set; }
     }
 }

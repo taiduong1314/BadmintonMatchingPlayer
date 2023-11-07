@@ -1,5 +1,6 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
+using Entities.ResponseObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace Services.Interfaces
     {
         Task<int> CreateForBuySlot(TransactionCreateInfo info);
         bool ExistTran(int tran_id);
+        Task<TransactionDetail> GetDetail(int transaction_id);
+        Task<List<TransactionInfo>> GetOfUser(int user_id);
         Task UpdateStatus(int tran_id, TransactionStatus tranStatus);
     }
 }

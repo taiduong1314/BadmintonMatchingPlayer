@@ -248,7 +248,7 @@ namespace Services.Implements
             return res;
         }
 
-        public async Task<List<User>> GetAllAccount(int user_id)
+        public async Task<List<User>> GetAllAccount()
         {
             var res = await _repositoryManager.User.FindAll(false)
                 .Select( x => new User

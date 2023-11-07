@@ -57,7 +57,8 @@ namespace Services.Implements
                         {
                             ContentSlot = info.DateRegis,
                             IdPost = info.PostId,
-                            IdUser = info.UserId
+                            IdUser = info.UserId,
+                            Price = post.PriceSlot
                         };
                         _repositoryManager.Slot.Create(slot);
                         _repositoryManager.SaveAsync().Wait();

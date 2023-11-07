@@ -9,6 +9,6 @@ namespace Entities.RequestObject
     public class TransactionCreateInfo
     {
         public int? IdUser { get; set; }
-        public int? IdSlot { get; set; }
+        public List<int>? IdSlot { get; set; }
     }
 }

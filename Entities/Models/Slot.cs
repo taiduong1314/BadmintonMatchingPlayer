@@ -4,7 +4,6 @@
     {
         public Slot()
         {
-            Transactions = new HashSet<Transaction>();
         }
 
         public int Id { get; set; }
@@ -14,9 +13,10 @@
         public string? ContentSlot { get; set; }
         public int? IdPost { get; set; }
         public int? IdUser { get; set; }
+        public int? TransactionId { get; set; }
         public bool IsDeleted { get; set; }
 
         public virtual Post? IdPostNavigation { get; set; }
-        public virtual ICollection<Transaction> Transactions { get; set; }
+        public virtual Transaction? Transaction { get; set; }
     }
 }

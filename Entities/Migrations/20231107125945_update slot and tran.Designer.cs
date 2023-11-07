@@ -4,6 +4,7 @@ using Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entities.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231107125945_update slot and tran")]
+    partial class updateslotandtran
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,7 +49,7 @@ namespace Entities.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Comments", (string)null);
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Entities.Models.HistoryTransaction", b =>
@@ -151,7 +153,7 @@ namespace Entities.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Entities.Models.Post", b =>
@@ -235,7 +237,7 @@ namespace Entities.Migrations
 
                     b.HasIndex("IdUserTo");
 
-                    b.ToTable("Posts", (string)null);
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("Entities.Models.Report", b =>
@@ -298,7 +300,7 @@ namespace Entities.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("Entities.Models.Slot", b =>
@@ -427,7 +429,7 @@ namespace Entities.Migrations
 
                     b.HasIndex("IdUser");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Entities.Models.TypePost", b =>
@@ -531,7 +533,7 @@ namespace Entities.Migrations
 
                     b.HasIndex("UserRole");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Entities.Models.UserRating", b =>
@@ -600,7 +602,7 @@ namespace Entities.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("VerifyToken", (string)null);
+                    b.ToTable("VerifyToken");
                 });
 
             modelBuilder.Entity("Entities.Models.Wallet", b =>

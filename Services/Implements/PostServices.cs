@@ -260,7 +260,6 @@ namespace Services.Implements
             var x = _repositoryManager.Post
                 .FindByCondition(x =>
                 x.Id == id_post
-                && x.QuantitySlot - x.Slots.Count() > 0
                 && !x.IsDeleted, false)
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
@@ -333,7 +332,7 @@ namespace Services.Implements
                 //Get list by date
                 foreach(var item in ds)
                 {
-                    var slots = _repositoryManager.Slot.FindByCondition(x => x.IdPost == post.Id && x.ContentSlot == item, false).Count();
+                    var slots = _repositoryManager.Slot.FindByCondition(x => x.IdPost == post.Id && x.ContentSlot == item && !x.IsDeleted, false).Count();
                     var avai = post.QuantitySlot - slots;
                     res.Add($"{item}:{avai}");
                 }
