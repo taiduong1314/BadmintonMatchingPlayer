@@ -138,16 +138,16 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("{email}/verify_token")]
-        public IActionResult GetVerifyToken(string email)
+        public async Task<IActionResult> GetVerifyToken(string email)
         {
             if (!_userServices.IsUserExist(email))
             {
                 return Ok(new ErrorObject { ErrorCode = "Can't found user" });
             }
 
-            var otp = _userServices.CreateVerifyToken(email);
-            var token = _jwtServices.CreateToken(otp);
-            return Ok(new SuccessObject { Data = new { Token = token }, Message = Message.SuccessMsg });
+            await _userServices.SendEmailAsync(email);
+            //var token = _jwtServices.CreateToken(otp);
+            return Ok(new SuccessObject { Data = new {}, Message = Message.SuccessMsg });
         }
         [HttpGet]
         [Route("{email}/verify_otp")]
