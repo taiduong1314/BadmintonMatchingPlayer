@@ -146,8 +146,7 @@ namespace BadmintonMatching.Controllers
             }
 
             await _userServices.SendEmailAsync(email);
-            //var token = _jwtServices.CreateToken(otp);
-            return Ok(new SuccessObject { Data = new {}, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject { Data = true, Message = "Send mail success" });
         }
         [HttpGet]
         [Route("{email}/verify_otp")]
