@@ -29,7 +29,7 @@ namespace Services.Implements
             {
                 DeadLine = new DateTime(int.Parse(date[2]), int.Parse(date[1]), int.Parse(date[0])).AddDays(1),
                 IdUser = info.IdUser,
-                MoneyTrans = slot.Price,
+                MoneyTrans = slot.Price*info.IdSlot.Count,
                 MethodTrans = "buy_slot",
                 TypeTrans = "buy _slot",
                 TimeTrans = DateTime.UtcNow,
