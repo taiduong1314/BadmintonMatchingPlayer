@@ -25,7 +25,7 @@ namespace BadmintonMatching.Controllers
             var tranId = await _transactionRepository.CreateForBuySlot(info);
             if (tranId == 0)
             {
-                return Ok(new ErrorObject{ ErrorCode = "Create not success" });
+                return Ok(new SuccessObject{ Message = "Create not success" });
             }
             else
             {
@@ -40,11 +40,11 @@ namespace BadmintonMatching.Controllers
             if (_transactionRepository.ExistTran(tran_id))
             {
                 await _transactionRepository.UpdateStatus(tran_id, (TransactionStatus)status_info);
-                return Ok(new SuccessObject { Message = "Update success" });
+                return Ok(new SuccessObject { Message = "Update success", Data = true });
             }
             else
             {
-                return Ok(new ErrorObject{ ErrorCode = "Invalid transaction" });
+                return Ok(new SuccessObject{ Message = "Invalid transaction" });
             }
         }
 

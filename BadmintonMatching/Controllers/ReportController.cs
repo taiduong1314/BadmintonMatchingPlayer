@@ -25,7 +25,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsAdmin(admin_id))
             {
-                return Ok(new ErrorObject { ErrorCode = "Not admin" });
+                return Ok(new SuccessObject { Message = "Not admin" });
             }
             var reports = await _reportServices.GetByStatus((ReportStatus)status);
             return Ok(new SuccessObject { Data = reports, Message = Message.SuccessMsg });
@@ -38,7 +38,7 @@ namespace BadmintonMatching.Controllers
             var report_id = await _reportServices.CreateFromTransaction(tran_id, info);
             if (report_id == 0)
             {
-                return Ok(new ErrorObject { ErrorCode = "Fail to create" });
+                return Ok(new SuccessObject { Message = "Fail to create" });
             }
             else
             {

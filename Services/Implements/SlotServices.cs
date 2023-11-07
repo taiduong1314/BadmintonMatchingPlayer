@@ -40,32 +40,30 @@ namespace Services.Implements
 
         public List<int> GetAvailable(CheckAvailableSlot info)
         {
-            var slots = _repositoryManager.Slot
+            var bookedSlot = _repositoryManager.Slot
                 .FindByCondition(x => x.IdPost == info.PostId && x.ContentSlot == info.DateRegis && !x.IsDeleted, true)
-                .Include(x => x.IdPostNavigation)
                 .ToList();
-            if(slots.Count > 0)
+
+            var post = _repositoryManager.Post.FindByCondition(x => x.Id == info.PostId, false).FirstOrDefault();
+
+            if(post != null)
             {
-                if(slots[0].IdPostNavigation != null)
+                if(post.QuantitySlot - bookedSlot.Count() - info.NumSlot >= 0)
                 {
-                    var avaiSlot = slots[0].IdPostNavigation.QuantitySlot - info.NumSlot;
-                    if (avaiSlot >= 0)
+                    var res = new List<int>();
+                    for (var i = 0; i < info.NumSlot; i++)
                     {
-                        var res = new List<int>();
-                        for(var i = 0; i <= info.NumSlot; i++)
+                        var slot = new Slot
                         {
-                            var slot = new Slot
-                            {
-                                ContentSlot = info.DateRegis,
-                                IdPost = info.PostId,
-                                IdUser = info.UserId
-                            };
-                            _repositoryManager.Slot.Create(slot);
-                            _repositoryManager.SaveAsync().Wait();
-                            res.Add(slot.Id);
-                        }
-                        return res;
+                            ContentSlot = info.DateRegis,
+                            IdPost = info.PostId,
+                            IdUser = info.UserId
+                        };
+                        _repositoryManager.Slot.Create(slot);
+                        _repositoryManager.SaveAsync().Wait();
+                        res.Add(slot.Id);
                     }
+                    return res;
                 }
             }
             return new List<int>();

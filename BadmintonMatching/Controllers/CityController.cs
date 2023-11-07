@@ -18,7 +18,7 @@ namespace BadmintonMatching.Controllers
         [HttpGet]
         public IActionResult GetCities()
         {
-            return Ok(cities);
+            return Ok(new SuccessObject { Data = cities, Message = Message.SuccessMsg });
         }
 
         [HttpGet("{id}")]
@@ -27,9 +27,9 @@ namespace BadmintonMatching.Controllers
             var city = cities.FirstOrDefault(c => c.Id == id);
             if (city == null)
             {
-                return Ok(new ErrorObject
+                return Ok(new SuccessObject
                 {
-                    ErrorCode = "No cities found!"
+                    Message = "No cities found!"
                 });
             }
             return Ok(new SuccessObject { Data = city, Message = Message.SuccessMsg});

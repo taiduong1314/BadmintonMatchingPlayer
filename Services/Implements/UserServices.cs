@@ -337,7 +337,7 @@ namespace Services.Implements
                     FullName = user.FullName,
                     PhoneNumber = user.PhoneNumber,
                     SortProfile = user.SortProfile,
-                    Balance = user.Wallets.ToList()[0].Balance,
+                    Balance = user.Wallets != null ? user.Wallets.ToList()[0].Balance : 0,
                 };
 
                 if(user.IsBanFromLogin)
@@ -514,6 +514,7 @@ namespace Services.Implements
                     Balance = 0,
                     IdUser = user.Id,
                 });
+                _repositoryManager.SaveAsync().Wait();
             }
             return user.Id;
         }

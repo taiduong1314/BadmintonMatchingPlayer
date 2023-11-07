@@ -29,7 +29,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
+                return Ok(new SuccessObject { Message = "Can't found user" });
             }
             var res = _postServices.GetSuggestionPost(user_id);
             return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
@@ -41,7 +41,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                Ok(new ErrorObject { ErrorCode = "Can't found user" });
+                Ok(new SuccessObject { Message = "Can't found user" });
             }
             var postId = await _postServices.CreatePost(user_id, info);
             if (postId != 0)
@@ -50,7 +50,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new ErrorObject { ErrorCode = "Save fail" });
+                return Ok(new SuccessObject { Message = "Save fail" });
             }
         }
 
@@ -76,7 +76,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new ErrorObject { ErrorCode = "Can't found user" });
+                return Ok(new SuccessObject { Message = "Can't found user" });
             }
 
             List<PostInfomation> res = new List<PostInfomation>();
@@ -131,7 +131,7 @@ namespace BadmintonMatching.Controllers
             else
             {
 
-                return Ok(new ErrorObject { ErrorCode = "Not admin" });
+                return Ok(new SuccessObject { Message = "Not admin" });
             }
         }
         #endregion
@@ -142,11 +142,11 @@ namespace BadmintonMatching.Controllers
         {
             if (_userServices.IsAdmin(admin_id) == false)
             {
-                return Ok(new ErrorObject { ErrorCode = "Not admin" });
+                return Ok(new SuccessObject { Message = "Not admin" });
             }
 
             var res = _postServices.DeletePost(post_id);
-            return Ok(res ? new SuccessObject { Data = null, Message = Message.SuccessMsg }: new ErrorObject { ErrorCode = "Update fail" });
+            return Ok(res ? new SuccessObject { Data = true, Message = Message.SuccessMsg }: new SuccessObject { Message = "Update fail" });
         }
 
 
