@@ -11,6 +11,10 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection.Metadata;
+using System.Net.Http;
+using System.Text.Json;
+using System.Net.Http.Headers;
 
 namespace Services.Implements
 {
@@ -24,11 +28,15 @@ namespace Services.Implements
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IJwtSupport _jwtSupport;
+        private readonly HttpClient _httpClient;
 
-        public UserServices(IRepositoryManager repositoryManager, IJwtSupport jwtSupport)
+        
+
+        public UserServices(IRepositoryManager repositoryManager, IJwtSupport jwtSupport, HttpClient httpClient)
         {
             _repositoryManager = repositoryManager;
             _jwtSupport = jwtSupport;
+            _httpClient = httpClient;
         }
 
         public void AddPlayingArea(int user_id, NewPlayingArea info)
@@ -81,6 +89,114 @@ namespace Services.Implements
                     _repositoryManager.SaveAsync().Wait();
                 }
             }
+        }
+        public async Task SendEmailAsync(string? email)
+        {
+            var random = new Random();
+            var token = random.Next(0, 999999).ToString();
+            while (true)
+            {
+                if (token.Length < 6)
+                {
+                    var addNum = 6 - token.Length;
+                    for (var i = 1; i <= addNum; i++)
+                    {
+                        token = "0" + token;
+                    }
+                }
+
+                var user_id = _repositoryManager.User.FindByCondition(x => x.Email == email, true).Select(x => x.Id).FirstOrDefault();
+                if (user_id > 0)
+                {
+                    if (_repositoryManager.VerifyToken.FindByCondition(x => x.Token == token && x.UserId == user_id, true) == null)
+                    {
+                        continue;
+                    }
+                    _repositoryManager.VerifyToken.Create(new VerifyToken
+                    {
+                        Token = token,
+                        UserId = user_id
+                    });
+                    _repositoryManager.SaveAsync().Wait();
+                    break;
+                }
+            }
+            try
+            {
+                //var apiKey = "LoTT0MXpZNnm_YpCc";
+                var serviceId = "service_qohde6p";
+                var templateId = "template_k2ncebm";
+                var userId = "v2YsGMt6K5MlrJD5S"; // Thay thế bằng user_id của bạn (nếu cần)
+                var apiKey = "IEfA8kxTGe-JiqUqfUkUt";
+                var emailJsServerUrl = $"https://api.emailjs.com/api/v1.0/email/send";
+
+                var emailContent = new
+                {
+                    service_id = serviceId,
+                    template_id = templateId,
+                    user_id = userId,
+                    template_params = new
+                    {
+                        to_email = email,
+                        message = token // Nội dung email
+                    }
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(emailContent), Encoding.UTF8, "application/json");
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+                var response = await _httpClient.PostAsync(emailJsServerUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Xử lý thành công
+                    Console.WriteLine("Email đã được gửi thành công.");
+                }
+                else
+                {
+                    // Xử lý lỗi
+                    var error = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Lỗi gửi email: {error}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Xử lý ngoại lệ
+                Console.WriteLine($"Lỗi: {ex.Message}");
+            }
+        }
+        public string CreateVerifyToken(string? email)
+        {
+            var random = new Random();
+            var token = random.Next(0, 999999).ToString();
+            while (true)
+            {
+                if (token.Length < 6)
+                {
+                    var addNum = 6 - token.Length;
+                    for (var i = 1; i <= addNum; i++)
+                    {
+                        token = "0" + token;
+                    }
+                }
+
+                var user_id = _repositoryManager.User.FindByCondition(x => x.Email == email, true).Select(x => x.Id).FirstOrDefault();
+                if (user_id > 0)
+                {
+                    if (_repositoryManager.VerifyToken.FindByCondition(x => x.Token == token && x.UserId == user_id, true) == null)
+                    {
+                        continue;
+                    }
+                    _repositoryManager.VerifyToken.Create(new VerifyToken
+                    {
+                        Token = token,
+                        UserId = user_id
+                    });
+                    _repositoryManager.SaveAsync().Wait();
+                    break;
+                }
+            }
+            return token;
         }
 
         public bool BanUnband(int user_id, int user_effect)
@@ -149,39 +265,7 @@ namespace Services.Implements
             return saveReport.Id;
         }
 
-        public string CreateVerifyToken(string? email)
-        {
-            var random = new Random();
-            var token = random.Next(0, 999999).ToString();
-            while(true)
-            {
-                if (token.Length < 6)
-                {
-                    var addNum = 6 - token.Length;
-                    for (var i = 1; i <= addNum; i++)
-                    {
-                        token = "0" + token;
-                    }
-                }
-
-                var user_id = _repositoryManager.User.FindByCondition(x => x.Email == email, true).Select(x => x.Id).FirstOrDefault();
-                if(user_id > 0)
-                {
-                    if (_repositoryManager.VerifyToken.FindByCondition(x => x.Token == token && x.UserId == user_id, true) == null)
-                    {
-                        continue;
-                    }
-                    _repositoryManager.VerifyToken.Create(new VerifyToken
-                    {
-                        Token = token,
-                        UserId = user_id
-                    });
-                    _repositoryManager.SaveAsync().Wait();
-                    break;
-                }
-            }
-            return token;
-        }
+        
 
         public bool ExistUserId(int userId)
         {

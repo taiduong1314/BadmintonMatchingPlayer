@@ -37,7 +37,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddRazorPages();
 
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-
+builder.Services.AddHttpClient<UserServices>();
 builder.Services.AddScoped<IHasingServices, HasingServices>();
 builder.Services.AddScoped<IJwtSupport, JwtServices>();
 builder.Services.AddScoped<IUserServices, UserServices>();
@@ -49,7 +49,7 @@ builder.Services.AddScoped<ITransactionServices, TransactionServices>();
 
 var app = builder.Build();
 var port = Environment.GetEnvironmentVariable("PORT");
-app.Urls.Add($"http://*:{port}");
+//app.Urls.Add($"http://*:{port}");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
