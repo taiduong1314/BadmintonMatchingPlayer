@@ -68,6 +68,25 @@ namespace Services.Implements
                     }).ToList(),
                     Total = x.MoneyTrans.Value.ToString(),
                 }).FirstOrDefaultAsync();
+            if(tran != null && tran.Slots != null && tran.Slots[0] != null)
+            {
+                var slotId = tran.Slots[0].Id;
+                var slot = await _repositoryManager.Slot.FindByCondition(x => x.Id == slotId, false).Include(x =>x.IdPostNavigation).FirstOrDefaultAsync();
+                if(slot != null && slot.IdPostNavigation != null)
+                {
+                    tran.Post = new PostInTransaction
+                    {
+                        Address = slot.IdPostNavigation.AddressSlot,
+                        EndTime = slot.IdPostNavigation.EndTime,
+                        Id = slot.IdPostNavigation.Id,
+                        ImageUrls = slot.IdPostNavigation.ImageUrls,
+                        PricePerSlot = slot.IdPostNavigation.PriceSlot.ToString(),
+                        StartTime = slot.IdPostNavigation.StartTime,
+                        Title = slot.IdPostNavigation.Title,
+                        TitleImage = slot.IdPostNavigation.ImgUrl
+                    };
+                }
+            }
             return tran != null ? tran : new TransactionDetail { Id = 0 };
         }
 

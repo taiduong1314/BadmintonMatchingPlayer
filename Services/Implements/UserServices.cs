@@ -643,6 +643,7 @@ namespace Services.Implements
                 user.ImgUrl = param.ImgUrl;
                 user.PhoneNumber = param.PhoneNumber;
                 user.SortProfile = param.SortProfile;
+                user.PlayingArea = param.PlayingArea;
                 _repositoryManager.User.Update(user);
                 await _repositoryManager.SaveAsync();
 

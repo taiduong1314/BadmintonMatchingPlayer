@@ -1,4 +1,5 @@
 using Entities;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Implements;
 using Repositories.Intefaces;
@@ -47,6 +48,10 @@ builder.Services.AddScoped<ISlotServices, SlotServices>();
 builder.Services.AddScoped<IWalletServices, WalletServices>();
 builder.Services.AddScoped<ITransactionServices, TransactionServices>();
 
+builder.Services.AddHangfire(configuration => configuration
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
+builder.Services.AddHangfireServer();
+
 var app = builder.Build();
 var port = Environment.GetEnvironmentVariable("PORT");
 app.Urls.Add($"http://*:{port}");
@@ -65,6 +70,8 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseHangfireDashboard("/badminton_hangfire");
+
 app.UseRouting(); 
 app.UseCors(acceptAllCors);
 
@@ -75,6 +82,7 @@ app.MapRazorPages();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
+    endpoints.MapHangfireDashboard();
 }); 
 
 app.Run();
