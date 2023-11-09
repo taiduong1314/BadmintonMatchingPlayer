@@ -20,24 +20,6 @@ namespace Services.Implements
             _repositoryManager = repositoryManager;
         }
 
-        public bool Discard(List<int> slotsId, int post_id)
-        {
-            var slots = _repositoryManager.Slot.FindByCondition(x => x.IdPost == post_id && slotsId.Contains(x.Id), true).ToList();
-            if(slots.Count == slotsId.Count)
-            {
-                foreach(var slot in slots)
-                {
-                    slot.IsDeleted = true;
-                }
-                _repositoryManager.SaveAsync().Wait();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         public List<int> GetAvailable(CheckAvailableSlot info)
         {
             var bookedSlot = _repositoryManager.Slot

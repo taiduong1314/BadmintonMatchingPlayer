@@ -30,20 +30,5 @@ namespace BadmintonMatching.Controllers
                 return BadRequest(new SuccessObject{ Message = "Not enought slot" });
             }
         }
-
-        [HttpDelete]
-        [Route("{post_id}/discard")]
-        public IActionResult DiscardSlot(int post_id, DiscartSlotParam info)
-        {
-            if(info.SlotsId == null || info.SlotsId.Count == 0)
-            {
-                return Ok(new SuccessObject { Message = "Require slot to discard" });
-            }
-            else
-            {
-                bool isSuccess = _slotServices.Discard(info.SlotsId, post_id);
-                return isSuccess ? Ok(new SuccessObject { Message = "Discard success", Data = isSuccess }) : Ok(new SuccessObject { Message = "Some Id is not match" });
-            }
-        }
     }
 }

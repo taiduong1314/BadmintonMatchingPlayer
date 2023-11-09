@@ -71,5 +71,28 @@ namespace BadmintonMatching.Controllers
             return Ok(new SuccessObject { Data= data, Message = Message.SuccessMsg });
         }
 
+        [HttpDelete]
+        [Route("{transaction_id}/discard")]
+        public async Task<IActionResult> DiscardTransaction(int transaction_id)
+        {
+            var transaction = await _transactionRepository.GetTransaction(transaction_id);
+            if(transaction.Id > 0)
+            {
+                if(transaction.Status != (int)TransactionStatus.ReportResolved && transaction.Status != (int)TransactionStatus.Played)
+                {
+                    await _transactionRepository.DeleteSlot(transaction_id);
+                    await _transactionRepository.DeleteTran(transaction_id);
+                    return Ok(new SuccessObject { Message = Message.SuccessMsg, Data = true });
+                }
+                else
+                {
+                    return Ok(new SuccessObject { Message = "Completed transaction not allow to delete" });
+                }
+            }
+            else
+            {
+                return Ok(new SuccessObject { Message = "Invalid transaction id" });
+            }
+        }
     }
 }

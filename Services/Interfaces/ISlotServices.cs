@@ -9,7 +9,6 @@ namespace Services.Interfaces
 {
     public interface ISlotServices
     {
-        bool Discard(List<int> slotsId, int post_id);
         List<int> GetAvailable(CheckAvailableSlot info);
     }
 }

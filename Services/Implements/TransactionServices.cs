@@ -47,6 +47,26 @@ namespace Services.Implements
             return tran.Id;
         }
 
+        public async Task DeleteSlot(int transaction_id)
+        {
+            var slots = _repositoryManager.Slot.FindByCondition(x => x.TransactionId == transaction_id, true).ToList();
+            foreach(var slot in slots)
+            {
+                _repositoryManager.Slot.Delete(slot);
+            }
+            await _repositoryManager.SaveAsync();
+        }
+
+        public async Task DeleteTran(int transaction_id)
+        {
+            var transaction = await _repositoryManager.Transaction.FindByCondition(x => x.Id == transaction_id, true).FirstOrDefaultAsync();
+            if(transaction != null)
+            {
+                _repositoryManager.Transaction.Delete(transaction);
+                await _repositoryManager.SaveAsync();
+            }
+        }
+
         public bool ExistTran(int tran_id)
         {
             return _repositoryManager.Transaction.FindByCondition(x => x.Id == tran_id, false).FirstOrDefault() != null;
@@ -105,6 +125,13 @@ namespace Services.Implements
                     }).ToList()
                 }).ToListAsync();
             return trans;
+        }
+
+        public async Task<Transaction> GetTransaction(int transaction_id)
+        {
+            var tran = await _repositoryManager.Transaction.FindByCondition(x => x.Id == transaction_id, false)
+                .FirstOrDefaultAsync();
+            return tran == null ? new Transaction { Id = 0 } : tran;
         }
 
         public async Task UpdateStatus(int tran_id, TransactionStatus tranStatus)
