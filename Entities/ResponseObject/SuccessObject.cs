@@ -1,8 +1,8 @@
 ﻿namespace Entities.ResponseObject
 {
-    public class SuccessObject
+    public class SuccessObject<T> where T : class
     {
         public string? Message { get; set; }
-        public object? Data { get; set; } = null;
+        public T? Data { get; set; } = null;
     }
 }

@@ -71,7 +71,7 @@ namespace Services.Implements
                 PriceSlot = decimal.Parse(info.Price),
                 QuantitySlot = info.AvailableSlot,
                 ContentPost = info.Description,
-                SavedDate = DateTime.UtcNow,
+                SavedDate = DateTime.UtcNow.AddHours(7),
                 ImgUrl = await HandleImg(info.HighlightUrl),
                 ImageUrls = urls,
                 IdUserTo = user_id
@@ -124,7 +124,7 @@ namespace Services.Implements
                     AddressSlot = x.AddressSlot,
                     CategorySlot = x.CategorySlot,
                     ContentPost = x.ContentPost,
-                    SavedDate = DateTime.UtcNow,
+                    SavedDate = DateTime.UtcNow.AddHours(7),
                     Days = x.Days,
                     EndTime = x.EndTime,
                     StartTime = x.StartTime,

@@ -19,20 +19,21 @@ namespace BadmintonMatching.Controllers
 
         [HttpPut]
         [Route("{user_id}")]
+
         public IActionResult UpdateWallet(int user_id, UpdateWallet updateWallet)
         {
             var newBalance = _walletServices.UpdateBalance(updateWallet.Changes, user_id);
             if(newBalance == -1)
             {
-                return Ok(new SuccessObject { Message = "Balance not enough to charge" });
+                return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
             }
             else if (newBalance == -2) 
             {
-                return Ok(new SuccessObject{ Message = $"Wallet of user {user_id} isn't found" });
+                return Ok(new SuccessObject<object> { Message = $"Wallet of user {user_id} isn't found" });
             }
             else
             {
-                return Ok(new SuccessObject { Data = new { NewBalance = newBalance }, Message = Message.SuccessMsg });
+                return Ok(new SuccessObject<object> { Data = new { NewBalance = newBalance }, Message = Message.SuccessMsg });
             }
         }
     }

@@ -40,7 +40,7 @@ namespace Services.Implements
                     reportContent = info.reportContent,
                     ReportTitle  = info.ReportTitle,
                     Status = (int)ReportStatus.Pending,
-                    TimeReport = DateTime.UtcNow,
+                    TimeReport = DateTime.UtcNow.AddHours(7),
                 };
                 _repositoryManager.Report.Create(report);
                 await _repositoryManager.SaveAsync();

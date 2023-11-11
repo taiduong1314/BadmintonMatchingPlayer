@@ -328,12 +328,16 @@ namespace BadmintonMatching.Controllers
     };
 
         [HttpGet]
+        [ProducesResponseType(typeof(SuccessObject<List<Ward>>), 200)]
+
         public IActionResult GetWards()
         {
-            return Ok(new SuccessObject { Data = wards, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<Ward>> { Data = wards, Message = Message.SuccessMsg });
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(SuccessObject<Ward>), 200)]
+
         public IActionResult GetWard(int id)
         {
             var ward = wards.FirstOrDefault(w => w.Id == id);
@@ -341,14 +345,17 @@ namespace BadmintonMatching.Controllers
             {
                 return NotFound();
             }
-            return Ok(new SuccessObject { Data = ward, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<Ward> { Data = ward, Message = Message.SuccessMsg });
         }
+
         [HttpGet("district/{districtId}")]
+        [ProducesResponseType(typeof(SuccessObject<List<Ward>>), 200)]
+
         public IActionResult GetDistrictsInCity(int districtId)
         {
             // Lọc danh sách quận dựa trên cityId
             var cityDistricts = wards.Where(d => d.DistrictId == districtId).ToList();
-            return Ok(new SuccessObject { Data = cityDistricts, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<Ward>> { Data = cityDistricts, Message = Message.SuccessMsg });
         }
     }
 }

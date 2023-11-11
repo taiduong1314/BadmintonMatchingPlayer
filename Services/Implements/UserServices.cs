@@ -258,7 +258,7 @@ namespace Services.Implements
                 reportContent = report.Content,
                 IdUserTo = user_id,
                 IdUserFrom = userreport_id,
-                TimeReport = DateTime.UtcNow,
+                TimeReport = DateTime.UtcNow.AddHours(7),
             };
             _repositoryManager.Report.Create(saveReport);
             _repositoryManager.SaveAsync().Wait();

@@ -6,6 +6,7 @@ using Repositories.Intefaces;
 using Repository.Services;
 using Services.Implements;
 using Services.Interfaces;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,12 @@ builder.Services.AddControllers(config =>
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(opt =>
+{
+    var fileName = Assembly.GetExecutingAssembly().GetName().Name + ".xml";
+    var filePath = Path.Combine(AppContext.BaseDirectory, fileName);
+    opt.IncludeXmlComments(filePath);
+});
 
 // Add services to the container.
 builder.Services.AddRazorPages();

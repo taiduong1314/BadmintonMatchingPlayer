@@ -37,17 +37,19 @@ namespace BadmintonMatching.Controllers
         // Thêm thông tin về các quận khác
     };
         [HttpGet]
+        [ProducesResponseType(typeof(SuccessObject<List<District>>), 200)]
         public IActionResult GetDistricts()
         {
-            return Ok(districts);
+            return Ok(new SuccessObject<List<District>> { Data = districts, Message = Message.SuccessMsg });
         }
 
         [HttpGet("city/{cityId}")]
+        [ProducesResponseType(typeof(SuccessObject<List<District>>), 200)]
         public IActionResult GetDistrictsInCity(int cityId)
         {
             // Lọc danh sách quận dựa trên cityId
             var cityDistricts = districts.Where(d => d.CityId == cityId).ToList();
-            return Ok(new SuccessObject { Data = cityDistricts, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<District>> { Data = cityDistricts, Message = Message.SuccessMsg });
         }
     }
 }

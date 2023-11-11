@@ -1,7 +1,9 @@
-﻿using Entities.RequestObject;
+﻿using Entities.Models;
+using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
+using System.Text.Json.Nodes;
 
 namespace BadmintonMatching.Controllers
 {
@@ -25,14 +27,15 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("user/{user_id}/suggestion")]
+        [ProducesResponseType(typeof(SuccessObject<List<PostInfomation>>), 200)]
         public IActionResult GetSuggestionPost(int user_id)
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject { Message = "Can't found user" });
+                return Ok(new SuccessObject<List<PostInfomation?>> { Message = "Can't found user" });
             }
             var res = _postServices.GetSuggestionPost(user_id);
-            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<PostInfomation>> { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpPost]
@@ -41,42 +44,45 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                Ok(new SuccessObject { Message = "Can't found user" });
+                Ok(new SuccessObject<object> { Message = "Can't found user" });
             }
             var postId = await _postServices.CreatePost(user_id, info);
             if (postId != 0)
             {
-                return Ok(new SuccessObject { Data = new { PostId = postId }, Message = Message.SuccessMsg });
+                return Ok(new SuccessObject<object> { Data = new { PostId = postId }, Message = Message.SuccessMsg });
             }
             else
             {
-                return Ok(new SuccessObject { Message = "Save fail" });
+                return Ok(new SuccessObject<object> { Message = "Save fail" });
             }
         }
 
         [HttpGet]
         [Route("play_ground")]
+        [ProducesResponseType(typeof(SuccessObject<List<string>>), 200)]
         public IActionResult GetPostPlayGround()
         {
             var res = _postServices.GetAllPlayGround();
-            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<string?>> { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
         [Route("play_ground/{play_ground}")]
+        [ProducesResponseType(typeof(SuccessObject<List<PostInfomation>>), 200)]
         public IActionResult GetPostByPlayGround(string play_ground)
         {
             List<PostInfomation> res = _postServices.GetPostByPlayGround(play_ground);
-            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<PostInfomation>> { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
         [Route("{user_id}/managed_all_post")]
+        [ProducesResponseType(typeof(SuccessObject<List<PostInfomation>>), 200)]
         public IActionResult GetPostByPlayGround(int user_id)
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject { Message = "Can't found user" });
+                return Ok(new SuccessObject<List<PostInfomation?>> { Message = "Can't found user" });
             }
 
             List<PostInfomation> res = new List<PostInfomation>();
@@ -91,34 +97,39 @@ namespace BadmintonMatching.Controllers
             }
 
 
-            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<PostInfomation>> { Data = res, Message = Message.SuccessMsg });
         }
+
         [HttpGet]
         [Route("{post_id}/details")]
+        [ProducesResponseType(typeof(SuccessObject<PostDetail>), 200)]
         public IActionResult GetDetailPost(int post_id)
         {
             var res = _postServices.GetPostDetail(post_id);
-            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<PostDetail> { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
         [Route("{user_id}/post_suggestion")]
+        [ProducesResponseType(typeof(SuccessObject<List<PostOptional>>), 200)]
         public IActionResult GetListOptionalPost()
         {
             var res = _postServices.GetListOptionalPost();
-            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<PostOptional>> { Data = res, Message = Message.SuccessMsg });
         }
         [HttpGet]
         [Route("GetListPost")]
+        [ProducesResponseType(typeof(SuccessObject<List<Post>>), 200)]
         public async Task<IActionResult> GetListPost()
         {
             var res = await _postServices.GetAllPost();
-            return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<Post>> { Data = res, Message = Message.SuccessMsg });
         }
 
         #region List Post at role Admin
         [HttpGet]
         [Route("{admin_id}/post")]
+        [ProducesResponseType(typeof(SuccessObject<List<ListPostByAdmin>>), 200)]
         public IActionResult GetListPostByAdmin(int admin_id)
         {
 
@@ -126,15 +137,16 @@ namespace BadmintonMatching.Controllers
             if (checkadmin)
             {
                 var res = _postServices.GetListPostByAdmin();
-                return Ok(new SuccessObject { Data = res, Message = Message.SuccessMsg });
+                return Ok(new SuccessObject<List<ListPostByAdmin>> { Data = res, Message = Message.SuccessMsg });
             }
             else
             {
 
-                return Ok(new SuccessObject { Message = "Not admin" });
+                return Ok(new SuccessObject<List<ListPostByAdmin?>> { Message = "Not admin" });
             }
         }
         #endregion
+
         #region Delete Post byAdmin
         [HttpPut]
         [Route("{admin_id}/delete/{post_id}")]
@@ -142,11 +154,11 @@ namespace BadmintonMatching.Controllers
         {
             if (_userServices.IsAdmin(admin_id) == false)
             {
-                return Ok(new SuccessObject { Message = "Not admin" });
+                return Ok(new SuccessObject<object> { Message = "Not admin" });
             }
 
             var res = _postServices.DeletePost(post_id);
-            return Ok(res ? new SuccessObject { Data = true, Message = Message.SuccessMsg }: new SuccessObject { Message = "Update fail" });
+            return Ok(res ? new SuccessObject<object> { Data = true, Message = Message.SuccessMsg }: new SuccessObject<object> { Message = "Update fail" });
         }
 
 

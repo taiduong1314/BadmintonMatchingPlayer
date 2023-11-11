@@ -23,11 +23,11 @@ namespace BadmintonMatching.Controllers
             List<int> slotsId = _slotServices.GetAvailable(info);
             if (slotsId.Count == info.NumSlot)
             {
-                return Ok(new SuccessObject { Data = new { SlotsId = slotsId }, Message = Message.SuccessMsg });
+                return Ok(new SuccessObject<object> { Data = new { SlotsId = slotsId }, Message = Message.SuccessMsg });
             }
             else
             {
-                return BadRequest(new SuccessObject{ Message = "Not enought slot" });
+                return BadRequest(new SuccessObject<object> { Message = "Not enought slot" });
             }
         }
     }

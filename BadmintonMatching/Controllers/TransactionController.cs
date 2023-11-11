@@ -27,48 +27,51 @@ namespace BadmintonMatching.Controllers
             var tranId = await _transactionRepository.CreateForBuySlot(info);
             if (tranId == 0)
             {
-                return Ok(new SuccessObject{ Message = "Create not success" });
+                return Ok(new SuccessObject<object>{ Message = "Create not success" });
             }
             else
             {
-                return Ok(new SuccessObject { Data = new { TranSactionId = tranId }, Message = Message.SuccessMsg });
+                return Ok(new SuccessObject<object> { Data = new { TranSactionId = tranId }, Message = Message.SuccessMsg });
             }
         }
 
         [HttpPut]
         [Route("{tran_id}/status_info/{status_info}")]
+        [ProducesResponseType(typeof(SuccessObject<List<Reports>>), 200)]
         public async Task<IActionResult> SuccessPayment(int tran_id, int status_info)
         {
             if (_transactionRepository.ExistTran(tran_id))
             {
                 await _transactionRepository.UpdateStatus(tran_id, (TransactionStatus)status_info);
-                return Ok(new SuccessObject { Message = "Update success", Data = true });
+                return Ok(new SuccessObject<object> { Message = "Update success", Data = true });
             }
             else
             {
-                return Ok(new SuccessObject{ Message = "Invalid transaction" });
+                return Ok(new SuccessObject<object> { Message = "Invalid transaction" });
             }
         }
 
         [HttpGet]
         [Route("user/{user_id}")]
+        [ProducesResponseType(typeof(SuccessObject<List<TransactionInfo>>), 200)]
         public async Task<IActionResult> GetTransactionOfUser(int user_id)
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject { Message = "Invalid User" });
+                return Ok(new SuccessObject<List<TransactionInfo?>> { Message = "Invalid User" });
             }
 
             var data = await _transactionRepository.GetOfUser(user_id);
-            return Ok(new SuccessObject { Data= data, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<TransactionInfo>> { Data= data, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
         [Route("{transaction_id}/detail")]
+        [ProducesResponseType(typeof(SuccessObject<TransactionDetail>), 200)]
         public async Task<IActionResult> GetTransactionDetail(int transaction_id)
         {
             var data = await _transactionRepository.GetDetail(transaction_id);
-            return Ok(new SuccessObject { Data= data, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<TransactionDetail> { Data= data, Message = Message.SuccessMsg });
         }
 
         [HttpDelete]
@@ -82,16 +85,16 @@ namespace BadmintonMatching.Controllers
                 {
                     await _transactionRepository.DeleteSlot(transaction_id);
                     await _transactionRepository.DeleteTran(transaction_id);
-                    return Ok(new SuccessObject { Message = Message.SuccessMsg, Data = true });
+                    return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = true });
                 }
                 else
                 {
-                    return Ok(new SuccessObject { Message = "Completed transaction not allow to delete" });
+                    return Ok(new SuccessObject<object> { Message = "Completed transaction not allow to delete" });
                 }
             }
             else
             {
-                return Ok(new SuccessObject { Message = "Invalid transaction id" });
+                return Ok(new SuccessObject<object> { Message = "Invalid transaction id" });
             }
         }
     }

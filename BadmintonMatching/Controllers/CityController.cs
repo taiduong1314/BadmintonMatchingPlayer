@@ -16,23 +16,25 @@ namespace BadmintonMatching.Controllers
         // Thêm thông tin về các thành phố khác
     };
         [HttpGet]
+        [ProducesResponseType(typeof(SuccessObject<List<City>>), 200)]
         public IActionResult GetCities()
         {
-            return Ok(new SuccessObject { Data = cities, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<City>> { Data = cities, Message = Message.SuccessMsg });
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(SuccessObject<City>), 200)]
         public IActionResult GetCity(int id)
         {
             var city = cities.FirstOrDefault(c => c.Id == id);
             if (city == null)
             {
-                return Ok(new SuccessObject
+                return Ok(new SuccessObject<List<City?>>
                 {
                     Message = "No cities found!"
                 });
             }
-            return Ok(new SuccessObject { Data = city, Message = Message.SuccessMsg});
+            return Ok(new SuccessObject<City> { Data = city, Message = Message.SuccessMsg});
         }
     }
 }

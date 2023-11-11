@@ -21,14 +21,15 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("status/{status}/{admin_id}")]
+        [ProducesResponseType(typeof(SuccessObject<List<Reports>>), 200)]
         public async Task<IActionResult> GetReportByStatus(int admin_id, int status)
         {
             if (!_userServices.IsAdmin(admin_id))
             {
-                return Ok(new SuccessObject { Message = "Not admin" });
+                return Ok(new SuccessObject<List<Reports?>> { Message = "Not admin" });
             }
             var reports = await _reportServices.GetByStatus((ReportStatus)status);
-            return Ok(new SuccessObject { Data = reports, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<Reports>> { Data = reports, Message = Message.SuccessMsg });
         }
 
         [HttpPost]
@@ -38,11 +39,11 @@ namespace BadmintonMatching.Controllers
             var report_id = await _reportServices.CreateFromTransaction(tran_id, info);
             if (report_id == 0)
             {
-                return Ok(new SuccessObject { Message = "Fail to create" });
+                return Ok(new SuccessObject<object> { Message = "Fail to create" });
             }
             else
             {
-                return Ok(new SuccessObject { Data = new { ReportId = report_id }, Message = Message.SuccessMsg });
+                return Ok(new SuccessObject<object> { Data = new { ReportId = report_id }, Message = Message.SuccessMsg });
             }
         }
     }

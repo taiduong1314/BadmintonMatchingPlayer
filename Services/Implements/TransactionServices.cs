@@ -32,7 +32,7 @@ namespace Services.Implements
                 MoneyTrans = slot.Price*info.IdSlot.Count,
                 MethodTrans = "buy_slot",
                 TypeTrans = "buy _slot",
-                TimeTrans = DateTime.UtcNow,
+                TimeTrans = DateTime.UtcNow.AddHours(7),
                 Status = (int)TransactionStatus.Processing,
             };
             _repositoryManager.Transaction.Create(tran);
@@ -99,7 +99,7 @@ namespace Services.Implements
                         Address = slot.IdPostNavigation.AddressSlot,
                         EndTime = slot.IdPostNavigation.EndTime,
                         Id = slot.IdPostNavigation.Id,
-                        ImageUrls = slot.IdPostNavigation.ImageUrls,
+                        ImageUrls = slot.IdPostNavigation.ImageUrls.Split(";").ToList(),
                         PricePerSlot = slot.IdPostNavigation.PriceSlot.ToString(),
                         StartTime = slot.IdPostNavigation.StartTime,
                         Title = slot.IdPostNavigation.Title,
