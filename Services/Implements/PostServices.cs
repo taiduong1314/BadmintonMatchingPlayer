@@ -63,6 +63,8 @@ namespace Services.Implements
             }
             var newPost = new Post
             {
+                CategorySlot = info.CategorySlot,
+                LevelSlot = info.LevelSlot,
                 Title = info.Title,
                 AddressSlot = info.Address,
                 Days = $"{info.Day}:{info.Month}:{info.Year}",
