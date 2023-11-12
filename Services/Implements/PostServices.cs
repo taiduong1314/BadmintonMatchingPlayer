@@ -62,6 +62,8 @@ namespace Services.Implements
             }
             var newPost = new Post
             {
+                CategorySlot = info.CategorySlot,
+                LevelSlot = info.LevelSlot,
                 Title = info.Title,
                 AddressSlot = info.Address,
                 ContentPost = info.Description,
