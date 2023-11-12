@@ -97,14 +97,22 @@ namespace Services.Implements
                     tran.Post = new PostInTransaction
                     {
                         Address = slot.IdPostNavigation.AddressSlot,
-                        EndTime = slot.IdPostNavigation.EndTime,
                         Id = slot.IdPostNavigation.Id,
                         ImageUrls = slot.IdPostNavigation.ImageUrls.Split(";").ToList(),
-                        PricePerSlot = slot.IdPostNavigation.PriceSlot.ToString(),
-                        StartTime = slot.IdPostNavigation.StartTime,
                         Title = slot.IdPostNavigation.Title,
                         TitleImage = slot.IdPostNavigation.ImgUrl
                     };
+                    foreach(var infoSlot in slot.IdPostNavigation.SlotsInfo.Split(";"))
+                    {
+                        var info = new SlotInfo(infoSlot);
+                        if(info.StartTime.Value.ToString("dd/MM/yyyy") == slot.ContentSlot)
+                        {
+                            tran.Post.StartTime = info.StartTime.Value.ToString("dd/MM/yyyy HH:mm");
+                            tran.Post.EndTime = info.EndTime.Value.ToString("dd/MM/yyyy HH:mm");
+                            tran.Post.PricePerSlot = info.Price.ToString();
+                            break;
+                        }
+                    }
                 }
             }
             return tran != null ? tran : new TransactionDetail { Id = 0 };

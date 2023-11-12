@@ -28,9 +28,21 @@ namespace Services.Implements
 
             var post = _repositoryManager.Post.FindByCondition(x => x.Id == info.PostId, false).FirstOrDefault();
 
-            if(post != null)
+            SlotInfo slotInfo = null;
+
+            foreach (var item in post.SlotsInfo.Split(";"))
             {
-                if(post.QuantitySlot - bookedSlot.Count() - info.NumSlot >= 0)
+                var slotInfoTemp = new SlotInfo(item);
+                if(slotInfoTemp.StartTime.Value.ToString("dd/MM/yyyy") == info.DateRegis)
+                {
+                    slotInfo = slotInfoTemp;
+                    break;
+                }
+            }
+
+            if(post != null && slotInfo != null)
+            {
+                if(slotInfo.AvailableSlot - bookedSlot.Count() - info.NumSlot >= 0)
                 {
                     var res = new List<int>();
                     for (var i = 0; i < info.NumSlot; i++)
@@ -40,7 +52,7 @@ namespace Services.Implements
                             ContentSlot = info.DateRegis,
                             IdPost = info.PostId,
                             IdUser = info.UserId,
-                            Price = post.PriceSlot
+                            Price = slotInfo.Price
                         };
                         _repositoryManager.Slot.Create(slot);
                         _repositoryManager.SaveAsync().Wait();

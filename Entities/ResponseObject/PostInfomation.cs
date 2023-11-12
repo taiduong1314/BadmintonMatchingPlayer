@@ -1,13 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Entities.Models;
+using Entities.RequestObject;
 
 namespace Entities.ResponseObject
 {
     public class PostInfomation
     {
+        public PostInfomation() { }
+        public PostInfomation(Post post)
+        {
+            Address = post.AddressSlot;
+            PostId = post.Id;
+            PostImgUrl = post.ImgUrl;
+            SortDescript = post.ContentPost;
+            UserId = post.IdUserTo;
+            UserImgUrl = post.IdUserToNavigation.ImgUrl;
+            UserName = post.IdUserToNavigation.UserName;
+
+            var finalInfo = new SlotInfo();
+            int joinedSlot = 0;
+            foreach (var slot in post.SlotsInfo.Split(";"))
+            {
+                var slotInfo = new SlotInfo(slot);
+                var joinSlot = post.Slots
+                    .Where(x =>
+                    !x.IsDeleted &&
+                    x.ContentSlot == slotInfo.StartTime.Value.ToString("dd/MM/yyyy"))
+                    .Count();
+                if (slotInfo.AvailableSlot - joinSlot >= finalInfo.AvailableSlot)
+                {
+                    finalInfo = slotInfo;
+                    joinedSlot = joinSlot;
+                }
+            }
+            AvailableSlot = finalInfo.AvailableSlot - joinedSlot;
+            Time = $"{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}: {finalInfo.StartTime.Value.ToString("HH:mm")} - {finalInfo.EndTime.Value.ToString("HH:mm")}";
+        }
         public int PostId { get; set; }
         public int? UserId { get; set; }
         public string? UserName { get; set; }

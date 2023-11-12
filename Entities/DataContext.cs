@@ -119,12 +119,6 @@ namespace Entities
                     .HasMaxLength(50)
                     .HasColumnName("levelSlot");
 
-                entity.Property(e => e.PriceSlot)
-                    .HasColumnType("money")
-                    .HasColumnName("priceSlot");
-
-                entity.Property(e => e.QuantitySlot).HasColumnName("quantitySlot");
-
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.HasOne(d => d.IdTypeNavigation)

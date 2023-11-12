@@ -117,6 +117,7 @@ namespace BadmintonMatching.Controllers
             var res = _postServices.GetListOptionalPost();
             return Ok(new SuccessObject<List<PostOptional>> { Data = res, Message = Message.SuccessMsg });
         }
+
         [HttpGet]
         [Route("GetListPost")]
         [ProducesResponseType(typeof(SuccessObject<List<Post>>), 200)]

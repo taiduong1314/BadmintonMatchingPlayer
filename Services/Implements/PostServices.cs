@@ -46,8 +46,7 @@ namespace Services.Implements
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Lỗi: " + ex.Message);
-                return string.Empty;
+                return base64encodedstring;
             }
 
         }
@@ -65,16 +64,12 @@ namespace Services.Implements
             {
                 Title = info.Title,
                 AddressSlot = info.Address,
-                Days = $"{info.Day}:{info.Month}:{info.Year}",
-                StartTime = info.StartTime,
-                EndTime = info.EndTime,
-                PriceSlot = decimal.Parse(info.Price),
-                QuantitySlot = info.AvailableSlot,
                 ContentPost = info.Description,
                 SavedDate = DateTime.UtcNow.AddHours(7),
                 ImgUrl = await HandleImg(info.HighlightUrl),
                 ImageUrls = urls,
-                IdUserTo = user_id
+                IdUserTo = user_id,
+                SlotsInfo = info.SlotsToString()
             };
             _repositoryManager.Post.Create(newPost);
             _repositoryManager.SaveAsync().Wait();
@@ -97,7 +92,6 @@ namespace Services.Implements
         {
             var posts = _repositoryManager.Post.FindByCondition(
                 x => x.AddressSlot != null
-                    && x.QuantitySlot > 0
                     && !x.IsDeleted
                     , true)
                 .ToList();
@@ -124,27 +118,24 @@ namespace Services.Implements
                     AddressSlot = x.AddressSlot,
                     CategorySlot = x.CategorySlot,
                     ContentPost = x.ContentPost,
-                    SavedDate = DateTime.UtcNow.AddHours(7),
-                    Days = x.Days,
-                    EndTime = x.EndTime,
-                    StartTime = x.StartTime,
+                    SavedDate = DateTime.UtcNow,
                     IdType = x.IdType,
                     IdTypeNavigation = x.IdTypeNavigation,
                     IdUserTo = x.IdUserTo,
                     IdUserToNavigation = x.IdUserToNavigation,
                     ImgUrl = x.ImgUrl,
                     LevelSlot = x.LevelSlot,
-                    PriceSlot = x.PriceSlot,
-                    QuantitySlot = x.QuantitySlot,
+                    SlotsInfo = x.SlotsInfo,
                     Slots = x.Slots,
                     Status = x.Status
-                }).ToListAsync();
+                })
+                .ToListAsync();
             return res;
         }
 
         public List<PostOptional> GetListOptionalPost()
         {
-            return _repositoryManager.Post.FindByCondition(x => x.QuantitySlot > 0 && !x.IsDeleted, true)
+            var optList = _repositoryManager.Post.FindByCondition(x => !x.IsDeleted, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
                 .Select(x => new PostOptional
@@ -153,16 +144,51 @@ namespace Services.Implements
                     Title = x.Title,
                     AddressSlot = x.AddressSlot,
                     ContentPost = x.ContentPost,
-                    Days = x.Days,
                     ImgUrlPost = x.ImgUrl,
-                    EndTime = x.EndTime,
-                    StartTime = x.StartTime,
-                    QuantitySlot = x.QuantitySlot,
                     FullName = x.IdUserToNavigation.FullName,
                     UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                    HighlightUrl = x.ImgUrl,
-                    Price = x.PriceSlot
+                    HighlightUrl = x.ImgUrl
                 }).ToList();
+
+            for(var i = 0; i < optList.Count(); i++)
+            {
+                var cPost = optList[i];
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
+                if(post != null)
+                {
+                    GetPostOptional(post, ref cPost);
+                }
+                optList[i] = cPost;
+            }
+            return optList;
+        }
+
+        private void GetPostOptional(Post post, ref PostOptional optPost)
+        {
+            var finalInfo = new SlotInfo();
+            int joinedSlot = 0;
+            foreach (var slot in post.SlotsInfo.Split(";"))
+            {
+                if(slot != string.Empty)
+                {
+                    var slotInfo = new SlotInfo(slot);
+                    var joinSlot = _repositoryManager.Slot
+                        .FindByCondition(x =>
+                        !x.IsDeleted &&
+                        x.ContentSlot == slotInfo.StartTime.Value.ToString("dd/MM/yyyy") &&
+                        x.IdPost == post.Id, false).Count();
+                    if (slotInfo.AvailableSlot - joinSlot >= finalInfo.AvailableSlot)
+                    {
+                        finalInfo = slotInfo;
+                        joinedSlot = joinSlot;
+                    }
+                }
+            }
+            optPost.Days = finalInfo.StartTime.Value.ToString("dd/MM/yyyy");
+            optPost.StartTime = finalInfo.StartTime.Value.ToString("HH:mm");
+            optPost.EndTime = finalInfo.EndTime.Value.ToString("HH:mm");
+            optPost.QuantitySlot = finalInfo.AvailableSlot - joinedSlot;
+            optPost.Price = finalInfo.Price;
         }
 
         public List<ListPostByAdmin> GetListPostByAdmin()
@@ -178,7 +204,6 @@ namespace Services.Implements
                     RoleUser = x.IdUserToNavigation.UserRoleNavigation.RoleName,
                     Status = x.Status,
                     TotalViewer = x.TotalViewer
-
                 }).ToList();
         }
 
@@ -187,18 +212,8 @@ namespace Services.Implements
             return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
-                .Select(x => new PostInfomation
-                {
-                    Address = x.AddressSlot,
-                    AvailableSlot = x.QuantitySlot,
-                    PostId = x.Id,
-                    PostImgUrl = x.ImgUrl,
-                    SortDescript = x.ContentPost,
-                    Time = $"{x.StartTime} - {x.EndTime}",
-                    UserId = x.IdUserTo,
-                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                    UserName = x.IdUserToNavigation.UserName
-                }).ToList();
+                .Include(x => x.Slots)
+                .Select(x => new PostInfomation(x)).ToList();
         }
 
         public List<PostInfomation> GetManagedPostAdmin(int user_id)
@@ -206,18 +221,8 @@ namespace Services.Implements
             return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
-                .Select(x => new PostInfomation
-                {
-                    Address = x.AddressSlot,
-                    AvailableSlot = x.QuantitySlot,
-                    PostId = x.Id,
-                    PostImgUrl = x.ImgUrl,
-                    SortDescript = x.ContentPost,
-                    Time = $"{x.StartTime} - {x.EndTime}",
-                    UserId = x.IdUserTo,
-                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                    UserName = x.IdUserToNavigation.UserName
-                }).ToList();
+                .Include(x => x.Slots)
+                .Select(x => new PostInfomation(x)).ToList();
         }
 
         public List<PostInfomation> GetPostByPlayGround(string play_ground)
@@ -227,27 +232,17 @@ namespace Services.Implements
             var posts = _repositoryManager.Post.FindByCondition(
                 x => x.AddressSlot != null
                 && x.AddressSlot == play_ground
-                && x.QuantitySlot > 0
                 && !x.IsDeleted
                 , true)
-                .Include(x => x.IdUserToNavigation).ToList();
+                .Include(x => x.IdUserToNavigation)
+                .Include(x => x.Slots)
+                .ToList();
 
             foreach (var item in posts)
             {
                 if (ServicesUtil.IsInTimePost(item))
                 {
-                    res.Add(new PostInfomation
-                    {
-                        Address = item.AddressSlot,
-                        AvailableSlot = item.QuantitySlot,
-                        PostId = item.Id,
-                        PostImgUrl = item.ImgUrl,
-                        SortDescript = item.ContentPost,
-                        Time = $"{item.StartTime} - {item.EndTime}",
-                        UserId = item.IdUserTo,
-                        UserImgUrl = item.IdUserToNavigation.ImgUrl,
-                        UserName = item.IdUserToNavigation.UserName
-                    });
+                    res.Add(new PostInfomation(item));
                 }
             }
 
@@ -256,7 +251,6 @@ namespace Services.Implements
 
         public PostDetail GetPostDetail(int id_post)
         {
-
             var x = _repositoryManager.Post
                 .FindByCondition(x =>
                 x.Id == id_post
@@ -264,81 +258,13 @@ namespace Services.Implements
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
                 .FirstOrDefault();
-
-            var postDetail = new PostDetail
+            if(x != null)
             {
-                AddressSlot = x.AddressSlot,
-                CategorySlot = x.CategorySlot,
-                ContentPost = x.ContentPost,
-                Days = x.Days,
-                EndTime = x.EndTime,
-                FullName = x.IdUserToNavigation.FullName,
-                HightLightImage = x.ImgUrl,
-                LevelSlot = x.LevelSlot,
-                PriceSlot = x.PriceSlot,
-                QuantitySlot = x.QuantitySlot,
-                ImgUrlUser = x.IdUserToNavigation.ImgUrl,
-                SortProfile = x.IdUserToNavigation.SortProfile,
-                StartTime = x.StartTime,
-                TotalRate = x.IdUserToNavigation.TotalRate,
-                UserId = x.IdUserTo.Value,
-                Title = x.Title
-            };
-            postDetail.AvailableSlot = GetAvailableSlot(x);
-            postDetail.ImageUrls = x.ImageUrls.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-            return postDetail;
-        }
-
-        private List<string> GetAvailableSlot(Post post)
-        {
-            //Get list date dd/mm/yy
-            if (post.Days != null)
-            {
-                var days = post.Days.Split(":");
-                var month = string.Empty;
-                var year = string.Empty;
-                var ds = new List<string>();
-                foreach (var day in days)
-                {
-                    if (day.Contains(';'))
-                    {
-                        foreach (var d in day.Split(";"))
-                        {
-                            ds.Add(d);
-                        }
-                    }
-                    else if (month == string.Empty)
-                    {
-                        month = day;
-                    }
-                    else if (year == string.Empty)
-                    {
-                        year = day;
-                    }
-                }
-
-                for (var i = 0; i < ds.Count; i++)
-                {
-                    var item = ds[i];
-                    if (item != null)
-                    {
-                        item = $"{item}/{month}/{year}";
-                        ds[i] = item;
-                    }
-                }
-
-                var res = new List<string>();
-                //Get list by date
-                foreach(var item in ds)
-                {
-                    var slots = _repositoryManager.Slot.FindByCondition(x => x.IdPost == post.Id && x.ContentSlot == item && !x.IsDeleted, false).Count();
-                    var avai = post.QuantitySlot - slots;
-                    res.Add($"{item}:{avai}");
-                }
-                return res;
+                var postDetail = new PostDetail(x);
+                postDetail.ImageUrls = x.ImageUrls.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
+                return postDetail;
             }
-            return new List<string>();
+            return new PostDetail();
         }
 
         public List<PostInfomation> GetSuggestionPost(int user_id)
@@ -350,28 +276,17 @@ namespace Services.Implements
                 var posts = _repositoryManager.Post.FindByCondition(
                     x => x.AddressSlot != null
                     && user.PlayingArea.Contains(x.AddressSlot)
-                    && x.QuantitySlot > 0
                     && !x.IsDeleted
                         , true)
                     .Include(x => x.IdUserToNavigation)
+                    .Include(x => x.Slots)
                     .ToList();
 
                 foreach (var item in posts)
                 {
                     if (ServicesUtil.IsInTimePost(item))
                     {
-                        res.Add(new PostInfomation
-                        {
-                            Address = item.AddressSlot,
-                            AvailableSlot = item.QuantitySlot,
-                            PostId = item.Id,
-                            PostImgUrl = item.ImgUrl,
-                            SortDescript = item.ContentPost,
-                            Time = $"{item.StartTime} - {item.EndTime}",
-                            UserId = item.IdUserTo,
-                            UserImgUrl = item.IdUserToNavigation.ImgUrl,
-                            UserName = item.IdUserToNavigation.UserName
-                        });
+                        res.Add(new PostInfomation(item));
                     }
                 }
             }

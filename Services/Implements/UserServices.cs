@@ -429,7 +429,7 @@ namespace Services.Implements
                     res.Id = -1;
                 }
 
-                user.LastLoginDate = DateTime.UtcNow;
+                user.LastLoginDate = DateTime.UtcNow.AddHours(7);
                 _repositoryManager.SaveAsync().Wait();
             }
             return res;
@@ -510,9 +510,9 @@ namespace Services.Implements
                 .OrderByDescending(x => x.LastLoginDate)
                 .Select(x => new UserManaged
                 {
-                    CreateDate = x.CreateDate.Value.ToString("dd/mm/yyyy"),
+                    CreateDate = x.CreateDate.Value.ToString("dd/MM/yyyy"),
                     FullName = x.FullName,
-                    LastLogin = x.LastLoginDate.Value.ToString("dd/mm/yyyy"),
+                    LastLogin = x.LastLoginDate.Value.ToString("dd/MM/yyyy"),
                     Role = x.UserRole == (int)UserRole.User ? "User" : "Admin",
                     Status = "Active",
                     UserId = x.Id
@@ -587,7 +587,7 @@ namespace Services.Implements
                 PhoneNumber = info.PhoneNum,
                 UserPassword = info.Password,
                 UserName = info.UserName,
-                CreateDate = DateTime.UtcNow,
+                CreateDate = DateTime.UtcNow.AddHours(7),
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();
@@ -610,7 +610,7 @@ namespace Services.Implements
                 Content = comment.Content,
                 IdTarget = user_id_receive_comment,
                 UserId = user_id,
-                SavedDate = DateTime.UtcNow,
+                SavedDate = DateTime.UtcNow.AddHours(7),
                 TargetTo = "User"
             };
 
