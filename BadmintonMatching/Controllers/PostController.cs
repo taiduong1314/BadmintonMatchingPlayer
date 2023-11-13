@@ -111,7 +111,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("{user_id}/post_suggestion")]
-        [ProducesResponseType(typeof(SuccessObject<List<PostOptional>>), 200)]
         public IActionResult GetListOptionalPost()
         {
             var res = _postServices.GetListOptionalPost();

@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 using Services.Interfaces;
@@ -43,6 +44,10 @@ namespace BadmintonMatching.Controllers
             if (_transactionRepository.ExistTran(tran_id))
             {
                 await _transactionRepository.UpdateStatus(tran_id, (TransactionStatus)status_info);
+                //if(status_info == (int)TransactionStatus.PaymentSuccess)
+                //{
+                //    var jobId = BackgroundJob.Schedule(() => AutoTransferMoney(tran_id), )
+                //}
                 return Ok(new SuccessObject<object> { Message = "Update success", Data = true });
             }
             else

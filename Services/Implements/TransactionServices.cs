@@ -152,7 +152,8 @@ namespace Services.Implements
             {
                 if (tranStatus == TransactionStatus.PaymentSuccess)
                 {
-
+                    //implement hangfire here
+                    //Create auto charge for played
                 }
                 else if (tranStatus == TransactionStatus.Reporting)
                 {
