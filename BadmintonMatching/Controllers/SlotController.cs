@@ -25,6 +25,10 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Data = new { SlotsId = slotsId }, Message = Message.SuccessMsg });
             }
+            else if (slotsId[0] == 0)
+            {
+                return Ok(new SuccessObject<object> { Message = "Can't join your owned post" });
+            }
             else
             {
                 return BadRequest(new SuccessObject<object> { Message = "Not enought slot" });

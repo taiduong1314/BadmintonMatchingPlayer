@@ -51,14 +51,13 @@ namespace Services.Implements
 
         }
 
-
         public async Task<int> CreatePost(int user_id, NewPostInfo info)
         {
             
             var urls = "";
             foreach (var url in info.ImgUrls)
             {
-                urls += $"{HandleImg(url).Result};";
+                urls += $"{await HandleImg(url)};";
             }
             var newPost = new Post
             {
@@ -186,7 +185,7 @@ namespace Services.Implements
                     }
                 }
             }
-            optPost.Days = finalInfo.StartTime.Value.ToString("dd/MM/yyyy");
+            optPost.Days = finalInfo.StartTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt");
             optPost.StartTime = finalInfo.StartTime.Value.ToString("HH:mm");
             optPost.EndTime = finalInfo.EndTime.Value.ToString("HH:mm");
             optPost.QuantitySlot = finalInfo.AvailableSlot - joinedSlot;

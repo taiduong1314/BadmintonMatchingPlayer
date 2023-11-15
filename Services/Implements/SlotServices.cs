@@ -28,6 +28,11 @@ namespace Services.Implements
 
             var post = _repositoryManager.Post.FindByCondition(x => x.Id == info.PostId, false).FirstOrDefault();
 
+            if(post.IdUserTo == info.UserId)
+            {
+                return new List<int>() { 0 };
+            }
+
             SlotInfo slotInfo = null;
 
             foreach (var item in post.SlotsInfo.Split(";"))
