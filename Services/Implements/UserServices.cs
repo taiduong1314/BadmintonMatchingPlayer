@@ -15,6 +15,8 @@ using System.Reflection.Metadata;
 using System.Net.Http;
 using System.Text.Json;
 using System.Net.Http.Headers;
+using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
 
 namespace Services.Implements
 {
@@ -56,6 +58,36 @@ namespace Services.Implements
                     _repositoryManager.SaveAsync().Wait();
                 }
             }
+        }
+        public async Task<string> HandleImg(string base64encodedstring)
+        {
+            var revertbase64 = base64encodedstring.Replace("data:image/jpeg;base64,", "");
+            try
+            {
+                var bytes = Convert.FromBase64String(revertbase64);
+                var contents = new StreamContent(new MemoryStream(bytes));
+                Account account = new Account(
+                    "dbjvirvym",
+                    "487892318776179",
+                    "txx6fF8ZVsT72id6ySvqNqwrN0E");
+                Cloudinary cloudinary = new Cloudinary(account);
+
+                string publicId = Guid.NewGuid().ToString();
+                var uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(publicId, new MemoryStream(bytes)),
+                    PublicId = publicId
+                };
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                return uploadResult.SecureUrl.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                return base64encodedstring;
+            }
+
         }
 
         public void AddPlayingLevel(int user_id, NewPlayingLevel info)
@@ -640,7 +672,7 @@ namespace Services.Implements
             {
                 user.UserName = param.UserName;
                 user.FullName = param.FullName;
-                user.ImgUrl = param.ImgUrl;
+                user.ImgUrl = await HandleImg(param.ImgUrl);
                 user.PhoneNumber = param.PhoneNumber;
                 user.SortProfile = param.SortProfile;
                 user.PlayingArea = param.PlayingArea;
