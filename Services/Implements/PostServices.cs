@@ -185,7 +185,7 @@ namespace Services.Implements
                     }
                 }
             }
-            optPost.Days = finalInfo.StartTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt");
+            optPost.Days = finalInfo.StartTime.Value.ToString("dd/MM/yyyy");
             optPost.StartTime = finalInfo.StartTime.Value.ToString("HH:mm");
             optPost.EndTime = finalInfo.EndTime.Value.ToString("HH:mm");
             optPost.QuantitySlot = finalInfo.AvailableSlot - joinedSlot;
