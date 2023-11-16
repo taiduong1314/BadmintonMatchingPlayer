@@ -16,6 +16,6 @@ namespace Entities.ResponseObject
         public double? Friendly { get; set; }
         public double? Trusted { get; set; }
         public double? Helpful { get; set; }
-
+        public string PlayingArea { get; set; }
     }
 }

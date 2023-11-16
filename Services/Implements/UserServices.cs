@@ -454,6 +454,7 @@ namespace Services.Implements
                     PhoneNumber = user.PhoneNumber,
                     SortProfile = user.SortProfile,
                     Balance = user.Wallets != null ? user.Wallets.ToList()[0].Balance : 0,
+                    Role = user.UserRole != null && user.UserRole == 1 ? "Admin" : user.UserRole != null && user.UserRole == 3 ? "Staff" : "User"
                 };
 
                 if(user.IsBanFromLogin)
@@ -579,6 +580,7 @@ namespace Services.Implements
                     FullName = x.FullName,
                     TotalRate = x.TotalRate,
                     SortProfile = x.SortProfile,
+                    PlayingArea = x.PlayingArea,
                 }).FirstOrDefault();
             return res;
         }
@@ -620,6 +622,7 @@ namespace Services.Implements
                 UserPassword = info.Password,
                 UserName = info.UserName,
                 CreateDate = DateTime.UtcNow.AddHours(7),
+                UserRole = 2
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();

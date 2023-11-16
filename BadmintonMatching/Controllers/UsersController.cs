@@ -38,7 +38,7 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Message = "Tài khoản hoặc mật khẩu không đúng" });
             }
-            return Ok(new SuccessObject<object> { Data = userInfo, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<UserInformation> { Data = userInfo, Message = Message.SuccessMsg });
         }
 
         [HttpPost]

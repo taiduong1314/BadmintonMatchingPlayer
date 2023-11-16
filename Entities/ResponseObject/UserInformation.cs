@@ -14,5 +14,6 @@
         public string? SortProfile { get; set; }
         public int Id { get; set; }
         public decimal? Balance { get; set; }
+        public string? Role { get; set; }
     }
 }
