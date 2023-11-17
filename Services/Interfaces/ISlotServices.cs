@@ -1,4 +1,5 @@
 ﻿using Entities.RequestObject;
+using Entities.ResponseObject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace Services.Interfaces
 {
     public interface ISlotServices
     {
-        List<int> GetAvailable(CheckAvailableSlot info);
+        List<SlotReturnInfo> GetAvailable(CheckAvailableSlot info);
     }
 }

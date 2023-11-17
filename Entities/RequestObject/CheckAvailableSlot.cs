@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Entities.RequestObject
+﻿namespace Entities.RequestObject
 {
     public class CheckAvailableSlot
     {
         public int UserId { get; set; }
-        public int NumSlot { get; set; }
         public int PostId { get; set; }
-        public string? DateRegis { get; set; }
+        public List<SlotsInfo> SlotsInfo { get; set; }
+    }
+
+    public class SlotsInfo
+    {
+        public DateTime DateRegis { get; set; }
+        public int NumSlots { get; set; }
     }
 }

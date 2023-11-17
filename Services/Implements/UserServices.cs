@@ -508,6 +508,7 @@ namespace Services.Implements
                 ImgUrl = x.ImgUrl,
                 PhoneNumber = x.PhoneNumber,
                 SortProfile =x.SortProfile,
+                PlayingArea = x.PlayingArea,
                 UserName = x.UserName
             }).FirstOrDefault();
            return res;

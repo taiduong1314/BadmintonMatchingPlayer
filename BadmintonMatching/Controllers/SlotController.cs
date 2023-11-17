@@ -20,18 +20,14 @@ namespace BadmintonMatching.Controllers
         [Route("available")]
         public IActionResult CheckAvailableAndCreateSlot(CheckAvailableSlot info)
         {
-            List<int> slotsId = _slotServices.GetAvailable(info);
-            if (slotsId.Count == info.NumSlot)
+            try
             {
-                return Ok(new SuccessObject<object> { Data = new { SlotsId = slotsId }, Message = Message.SuccessMsg });
+                List<SlotReturnInfo> slotInfos = _slotServices.GetAvailable(info);
+                return Ok(new SuccessObject<List<SlotReturnInfo>> { Data = slotInfos, Message = Message.SuccessMsg });
             }
-            else if (slotsId[0] == 0)
+            catch (FieldAccessException)
             {
-                return Ok(new SuccessObject<object> { Message = "Can't join your owned post" });
-            }
-            else
-            {
-                return BadRequest(new SuccessObject<object> { Message = "Not enought slot" });
+                return Ok(new SuccessObject<object> { Message = "Can't subcript to your post" });
             }
         }
     }
