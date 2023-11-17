@@ -46,14 +46,14 @@ namespace BadmintonMatching.Controllers
             {
                 Ok(new SuccessObject<object> { Message = "Can't found user" });
             }
-            var postId = await _postServices.CreatePost(user_id, info);
-            if (postId != 0)
-            {
-                return Ok(new SuccessObject<object> { Data = new { PostId = postId }, Message = Message.SuccessMsg });
-            }
-            else if (postId == -1)
+            var postId = await _postServices.CreatePost(user_id, info); 
+            if (postId == -1)
             {
                 return Ok(new SuccessObject<object> { Message = "Invalid base64 string" });
+            }
+            else if (postId != 0)
+            {
+                return Ok(new SuccessObject<object> { Data = new { PostId = postId }, Message = Message.SuccessMsg });
             }
             else
             {
