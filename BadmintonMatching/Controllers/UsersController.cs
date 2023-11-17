@@ -335,8 +335,15 @@ namespace BadmintonMatching.Controllers
         [Route("{user_id}")]
         public async Task<IActionResult> UpdateUserProfile(UpdateProfileUser param, int user_id, bool trackChanges)
         {
-            var data = await _userServices.UpdateProfile(user_id, param, trackChanges);
-            return Ok(new SuccessObject<object> { Data = data, Message = Message.SuccessMsg });
+            try
+            {
+                var data = await _userServices.UpdateProfile(user_id, param, trackChanges);
+                return Ok(new SuccessObject<object> { Data = data, Message = Message.SuccessMsg });
+            }
+            catch
+            {
+                return Ok(new SuccessObject<object> { Message = "Invalid base 64 string" });
+            }
             //await _repository.SaveAsync();
             //return Ok();
         }

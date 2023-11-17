@@ -46,35 +46,49 @@ namespace Services.Implements
             }
             catch (Exception ex)
             {
-                return base64encodedstring;
+                throw new Exception();
             }
 
         }
 
         public async Task<int> CreatePost(int user_id, NewPostInfo info)
         {
-            
             var urls = "";
             foreach (var url in info.ImgUrls)
             {
-                urls += $"{await HandleImg(url)};";
+                try
+                {
+                    urls += $"{await HandleImg(url)};";
+                }
+                catch
+                {
+                    return -1;
+                }
             }
-            var newPost = new Post
+
+            try
             {
-                CategorySlot = info.CategorySlot,
-                LevelSlot = info.LevelSlot,
-                Title = info.Title,
-                AddressSlot = info.Address,
-                ContentPost = info.Description,
-                SavedDate = DateTime.UtcNow.AddHours(7),
-                ImgUrl = await HandleImg(info.HighlightUrl),
-                ImageUrls = urls,
-                IdUserTo = user_id,
-                SlotsInfo = info.SlotsToString()
-            };
-            _repositoryManager.Post.Create(newPost);
-            _repositoryManager.SaveAsync().Wait();
-            return newPost.Id;
+                var newPost = new Post
+                {
+                    CategorySlot = info.CategorySlot,
+                    LevelSlot = info.LevelSlot,
+                    Title = info.Title,
+                    AddressSlot = info.Address,
+                    ContentPost = info.Description,
+                    SavedDate = DateTime.UtcNow.AddHours(7),
+                    ImgUrl = await HandleImg(info.HighlightUrl),
+                    ImageUrls = urls,
+                    IdUserTo = user_id,
+                    SlotsInfo = info.SlotsToString()
+                };
+                _repositoryManager.Post.Create(newPost);
+                _repositoryManager.SaveAsync().Wait();
+                return newPost.Id;
+            }
+            catch
+            {
+                return -1;
+            }
         }
 
         public bool DeletePost(int post_id)

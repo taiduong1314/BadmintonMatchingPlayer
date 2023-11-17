@@ -85,7 +85,7 @@ namespace Services.Implements
             }
             catch (Exception ex)
             {
-                return base64encodedstring;
+                throw new Exception();
             }
 
         }
@@ -675,7 +675,14 @@ namespace Services.Implements
             {
                 user.UserName = param.UserName;
                 user.FullName = param.FullName;
-                user.ImgUrl = await HandleImg(param.ImgUrl);
+                try
+                {
+                    user.ImgUrl = await HandleImg(param.ImgUrl);
+                }
+                catch
+                {
+                    throw new Exception();
+                }
                 user.PhoneNumber = param.PhoneNumber;
                 user.SortProfile = param.SortProfile;
                 user.PlayingArea = param.PlayingArea;
@@ -687,7 +694,6 @@ namespace Services.Implements
             else
             {
                 return new NotFoundObjectResult(new { message = "User with the specified ID not found" });
-
             }
         }
     }

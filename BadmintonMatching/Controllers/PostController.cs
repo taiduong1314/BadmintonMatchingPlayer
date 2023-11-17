@@ -51,6 +51,10 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Data = new { PostId = postId }, Message = Message.SuccessMsg });
             }
+            else if (postId == -1)
+            {
+                return Ok(new SuccessObject<object> { Message = "Invalid base64 string" });
+            }
             else
             {
                 return Ok(new SuccessObject<object> { Message = "Save fail" });
