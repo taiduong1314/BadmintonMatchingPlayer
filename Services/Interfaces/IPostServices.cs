@@ -10,6 +10,7 @@ namespace Services.Interfaces
         bool DeletePost(int post_id);
         List<string?> GetAllPlayGround();
         Task<List<Post>> GetAllPost();
+        List<JoinedPost> GetJoined(int user_id);
         List<PostOptional> GetListOptionalPost();
         List<ListPostByAdmin> GetListPostByAdmin();
         List<PostInfomation> GetManagedPost(int user_id);

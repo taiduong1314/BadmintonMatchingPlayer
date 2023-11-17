@@ -18,6 +18,7 @@
             Wallets = new HashSet<Wallet>();
             Tokens = new HashSet<VerifyToken>();
             Notifications = new HashSet<Notification>();
+            Slots = new HashSet<Slot>();
         }
 
         public int Id { get; set; }
@@ -48,5 +49,6 @@
         public virtual ICollection<UserRating> UserRatings { get; set; }
         public virtual ICollection<Wallet> Wallets { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
+        public virtual ICollection<Slot> Slots { get; set; }
     }
 }

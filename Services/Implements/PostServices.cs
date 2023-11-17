@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
 using Services.Util;
-
+using System.Security.Cryptography.X509Certificates;
 
 namespace Services.Implements
 {
@@ -304,6 +304,50 @@ namespace Services.Implements
                         res.Add(new PostInfomation(item));
                     }
                 }
+            }
+            return res;
+        }
+
+        public List<JoinedPost> GetJoined(int user_id)
+        {
+            var res = new List<JoinedPost>();
+
+            var transactions = _repositoryManager.Transaction.FindByCondition(x => x.IdUser == user_id, false).ToList();
+            if(transactions == null || transactions.Count == 0)
+            {
+                return res;
+            }
+            foreach(var item in transactions)
+            {
+                var slot = _repositoryManager.Slot.FindByCondition(x => x.TransactionId == item.Id, false)
+                    .FirstOrDefault();
+                if (slot == null)
+                    return res;
+
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == slot.IdPost, false)
+                    .Include(x => x.Slots)
+                    .ThenInclude(x => x.User)
+                    .FirstOrDefault();
+
+                var bookedInfos = new List<BookedSlotInfo>();
+                foreach(var infoStr in post.SlotsInfo.Split(';'))
+                {
+                    var info = new SlotInfo(infoStr);
+                    bookedInfos.Add(new BookedSlotInfo
+                    {
+                        BookedSlot = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Count(),
+                        CreateSlot = info.AvailableSlot,
+                        ImageUrls = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Select(x => x.User.ImgUrl).ToList()
+                    });
+                }
+
+                res.Add(new JoinedPost
+                {
+                    AreaName = post.AddressSlot,
+                    MoneyPaid = item.MoneyTrans,
+                    TransacionId = item.Id,
+                    BookedInfos = bookedInfos
+                });
             }
             return res;
         }

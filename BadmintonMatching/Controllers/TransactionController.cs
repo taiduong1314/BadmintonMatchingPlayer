@@ -25,6 +25,10 @@ namespace BadmintonMatching.Controllers
         [Route("buy_slot")]
         public async Task<IActionResult> CreateTransactionBuyingSlot(TransactionCreateInfo info)
         {
+            if (_transactionRepository.IsFromTwoPost(info.IdSlot))
+            {
+                return Ok(new SuccessObject<object> { Message = "Can't create from slots of more than 1 post" });
+            }
             var tranId = await _transactionRepository.CreateForBuySlot(info);
             if (tranId == 0)
             {

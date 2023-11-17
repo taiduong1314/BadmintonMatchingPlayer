@@ -210,6 +210,11 @@ namespace Entities
                     .WithMany(p => p.Slots)
                     .HasForeignKey(d => d.TransactionId)
                     .HasConstraintName("FK_Slot_Transaction");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Slots)
+                    .HasForeignKey(d => d.IdUser)
+                    .HasConstraintName("FK_Slot_User");
             });
 
             modelBuilder.Entity<Subscription>(entity =>

@@ -18,6 +18,7 @@ namespace Services.Interfaces
         Task<TransactionDetail> GetDetail(int transaction_id);
         Task<List<TransactionInfo>> GetOfUser(int user_id);
         Task<Transaction> GetTransaction(int transaction_id);
+        bool IsFromTwoPost(List<int>? idSlot);
         Task UpdateStatus(int tran_id, TransactionStatus tranStatus);
     }
 }

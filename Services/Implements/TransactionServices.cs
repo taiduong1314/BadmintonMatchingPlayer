@@ -142,6 +142,14 @@ namespace Services.Implements
             return tran == null ? new Transaction { Id = 0 } : tran;
         }
 
+        public bool IsFromTwoPost(List<int>? idSlot)
+        {
+            var idPosts = _repositoryManager.Slot.FindByCondition(x => idSlot.Contains(x.Id), false)
+                .GroupBy(x => x.IdPost)
+                .ToList();
+            return idPosts.Count() > 1;
+        }
+
         public async Task UpdateStatus(int tran_id, TransactionStatus tranStatus)
         {
             var tran = await _repositoryManager.Transaction.FindByCondition(x => x.Id == tran_id, true)

@@ -18,5 +18,6 @@
 
         public virtual Post? IdPostNavigation { get; set; }
         public virtual Transaction? Transaction { get; set; }
+        public virtual User? User { get; set; }
     }
 }
