@@ -697,5 +697,38 @@ namespace Services.Implements
                 return new NotFoundObjectResult(new { message = "User with the specified ID not found" });
             }
         }
+
+        public async Task<int> SubUnSub(int user_id, int target_id)
+        {
+            var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, false).FirstOrDefaultAsync();
+            if(user == null)
+            {
+                return -2;
+            }
+            var target = await _repositoryManager.User.FindByCondition(x => x.Id == target_id, false).FirstOrDefaultAsync();
+            if(user == null)
+            {
+                return -1;
+            }
+
+            var subc = await _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id && x.UserSubId == target_id, true).FirstOrDefaultAsync();
+            if(subc != null)
+            {
+                subc.IsSubcription = !subc.IsSubcription;
+                return subc.IsSubcription ? 1 : 0;
+            }
+            else
+            {
+                _repositoryManager.Subscription.Create(new Subscription
+                {
+                    UserId = user_id,
+                    UserSubId = target_id,
+                    IsSubcription = true,
+                    IsBanded = false
+                });
+                await _repositoryManager.SaveAsync();
+                return 1;
+            }
+        }
     }
 }

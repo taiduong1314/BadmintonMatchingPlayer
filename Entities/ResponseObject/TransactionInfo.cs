@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public string? MoneyPaied { get; set; }
+        public string? PlayingArea { get; set; }
         public List<SlotBuy>? Slots { get; set; }
     }
 

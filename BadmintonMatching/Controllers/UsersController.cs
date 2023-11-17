@@ -381,5 +381,27 @@ namespace BadmintonMatching.Controllers
         }
         #endregion
 
+        [HttpPut]
+        [Route("{user_id}/sub_unsub/{target_id}")]
+        public async Task<IActionResult> SubUnsub(int user_id, int target_id)
+        {
+            var res = await _userServices.SubUnSub(user_id, target_id);
+            switch (res)
+            {
+                case -2:
+                    {
+                        return Ok(new SuccessObject<object?> { Message = "Can't found user" });
+                    }
+                case -1:
+                    {
+                        return Ok(new SuccessObject<object?> { Message = "Can't found target user" });
+                    }
+                default:
+                    {
+                        var addTxt = res == 0 ? "Unsubcribe" : "Subcribe";
+                        return Ok(new SuccessObject<object?> { Data = true, Message = $"{addTxt} success!" });
+                    }
+            }
+        }
     }
 }

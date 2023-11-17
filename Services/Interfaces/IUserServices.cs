@@ -41,5 +41,6 @@ namespace Services.Interfaces
         List<UserManaged> GetUserForManaged();
         bool BanUnbandLogin(int user_id);
         List<UserReport> GetReports(int user_id);
+        Task<int> SubUnSub(int user_id, int target_id);
     }
 }
