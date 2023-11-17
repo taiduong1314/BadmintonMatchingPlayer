@@ -42,5 +42,6 @@ namespace Services.Interfaces
         bool BanUnbandLogin(int user_id);
         List<UserReport> GetReports(int user_id);
         Task<int> SubUnSub(int user_id, int target_id);
+        Task<int> SettingPassword(int user_id, SettingPasswordRequest info);
     }
 }

@@ -22,8 +22,8 @@ namespace Services.Implements
 {
     public enum UserRole
     {
-        Admin = 1,
-        User = 0
+        Admin = 2,
+        User = 1
     }
 
     public class UserServices : IUserServices
@@ -729,6 +729,30 @@ namespace Services.Implements
                 await _repositoryManager.SaveAsync();
                 return 1;
             }
+        }
+
+        public async Task<int> SettingPassword(int user_id, SettingPasswordRequest info)
+        {
+            var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).FirstOrDefaultAsync();
+            if(user == null)
+            {
+                return -2;
+            }
+
+            if(user.UserPassword != info.OldPass)
+            {
+                return 0;
+            }
+
+            if(info.NewPass != info.ReEnterPass)
+            {
+                return -1;
+            }
+
+            user.UserPassword = info.NewPass;
+            _repositoryManager.User.Update(user);
+            await _repositoryManager.SaveAsync();
+            return 1;
         }
     }
 }

@@ -403,5 +403,33 @@ namespace BadmintonMatching.Controllers
                     }
             }
         }
+
+        [HttpPut]
+        [Route("{user_id}/setting_password")]
+        public async Task<IActionResult> SettingPassword(int user_id, SettingPasswordRequest info)
+        {
+            var res = await _userServices.SettingPassword(user_id, info);
+            if (res == 1)
+            {
+                return Ok(new SuccessObject<object?> { Data = true, Message = $"Update success!" });
+            }
+            else if (res == 0)
+            {
+                return Ok(new SuccessObject<object?> { Message = "Invalid old password" });
+            }
+            else if (res == -1)
+            {
+                return Ok(new SuccessObject<object?> { Message = "Wrong re-input password" });
+            }
+            else if (res == -2)
+            {
+                return Ok(new SuccessObject<object?> { Message = "Invalid user" });
+            }
+            else
+            {
+                return Ok(new SuccessObject<object?> { Message = "Update Fail" });
+            }
+        }
+
     }
 }

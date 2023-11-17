@@ -22,7 +22,7 @@ namespace Services.Implements
 
         public async Task<string> HandleImg(string base64encodedstring)
         {
-            var revertbase64 = base64encodedstring.Replace("data:image/jpg;base64,", "");
+            var revertbase64 = base64encodedstring.Replace("data:image/jpeg;base64,", "");
             try
             {
                 var bytes = Convert.FromBase64String(revertbase64);
@@ -125,7 +125,7 @@ namespace Services.Implements
 
         public async Task<List<Post>> GetAllPost()
         {
-            var res = await _repositoryManager.Post.FindAll(false)
+            var res = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted ,false)
                 .Select(x => new Post
                 {
                     Id = x.Id,
