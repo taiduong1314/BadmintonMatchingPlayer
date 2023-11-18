@@ -145,9 +145,16 @@ namespace Services.Implements
         public bool IsFromTwoPost(List<int>? idSlot)
         {
             var idPosts = _repositoryManager.Slot.FindByCondition(x => idSlot.Contains(x.Id), false)
-                .GroupBy(x => x.IdPost)
+                .Select(x => x.IdPost)
                 .ToList();
-            return idPosts.Count() > 1;
+
+            var postId = idPosts[0];
+            foreach(var id in idPosts)
+            {
+                if (id != postId)
+                    return true;
+            }
+            return false;
         }
 
         public async Task UpdateStatus(int tran_id, TransactionStatus tranStatus)
