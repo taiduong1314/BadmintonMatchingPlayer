@@ -22,8 +22,9 @@ namespace Services.Implements
 {
     public enum UserRole
     {
-        Admin = 2,
-        User = 1
+        Admin = 1,
+        User = 2,
+        Staff = 3
     }
 
     public class UserServices : IUserServices
@@ -454,7 +455,7 @@ namespace Services.Implements
                     PhoneNumber = user.PhoneNumber,
                     SortProfile = user.SortProfile,
                     Balance = user.Wallets != null ? user.Wallets.ToList()[0].Balance : 0,
-                    Role = user.UserRole != null && user.UserRole == 1 ? "Admin" : user.UserRole != null && user.UserRole == 3 ? "Staff" : "User"
+                    Role = user.UserRole != null && user.UserRole == (int)UserRole.Admin ? "Admin" : user.UserRole != null && user.UserRole == (int)UserRole.Staff ? "Staff" : "User"
                 };
 
                 if(user.IsBanFromLogin)
@@ -547,7 +548,7 @@ namespace Services.Implements
                     CreateDate = x.CreateDate.Value.ToString("dd/MM/yyyy"),
                     FullName = x.FullName,
                     LastLogin = x.LastLoginDate.Value.ToString("dd/MM/yyyy"),
-                    Role = x.UserRole == (int)UserRole.User ? "User" : "Admin",
+                    Role = x.UserRole == (int)UserRole.User ? "User" : x.UserRole == (int)UserRole.Staff ? "Staff" : "Admin",
                     Status = "Active",
                     UserId = x.Id
                 })
@@ -623,7 +624,7 @@ namespace Services.Implements
                 UserPassword = info.Password,
                 UserName = info.UserName,
                 CreateDate = DateTime.UtcNow.AddHours(7),
-                UserRole = 2
+                UserRole = (int)UserRole.User
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();
