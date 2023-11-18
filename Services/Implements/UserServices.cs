@@ -676,13 +676,16 @@ namespace Services.Implements
             {
                 user.UserName = param.UserName;
                 user.FullName = param.FullName;
-                try
+                if(param.ImgUrl != null)
                 {
-                    user.ImgUrl = await HandleImg(param.ImgUrl);
-                }
-                catch
-                {
-                    throw new Exception();
+                    try
+                    {
+                        user.ImgUrl = await HandleImg(param.ImgUrl);
+                    }
+                    catch
+                    {
+                        throw new Exception();
+                    }
                 }
                 user.PhoneNumber = param.PhoneNumber;
                 user.SortProfile = param.SortProfile;
