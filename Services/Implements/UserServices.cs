@@ -676,7 +676,7 @@ namespace Services.Implements
             {
                 user.UserName = param.UserName;
                 user.FullName = param.FullName;
-                if(param.ImgUrl != null)
+                if(param.ImgUrl != user.ImgUrl)
                 {
                     try
                     {
