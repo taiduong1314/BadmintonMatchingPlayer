@@ -162,7 +162,8 @@ namespace Services.Implements
                     ImgUrlPost = x.ImgUrl,
                     FullName = x.IdUserToNavigation.FullName,
                     UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                    HighlightUrl = x.ImgUrl
+                    HighlightUrl = x.ImgUrl,
+                    UserId = x.IdUserTo
                 }).ToList();
 
             for(var i = 0; i < optList.Count(); i++)

@@ -21,5 +21,6 @@ namespace Entities.ResponseObject
         public string? UserImgUrl { get; set; }
         public string? HighlightUrl { get; set; }
         public decimal? Price { get; set; }
+        public int? UserId { get; set; }
     }
 }
