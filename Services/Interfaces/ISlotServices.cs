@@ -10,6 +10,7 @@ namespace Services.Interfaces
 {
     public interface ISlotServices
     {
+        void Delete(List<int> lsSlot);
         List<SlotReturnInfo> GetAvailable(CheckAvailableSlot info);
     }
 }

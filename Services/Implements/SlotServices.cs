@@ -16,6 +16,19 @@ namespace Services.Implements
             _repositoryManager = repositoryManager;
         }
 
+        public void Delete(List<int> lsSlot)
+        {
+            foreach (var slotId in lsSlot)
+            {
+                var slot = _repositoryManager.Slot.FindByCondition(x => x.Id == slotId && !x.IsDeleted, true).FirstOrDefault();
+                if(slot != null)
+                {
+                    _repositoryManager.Slot.Delete(slot);
+                }
+            }
+            _repositoryManager.SaveAsync().Wait();
+        }
+
         public List<SlotReturnInfo> GetAvailable(CheckAvailableSlot info)
         {
             var res = new List<SlotReturnInfo>();

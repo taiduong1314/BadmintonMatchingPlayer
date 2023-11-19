@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Entities.ResponseObject
 {
+    public class SlotIncludeTransaction
+    {
+        public int? TransactionId { get; set; }
+    }
     public class SlotReturnInfo
     {
         public string? Date { get; set; }

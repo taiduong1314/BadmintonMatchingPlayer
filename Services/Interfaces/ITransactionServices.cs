@@ -11,7 +11,7 @@ namespace Services.Interfaces
 {
     public interface ITransactionServices
     {
-        Task<int> CreateForBuySlot(TransactionCreateInfo info);
+        Task<Transaction> CreateForBuySlot(TransactionCreateInfo info);
         Task DeleteSlot(int transaction_id);
         Task DeleteTran(int transaction_id);
         bool ExistTran(int tran_id);

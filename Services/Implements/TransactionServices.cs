@@ -16,12 +16,12 @@ namespace Services.Implements
             _repositoryManager = repositoryManager;
         }
 
-        public async Task<int> CreateForBuySlot(TransactionCreateInfo info)
+        public async Task<Transaction> CreateForBuySlot(TransactionCreateInfo info)
         {
             var slot = await _repositoryManager.Slot.FindByCondition(x => x.Id == info.IdSlot[0], false).FirstOrDefaultAsync();
             if (slot == null || slot.ContentSlot == null)
             {
-                return 0;
+                return null;
             }
 
             var date = slot.ContentSlot.Split('/');
@@ -44,7 +44,7 @@ namespace Services.Implements
                 _repositoryManager.Transaction.Update(tran);
                 await _repositoryManager.SaveAsync();
             }
-            return tran.Id;
+            return tran;
         }
 
         public async Task DeleteSlot(int transaction_id)

@@ -1,6 +1,7 @@
 ﻿using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
+using Repositories.Intefaces;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -10,20 +11,86 @@ namespace BadmintonMatching.Controllers
     public class SlotController : ControllerBase
     {
         private readonly ISlotServices _slotServices;
+        private readonly ITransactionServices _transactionRepository;
+        private readonly IWalletServices _walletServices;
 
-        public SlotController(ISlotServices slotServices)
+        public SlotController(ISlotServices slotServices, ITransactionServices transactionRepository, IWalletServices walletServices)
         {
             _slotServices = slotServices;
+            _transactionRepository = transactionRepository;
+            _walletServices = walletServices;
         }
 
         [HttpPost]
         [Route("available")]
-        public IActionResult CheckAvailableAndCreateSlot(CheckAvailableSlot info)
+        public async Task<IActionResult> CheckAvailableAndCreateSlot(CheckAvailableSlot info)
         {
             try
             {
                 List<SlotReturnInfo> slotInfos = _slotServices.GetAvailable(info);
-                return Ok(new SuccessObject<List<SlotReturnInfo>> { Data = slotInfos, Message = Message.SuccessMsg });
+
+                var lsSlot = new List<int>();
+                var isDeleteSlot = false;
+                foreach (var item in slotInfos)
+                {
+                    if(item.SlotIds != null)
+                    {
+                        foreach (var slotId in item.SlotIds)
+                        {
+                            lsSlot.Add(slotId);
+                        }
+                    }
+                    else
+                    {
+                        isDeleteSlot = true;
+                    }
+                }
+
+                if (isDeleteSlot)
+                {
+                    _slotServices.Delete(lsSlot);
+                    return Ok(new SuccessObject<SlotIncludeTransaction>
+                    {
+                        Message = "Invalid num of available slot input"
+                    });
+                }
+
+                var createInfo = new TransactionCreateInfo
+                {
+                    IdSlot = lsSlot,
+                    IdUser = info.UserId
+                };
+                var tran = await _transactionRepository.CreateForBuySlot(createInfo);
+
+                if(tran == null)
+                {
+                    _slotServices.Delete(lsSlot);
+                    return Ok(new SuccessObject<object> { Message = "Slot not found" });
+                }
+
+                var newBalance = _walletServices.UpdateBalance(tran.MoneyTrans.Value, createInfo.IdUser.Value);
+                if(newBalance == -1 || newBalance == -2)
+                {
+                    await _transactionRepository.DeleteSlot(tran.Id);
+                    await _transactionRepository.DeleteTran(tran.Id);
+                    if (newBalance == -1)
+                    {
+                        return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+                    }
+                    else if (newBalance == -2)
+                    {
+                        return Ok(new SuccessObject<object> { Message = $"Wallet of user {createInfo.IdUser.Value} isn't found" });
+                    }
+                }
+
+                return Ok(new SuccessObject<SlotIncludeTransaction> 
+                {
+                    Data = new SlotIncludeTransaction
+                    {
+                        TransactionId = tran.Id
+                    },
+                    Message = Message.SuccessMsg 
+                });
             }
             catch (FieldAccessException)
             {

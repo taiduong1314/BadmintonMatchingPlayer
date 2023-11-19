@@ -30,7 +30,7 @@ namespace BadmintonMatching.Controllers
                 return Ok(new SuccessObject<object> { Message = "Can't create from slots of more than 1 post" });
             }
             var tranId = await _transactionRepository.CreateForBuySlot(info);
-            if (tranId == 0)
+            if (tranId.Id == 0)
             {
                 return Ok(new SuccessObject<object>{ Message = "Create not success" });
             }
