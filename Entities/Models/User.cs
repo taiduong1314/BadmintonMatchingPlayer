@@ -19,6 +19,8 @@
             Tokens = new HashSet<VerifyToken>();
             Notifications = new HashSet<Notification>();
             Slots = new HashSet<Slot>();
+            ChatRooms = new HashSet<UserChatRoom>();
+            Messages = new HashSet<Messages>();
         }
 
         public int Id { get; set; }
@@ -50,5 +52,7 @@
         public virtual ICollection<Wallet> Wallets { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
         public virtual ICollection<Slot> Slots { get; set; }
+        public virtual ICollection<UserChatRoom> ChatRooms { get; set; }
+        public virtual ICollection<Messages> Messages { get; set; }
     }
 }

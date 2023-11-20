@@ -30,6 +30,9 @@ namespace Entities
         public virtual DbSet<VerifyToken> VerifyToken { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
         public virtual DbSet<Comment> Comments { get; set; } = null!;
+        public virtual DbSet<ChatRoom> ChatRooms { get; set; } = null!;
+        public virtual DbSet<UserChatRoom> UserChatRooms { get; set; } = null!;
+        public virtual DbSet<Messages> Messages { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -154,6 +157,47 @@ namespace Entities
                     .WithMany(p => p.Reports)
                     .HasForeignKey(d => d.IdTransaction)
                     .HasConstraintName("FK_Transaction_Reports");
+            });
+
+            modelBuilder.Entity<ChatRoom>(entity =>
+            {
+                entity.ToTable("ChatRoom");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+            });
+
+            modelBuilder.Entity<UserChatRoom>(entity =>
+            {
+                entity.ToTable("UserChatRoom");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.ChatRooms)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_ChatRoomUser_User");
+
+                entity.HasOne(d => d.ChatRoom)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.RoomId)
+                    .HasConstraintName("FK_ChatRoomUser_Room");
+            });
+
+            modelBuilder.Entity<Messages>(entity =>
+            {
+                entity.ToTable("Messages");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Messages)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_Message_User");
+
+                entity.HasOne(d => d.ChatRoom)
+                    .WithMany(p => p.Messages)
+                    .HasForeignKey(d => d.RoomId)
+                    .HasConstraintName("FK_Message_Room");
             });
 
             modelBuilder.Entity<Role>(entity =>

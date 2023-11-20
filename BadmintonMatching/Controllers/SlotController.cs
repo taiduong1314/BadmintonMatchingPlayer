@@ -88,11 +88,14 @@ namespace BadmintonMatching.Controllers
                     }
                 }
 
+                //var chatRoom = _chatServices.GetChatRoom(tran.Id);
+
                 return Ok(new SuccessObject<SlotIncludeTransaction> 
                 {
                     Data = new SlotIncludeTransaction
                     {
-                        TransactionId = tran.Id
+                        TransactionId = tran.Id,
+                        //ChatInfos = chatRoom
                     },
                     Message = Message.SuccessMsg
                 });

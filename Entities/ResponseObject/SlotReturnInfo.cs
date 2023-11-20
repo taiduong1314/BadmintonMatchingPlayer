@@ -9,6 +9,7 @@ namespace Entities.ResponseObject
     public class SlotIncludeTransaction
     {
         public int? TransactionId { get; set; }
+        public List<ChatInfos>? ChatInfos { get; set; }
     }
     public class SlotReturnInfo
     {
@@ -18,7 +19,7 @@ namespace Entities.ResponseObject
     }
     public class ChatInfos
     {
-        public string ClientName { get; set; }
-        public string RoomId { get; set; }
+        public string? ClientName { get; set; }
+        public string? RoomId { get; set; }
     }
 }
