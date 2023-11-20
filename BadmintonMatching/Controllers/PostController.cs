@@ -27,7 +27,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("user/{user_id}/suggestion")]
-        [ProducesResponseType(typeof(SuccessObject<List<PostInfomation>>), 200)]
         public IActionResult GetSuggestionPost(int user_id)
         {
             if (!_userServices.ExistUserId(user_id))
@@ -63,7 +62,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("play_ground")]
-        [ProducesResponseType(typeof(SuccessObject<List<string>>), 200)]
         public IActionResult GetPostPlayGround()
         {
             var res = _postServices.GetAllPlayGround();
@@ -72,7 +70,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("play_ground/{play_ground}")]
-        [ProducesResponseType(typeof(SuccessObject<List<PostInfomation>>), 200)]
         public IActionResult GetPostByPlayGround(string play_ground)
         {
             List<PostInfomation> res = _postServices.GetPostByPlayGround(play_ground);
@@ -81,7 +78,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("{user_id}/managed_all_post")]
-        [ProducesResponseType(typeof(SuccessObject<List<PostInfomation>>), 200)]
         public IActionResult GetPostByPlayGround(int user_id)
         {
             if (!_userServices.ExistUserId(user_id))
@@ -106,7 +102,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("{post_id}/details")]
-        [ProducesResponseType(typeof(SuccessObject<PostDetail>), 200)]
         public IActionResult GetDetailPost(int post_id)
         {
             var res = _postServices.GetPostDetail(post_id);
@@ -123,7 +118,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("GetListPost")]
-        [ProducesResponseType(typeof(SuccessObject<List<Post>>), 200)]
         public async Task<IActionResult> GetListPost()
         {
             var res = await _postServices.GetAllPost();
@@ -133,7 +127,6 @@ namespace BadmintonMatching.Controllers
         #region List Post at role Admin
         [HttpGet]
         [Route("{admin_id}/post")]
-        [ProducesResponseType(typeof(SuccessObject<List<ListPostByAdmin>>), 200)]
         public IActionResult GetListPostByAdmin(int admin_id)
         {
 

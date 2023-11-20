@@ -53,6 +53,7 @@ builder.Services.AddScoped<IReportServices, ReportServices>();
 builder.Services.AddScoped<ISlotServices, SlotServices>();
 builder.Services.AddScoped<IWalletServices, WalletServices>();
 builder.Services.AddScoped<ITransactionServices, TransactionServices>();
+builder.Services.AddScoped<IChatServices, ChatService>();
 
 builder.Services.AddHangfire(configuration => configuration
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));

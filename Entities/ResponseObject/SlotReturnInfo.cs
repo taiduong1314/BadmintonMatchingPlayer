@@ -16,4 +16,9 @@ namespace Entities.ResponseObject
         public List<int>? SlotIds { get; set; }
         public string? Message { get; set; }
     }
+    public class ChatInfos
+    {
+        public string ClientName { get; set; }
+        public string RoomId { get; set; }
+    }
 }

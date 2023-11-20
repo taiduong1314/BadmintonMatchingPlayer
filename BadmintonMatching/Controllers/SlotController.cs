@@ -13,12 +13,17 @@ namespace BadmintonMatching.Controllers
         private readonly ISlotServices _slotServices;
         private readonly ITransactionServices _transactionRepository;
         private readonly IWalletServices _walletServices;
+        private readonly IChatServices _chatServices;
 
-        public SlotController(ISlotServices slotServices, ITransactionServices transactionRepository, IWalletServices walletServices)
+        public SlotController(ISlotServices slotServices, 
+            ITransactionServices transactionRepository, 
+            IWalletServices walletServices,
+            IChatServices chatServices)
         {
             _slotServices = slotServices;
             _transactionRepository = transactionRepository;
             _walletServices = walletServices;
+            _chatServices = chatServices;
         }
 
         [HttpPost]
@@ -68,7 +73,7 @@ namespace BadmintonMatching.Controllers
                     return Ok(new SuccessObject<object> { Message = "Slot not found" });
                 }
 
-                var newBalance = _walletServices.UpdateBalance(tran.MoneyTrans.Value, createInfo.IdUser.Value);
+                var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value);
                 if(newBalance == -1 || newBalance == -2)
                 {
                     await _transactionRepository.DeleteSlot(tran.Id);
@@ -89,7 +94,7 @@ namespace BadmintonMatching.Controllers
                     {
                         TransactionId = tran.Id
                     },
-                    Message = Message.SuccessMsg 
+                    Message = Message.SuccessMsg
                 });
             }
             catch (FieldAccessException)
