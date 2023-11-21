@@ -19,7 +19,7 @@ namespace Entities.ResponseObject
     }
     public class ChatInfos
     {
-        public string? ClientName { get; set; }
         public int? RoomId { get; set; }
+        public string? PlayDate { get; set; }
     }
 }

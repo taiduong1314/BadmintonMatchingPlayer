@@ -157,8 +157,6 @@ namespace BadmintonMatching.Controllers
             var res = _postServices.DeletePost(post_id);
             return Ok(res ? new SuccessObject<object> { Data = true, Message = Message.SuccessMsg }: new SuccessObject<object> { Message = "Update fail" });
         }
-
-
         #endregion
 
         [HttpGet]

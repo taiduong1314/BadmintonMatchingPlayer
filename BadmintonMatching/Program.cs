@@ -1,3 +1,4 @@
+using BadmintonMatching.RealtimeHub;
 using Entities;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,8 @@ builder.Services.AddCors(options =>
                           policy.AllowAnyOrigin();
                       });
 });
+
+builder.Services.AddSignalR();
 
 builder.Services.AddControllers(config =>
 {
@@ -61,7 +64,7 @@ builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 var port = Environment.GetEnvironmentVariable("PORT");
-app.Urls.Add($"http://*:{port}");
+//app.Urls.Add($"http://*:{port}");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -90,6 +93,8 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
     endpoints.MapHangfireDashboard();
-}); 
+});
+
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

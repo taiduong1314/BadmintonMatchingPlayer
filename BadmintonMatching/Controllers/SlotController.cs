@@ -88,6 +88,10 @@ namespace BadmintonMatching.Controllers
                             return Ok(new SuccessObject<object> { Message = $"Wallet of user {createInfo.IdUser.Value} isn't found" });
                         }
                     }
+                    else
+                    {
+                        await _transactionRepository.UpdateStatus(tran.Id, Entities.Models.TransactionStatus.PaymentSuccess);
+                    }
                 }
                 else
                 {
@@ -98,14 +102,14 @@ namespace BadmintonMatching.Controllers
                     //
                 }
 
-                //var chatRoom = _chatServices.GetChatRoom(tran.Id);
+                var chatRoom = await _chatServices.GetChatRoom(tran.Id);
 
                 return Ok(new SuccessObject<SlotIncludeTransaction>
                 {
                     Data = new SlotIncludeTransaction
                     {
                         TransactionId = tran.Id,
-                        //ChatInfos = chatRoom
+                        ChatInfos = chatRoom
                     },
                     Message = Message.SuccessMsg
                 });
