@@ -1,7 +1,6 @@
 ﻿using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
-using Repositories.Intefaces;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -15,8 +14,8 @@ namespace BadmintonMatching.Controllers
         private readonly IWalletServices _walletServices;
         private readonly IChatServices _chatServices;
 
-        public SlotController(ISlotServices slotServices, 
-            ITransactionServices transactionRepository, 
+        public SlotController(ISlotServices slotServices,
+            ITransactionServices transactionRepository,
             IWalletServices walletServices,
             IChatServices chatServices)
         {
@@ -38,7 +37,7 @@ namespace BadmintonMatching.Controllers
                 var isDeleteSlot = false;
                 foreach (var item in slotInfos)
                 {
-                    if(item.SlotIds != null)
+                    if (item.SlotIds != null)
                     {
                         foreach (var slotId in item.SlotIds)
                         {
@@ -67,30 +66,41 @@ namespace BadmintonMatching.Controllers
                 };
                 var tran = await _transactionRepository.CreateForBuySlot(createInfo);
 
-                if(tran == null)
+                if (tran == null)
                 {
                     _slotServices.Delete(lsSlot);
                     return Ok(new SuccessObject<object> { Message = "Slot not found" });
                 }
 
-                var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value);
-                if(newBalance == -1 || newBalance == -2)
+                if (!info.IsVnpay)
                 {
-                    await _transactionRepository.DeleteSlot(tran.Id);
-                    await _transactionRepository.DeleteTran(tran.Id);
-                    if (newBalance == -1)
+                    var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value);
+                    if (newBalance == -1 || newBalance == -2)
                     {
-                        return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+                        await _transactionRepository.DeleteSlot(tran.Id);
+                        await _transactionRepository.DeleteTran(tran.Id);
+                        if (newBalance == -1)
+                        {
+                            return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+                        }
+                        else if (newBalance == -2)
+                        {
+                            return Ok(new SuccessObject<object> { Message = $"Wallet of user {createInfo.IdUser.Value} isn't found" });
+                        }
                     }
-                    else if (newBalance == -2)
-                    {
-                        return Ok(new SuccessObject<object> { Message = $"Wallet of user {createInfo.IdUser.Value} isn't found" });
-                    }
+                }
+                else
+                {
+                    //Charge ví VNPAY với value là tran.MoneyTrans.Value
+
+                    //Thành công chạy tiếp
+
+                    //
                 }
 
                 //var chatRoom = _chatServices.GetChatRoom(tran.Id);
 
-                return Ok(new SuccessObject<SlotIncludeTransaction> 
+                return Ok(new SuccessObject<SlotIncludeTransaction>
                 {
                     Data = new SlotIncludeTransaction
                     {

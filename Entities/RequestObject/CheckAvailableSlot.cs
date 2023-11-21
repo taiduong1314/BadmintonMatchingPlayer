@@ -5,6 +5,7 @@
         public int UserId { get; set; }
         public int PostId { get; set; }
         public List<SlotsInfo> SlotsInfo { get; set; }
+        public bool IsVnpay { get; set; } = false;
     }
 
     public class SlotsInfo

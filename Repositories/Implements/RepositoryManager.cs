@@ -27,6 +27,9 @@ namespace Repositories.Implements
         private IWishlistRepository _wishlist;
         private IVerifyTokenRepository _verifyToken;
         private ICommentRepository _comment;
+        private IUserChatRoomRepository _chatRoomUser;
+        private IChatRoomRepository _chatRoom;
+        private IMessageRepository _message;
 
         public RepositoryManager(DataContext context)
         {
@@ -46,6 +49,9 @@ namespace Repositories.Implements
             _wishlist = new WishlistRepository(_context);
             _verifyToken = new VerifyTokenRepository(_context);
             _comment = new CommentRepository(_context);
+            _chatRoomUser = new UserChatRoomRepository(_context);
+            _chatRoom = new ChatRoomRepository(_context);
+            _message = new MessageRepository(_context);
         }
         public IHistoryTransactionRepository HistoryTransaction
         {
@@ -150,6 +156,27 @@ namespace Repositories.Implements
             get
             {
                 return _comment;
+            }
+        }
+        public IUserChatRoomRepository ChatRoomUser
+        {
+            get
+            {
+                return _chatRoomUser;
+            }
+        }
+        public IChatRoomRepository ChatRoom
+        {
+            get
+            {
+                return _chatRoom;
+            }
+        }
+        public IMessageRepository Message
+        {
+            get
+            {
+                return _message;
             }
         }
         public Task SaveAsync() => _context.SaveChangesAsync();

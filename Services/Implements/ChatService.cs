@@ -1,11 +1,7 @@
-﻿using Entities.ResponseObject;
+﻿using Entities.Models;
+using Entities.ResponseObject;
 using Repositories.Intefaces;
 using Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Implements
 {
@@ -21,13 +17,65 @@ namespace Services.Implements
         public List<ChatInfos> GetChatRoom(int transactionId)
         {
             var slots = _repositoryManager.Slot.FindByCondition(x => x.TransactionId == transactionId, false).ToList();
-            
-            foreach(var slot in slots)
+
+            var playDate = string.Empty;
+            var res = new List<ChatInfos>();
+            foreach (var slot in slots)
             {
+                if (playDate != slot.ContentSlot)
+                {
+                    var room = _repositoryManager.ChatRoom
+                        .FindByCondition(x => x.Code == $"{slot.IdPost}_{slot.ContentSlot}", false)
+                        .Select(x => new ChatInfos
+                        {
+                            ClientName = x.Code,
+                            RoomId = x.Id
+                        })
+                        .FirstOrDefault();
 
+                    if (room == null)
+                    {
+                        var roomEnt = new Entities.Models.ChatRoom
+                        {
+                            Code = $"{slot.IdPost}_{slot.ContentSlot}",
+                            Name = $"Play date: {slot.ContentSlot}"
+                        };
+                        _repositoryManager.ChatRoom.Create(roomEnt);
+                        _repositoryManager.SaveAsync().Wait();
+
+                        _repositoryManager.ChatRoomUser.Create(new Entities.Models.UserChatRoom
+                        {
+                            RoomId = roomEnt.Id,
+                            UserId = slot.IdUser
+                        });
+                        _repositoryManager.SaveAsync().Wait();
+
+                        room = new ChatInfos
+                        {
+                            ClientName = roomEnt.Code,
+                            RoomId = roomEnt.Id
+                        };
+                    }
+                    else
+                    {
+                        var userJoined = _repositoryManager.ChatRoomUser
+                            .FindByCondition(x => x.UserId == slot.IdUser && x.RoomId == room.RoomId, false)
+                            .FirstOrDefault();
+
+                        if(userJoined == null)
+                        {
+                            _repositoryManager.ChatRoomUser.Create(new Entities.Models.UserChatRoom
+                            {
+                                RoomId = room.RoomId,
+                                UserId = slot.IdUser
+                            });
+                            _repositoryManager.SaveAsync().Wait();
+                        }
+                    }
+                    res.Add(room);
+                }
             }
-
-            return new List<ChatInfos>();
+            return res;
         }
     }
 }

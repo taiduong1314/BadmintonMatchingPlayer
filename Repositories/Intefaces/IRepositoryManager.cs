@@ -23,6 +23,9 @@ namespace Repositories.Intefaces
         IWishlistRepository Wishlist { get; }
         IVerifyTokenRepository VerifyToken { get; }
         ICommentRepository Comment { get; }
+        IUserChatRoomRepository ChatRoomUser { get; }
+        IChatRoomRepository ChatRoom { get; }
+        IMessageRepository Message { get; }
         Task SaveAsync();
     }
 }

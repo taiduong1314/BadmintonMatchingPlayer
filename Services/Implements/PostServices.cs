@@ -323,23 +323,39 @@ namespace Services.Implements
                 var slot = _repositoryManager.Slot.FindByCondition(x => x.TransactionId == item.Id, false)
                     .FirstOrDefault();
                 if (slot == null)
-                    return res;
+                    continue;
 
                 var post = _repositoryManager.Post.FindByCondition(x => x.Id == slot.IdPost, false)
                     .Include(x => x.Slots)
                     .ThenInclude(x => x.User)
                     .FirstOrDefault();
 
+                var finalInfo = new SlotInfo();
+                int joinedSlot = 0;
                 var bookedInfos = new List<BookedSlotInfo>();
                 foreach(var infoStr in post.SlotsInfo.Split(';'))
                 {
-                    var info = new SlotInfo(infoStr);
-                    bookedInfos.Add(new BookedSlotInfo
+                    if (infoStr != string.Empty)
                     {
-                        BookedSlot = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Count(),
-                        CreateSlot = info.AvailableSlot,
-                        ImageUrls = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Select(x => x.User.ImgUrl).ToList()
-                    });
+                        var info = new SlotInfo(infoStr);
+                        bookedInfos.Add(new BookedSlotInfo
+                        {
+                            BookedSlot = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Count(),
+                            CreateSlot = info.AvailableSlot,
+                            ImageUrls = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Select(x => x.User.ImgUrl).ToList()
+                        });
+
+                        var joinSlot = _repositoryManager.Slot
+                            .FindByCondition(x =>
+                            !x.IsDeleted &&
+                            x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy") &&
+                            x.IdPost == post.Id, false).Count();
+                        if (info.AvailableSlot - joinSlot >= finalInfo.AvailableSlot)
+                        {
+                            finalInfo = info;
+                            joinedSlot = joinSlot;
+                        }
+                    }
                 }
 
                 res.Add(new JoinedPost
@@ -347,7 +363,14 @@ namespace Services.Implements
                     AreaName = post.AddressSlot,
                     MoneyPaid = item.MoneyTrans,
                     TransacionId = item.Id,
-                    BookedInfos = bookedInfos
+                    BookedInfos = bookedInfos,
+                    PostId = post.Id,
+                    Status = ((TransactionStatus)item.Status).ToString(),
+                    PostTitle = post.Title,
+                    AvailableSlot = (finalInfo.AvailableSlot - joinedSlot).ToString(),
+                    EndTime = finalInfo.EndTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
+                    StartTime = finalInfo.StartTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
+                    CoverImage = post.ImgUrl
                 });
             }
             return res;
