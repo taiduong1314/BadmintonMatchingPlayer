@@ -60,6 +60,7 @@ public static class PaymentHelper
         var vnpSecureHash =
             collection.FirstOrDefault(k => k.Key == "vnp_SecureHash").Value; //hash của dữ liệu trả về
         var orderInfo = vnPay.GetResponseData("vnp_OrderInfo");
+        var vnpAmount = vnPay.GetResponseData("vnp_Amount");
 
         var checkSignature =
             vnPay.ValidateSignature(vnpSecureHash, hashSecret); //check Signature
@@ -89,7 +90,8 @@ public static class PaymentHelper
             PaymentId = vnPayTranId.ToString(),
             TransactionId = vnPayTranId.ToString(),
             Token = vnpSecureHash,
-            PaymentCode = paymentCode
+            PaymentCode = paymentCode,
+            TotalAmount = ((int)(double.Parse(vnpAmount) / 100)).ToString()
         };
     }
 
