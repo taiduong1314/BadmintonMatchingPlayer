@@ -1,7 +1,9 @@
-﻿using Entities.RequestObject;
+﻿using BadmintonMatching.Payment;
+using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Services.Implements;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -11,10 +13,12 @@ namespace BadmintonMatching.Controllers
     public class WalletController : ControllerBase
     {
         private readonly IWalletServices _walletServices;
+        private readonly IVNPayService _vnPayService;
 
-        public WalletController(IWalletServices walletServices)
+        public WalletController(IWalletServices walletServices, IVNPayService vnPayService)
         {
             _walletServices = walletServices;
+            _vnPayService = vnPayService;
         }
 
         [HttpPut]
@@ -35,6 +39,30 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Data = new { NewBalance = newBalance }, Message = Message.SuccessMsg });
             }
+        }
+        [HttpPost]
+        [Route("create-vnpay")]
+        public async Task<IActionResult> CreateVnPay(UpdateWallet wallet)
+        {
+            var responseUriVnPay = _vnPayService.CreatePayment(new PaymentInfoModel()
+            {
+                TotalAmount = (double)wallet.Changes,
+                PaymentCode = Guid.NewGuid().ToString()
+            }, HttpContext);
+
+            if (string.IsNullOrEmpty(responseUriVnPay.Uri))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    Message = "Can't create payment url at this time"
+                });
+            }
+
+            return Ok(new SuccessObject<object>
+            {
+                Message = "Create url successfully!",
+                Data = responseUriVnPay
+            });
         }
     }
 }
