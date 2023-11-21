@@ -3,6 +3,7 @@ using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Services.Implements;
 using Services.Interfaces;
 
@@ -14,11 +15,13 @@ namespace BadmintonMatching.Controllers
     {
         private readonly IWalletServices _walletServices;
         private readonly IVNPayService _vnPayService;
+        private readonly IOptions<VnPayOption> _options;
 
-        public WalletController(IWalletServices walletServices, IVNPayService vnPayService)
+        public WalletController(IWalletServices walletServices, IVNPayService vnPayService, IOptions<VnPayOption> options)
         {
             _walletServices = walletServices;
             _vnPayService = vnPayService;
+            _options = options;
         }
 
         [HttpPut]
@@ -47,7 +50,7 @@ namespace BadmintonMatching.Controllers
             var responseUriVnPay = _vnPayService.CreatePayment(new PaymentInfoModel()
             {
                 TotalAmount = (double)wallet.Changes,
-                PaymentCode = Guid.NewGuid().ToString()
+                PaymentCode = wallet.UserId + "." + Guid.NewGuid()
             }, HttpContext);
 
             if (string.IsNullOrEmpty(responseUriVnPay.Uri))
@@ -63,6 +66,34 @@ namespace BadmintonMatching.Controllers
                 Message = "Create url successfully!",
                 Data = responseUriVnPay
             });
+        }
+        [HttpGet]
+        [Route("vnpay-callback")]
+        public async Task<IActionResult> VnPayCallback()
+        {
+            var vnPayResponse = _vnPayService.PaymentExecute(Request.Query);
+
+            if (!vnPayResponse.Success)
+            {
+                return Redirect(_options.Value.FEUrlCallback + "?success=false");
+            }
+
+            var paymentCodeSplit = vnPayResponse.PaymentCode.Split(".");
+
+            if (paymentCodeSplit.Length != 2)
+            {
+                return Redirect(_options.Value.FEUrlCallback + "?success=false");
+            }
+
+            var userId = int.Parse(paymentCodeSplit.First());
+            var money = double.Parse(vnPayResponse.TotalAmount);
+
+            // Thực hiện nạp tiền tại đây
+            // TO-DO
+
+            var transactionId = string.Empty; // Lấy transaction id và gán lại
+
+            return Redirect(_options.Value.FEUrlCallback + $"?success=true&amount={money}");
         }
     }
 }

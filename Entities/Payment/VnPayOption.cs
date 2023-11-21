@@ -10,4 +10,5 @@ public class VnPayOption
     public string Version { get; set; }
     public string Locale { get; set; }
     public string TimeZoneId { get; set; }
+    public string FEUrlCallback { get; set; }
 }
