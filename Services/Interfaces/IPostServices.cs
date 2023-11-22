@@ -18,5 +18,6 @@ namespace Services.Interfaces
         List<PostInfomation> GetPostByPlayGround(string play_ground);
         PostDetail GetPostDetail(int id_post);
         List<PostInfomation> GetSuggestionPost(int user_id);
+        Task<string> HandleImg(string imgUrl);
     }
 }

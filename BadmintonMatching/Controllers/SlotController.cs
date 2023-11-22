@@ -72,21 +72,6 @@ namespace BadmintonMatching.Controllers
                     return Ok(new SuccessObject<object> { Message = "Slot not found" });
                 }
 
-                
-                var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value);
-                if(newBalance == -1 || newBalance == -2)
-                {
-                    await _transactionRepository.DeleteSlot(tran.Id);
-                    await _transactionRepository.DeleteTran(tran.Id);
-                    if (newBalance == -1)
-                    {
-                        return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
-                    }
-                    else if (newBalance == -2)
-                    {
-                        return Ok(new SuccessObject<object> { Message = $"Wallet of user {createInfo.IdUser.Value} isn't found" });
-                    }
-                }
                 if (!info.IsVnpay)
                 {
                     var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value);
