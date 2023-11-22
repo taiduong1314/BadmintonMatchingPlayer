@@ -74,6 +74,7 @@ namespace BadmintonMatching.Controllers
             {
                 var hub = new ChatHub();
                 await _chatHub.Clients.User(info.RoomId.ToString()).SendAsync(info.Message, $"{user.FullName} Image:{user.ImgUrl}");
+                await _chatHub.Clients.All.SendAsync(info.Message, $"{user.FullName} Image:{user.ImgUrl}");
                 return Ok(new SuccessObject<object> { Data = true, Message = Message.SuccessMsg });
             }
             else
