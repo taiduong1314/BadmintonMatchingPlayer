@@ -9,5 +9,6 @@ namespace Entities.RequestObject
     public class UpdateWallet
     {
         public decimal Changes { get; set; }
+        public int UserId { get; set; }
     }
 }

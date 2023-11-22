@@ -1,7 +1,10 @@
-﻿using Entities.RequestObject;
+﻿using BadmintonMatching.Payment;
+using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Services.Implements;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -11,10 +14,14 @@ namespace BadmintonMatching.Controllers
     public class WalletController : ControllerBase
     {
         private readonly IWalletServices _walletServices;
+        private readonly IVNPayService _vnPayService;
+        private readonly IOptions<VnPayOption> _options;
 
-        public WalletController(IWalletServices walletServices)
+        public WalletController(IWalletServices walletServices, IVNPayService vnPayService, IOptions<VnPayOption> options)
         {
             _walletServices = walletServices;
+            _vnPayService = vnPayService;
+            _options = options;
         }
 
         [HttpPut]
@@ -35,6 +42,58 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Data = new { NewBalance = newBalance }, Message = Message.SuccessMsg });
             }
+        }
+        [HttpPost]
+        [Route("create-vnpay")]
+        public async Task<IActionResult> CreateVnPay(UpdateWallet wallet)
+        {
+            var responseUriVnPay = _vnPayService.CreatePayment(new PaymentInfoModel()
+            {
+                TotalAmount = (double)wallet.Changes,
+                PaymentCode = wallet.UserId + "." + Guid.NewGuid()
+            }, HttpContext);
+
+            if (string.IsNullOrEmpty(responseUriVnPay.Uri))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    Message = "Can't create payment url at this time"
+                });
+            }
+
+            return Ok(new SuccessObject<object>
+            {
+                Message = "Create url successfully!",
+                Data = responseUriVnPay
+            });
+        }
+        [HttpGet]
+        [Route("vnpay-callback")]
+        public async Task<IActionResult> VnPayCallback()
+        {
+            var vnPayResponse = _vnPayService.PaymentExecute(Request.Query);
+
+            if (!vnPayResponse.Success)
+            {
+                return Redirect(_options.Value.FEUrlCallback + "?success=false");
+            }
+
+            var paymentCodeSplit = vnPayResponse.PaymentCode.Split(".");
+
+            if (paymentCodeSplit.Length != 2)
+            {
+                return Redirect(_options.Value.FEUrlCallback + "?success=false");
+            }
+
+            var userId = int.Parse(paymentCodeSplit.First());
+            var money = double.Parse(vnPayResponse.TotalAmount);
+
+            // Thực hiện nạp tiền tại đây
+            // TO-DO
+
+            var transactionId = string.Empty; // Lấy transaction id và gán lại
+
+            return Redirect(_options.Value.FEUrlCallback + $"?success=true&amount={money}");
         }
     }
 }

@@ -8,6 +8,7 @@ using Repository.Services;
 using Services.Implements;
 using Services.Interfaces;
 using System.Reflection;
+using BadmintonMatching.Payment;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +58,8 @@ builder.Services.AddScoped<ISlotServices, SlotServices>();
 builder.Services.AddScoped<IWalletServices, WalletServices>();
 builder.Services.AddScoped<ITransactionServices, TransactionServices>();
 builder.Services.AddScoped<IChatServices, ChatService>();
-
+builder.Services.AddScoped<IVNPayService, VNPayService>();
+builder.Services.Configure<VnPayOption>(builder.Configuration.GetSection("PaymentConfig:VnPay"));
 builder.Services.AddHangfire(configuration => configuration
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
 builder.Services.AddHangfireServer();
