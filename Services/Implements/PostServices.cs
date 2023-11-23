@@ -123,26 +123,20 @@ namespace Services.Implements
             return res;
         }
 
-        public async Task<List<Post>> GetAllPost()
+        public async Task<List<PostOptional>> GetAllPost()
         {
-            var res = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted ,false)
-                .Select(x => new Post
+            var res = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted ,false).Include(x => x.IdUserToNavigation)
+                .Select(x => new PostOptional
                 {
-                    Id = x.Id,
+                    IdPost = x.Id,
                     Title = x.Title,
                     AddressSlot = x.AddressSlot,
-                    CategorySlot = x.CategorySlot,
                     ContentPost = x.ContentPost,
-                    SavedDate = DateTime.UtcNow,
-                    IdType = x.IdType,
-                    IdTypeNavigation = x.IdTypeNavigation,
-                    IdUserTo = x.IdUserTo,
-                    IdUserToNavigation = x.IdUserToNavigation,
-                    ImgUrl = x.ImgUrl,
-                    LevelSlot = x.LevelSlot,
-                    SlotsInfo = x.SlotsInfo,
-                    Slots = x.Slots,
-                    Status = x.Status
+                    ImgUrlPost = x.ImgUrl,
+                    FullName = x.IdUserToNavigation.FullName,
+                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
+                    HighlightUrl = x.ImgUrl,
+                    UserId = x.IdUserTo
                 })
                 .ToListAsync();
             return res;
