@@ -446,7 +446,7 @@ namespace Services.Implements
                     Avatar = user.ImgUrl,
                     Id = user.Id,
                     UserName = user.FullName,
-                    Token = _jwtSupport.CreateToken(1, user.Id, isNewUser),
+                    Token = _jwtSupport.CreateToken(user.UserRole.Value, user.Id, isNewUser),
                     PlayingArea = user.PlayingArea,
                     PlayingLevel = user.PlayingLevel,
                     PlayingWay = user.PlayingWay,
