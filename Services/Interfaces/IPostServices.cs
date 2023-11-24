@@ -9,7 +9,7 @@ namespace Services.Interfaces
         Task<int> CreatePost(int user_id, NewPostInfo info);
         bool DeletePost(int post_id);
         List<string?> GetAllPlayGround();
-        Task<List<Post>> GetAllPost();
+        Task<List<PostOptional>> GetAllPost();
         List<JoinedPost> GetJoined(int user_id);
         List<PostOptional> GetListOptionalPost();
         List<ListPostByAdmin> GetListPostByAdmin();

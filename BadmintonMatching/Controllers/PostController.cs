@@ -121,7 +121,7 @@ namespace BadmintonMatching.Controllers
         public async Task<IActionResult> GetListPost()
         {
             var res = await _postServices.GetAllPost();
-            return Ok(new SuccessObject<List<Post>> { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<PostOptional>> { Data = res, Message = Message.SuccessMsg });
         }
 
         #region List Post at role Admin
