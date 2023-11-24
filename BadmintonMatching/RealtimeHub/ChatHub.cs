@@ -10,7 +10,6 @@ namespace BadmintonMatching.RealtimeHub
 {
     public class ChatHub : Hub
     {
-        private static readonly IDictionary<string, int> _connections = new Dictionary<string, int>();
         private readonly IChatServices _chatService;
         private readonly IUserServices _userServices;
 
@@ -31,8 +30,6 @@ namespace BadmintonMatching.RealtimeHub
 
             await Groups.AddToGroupAsync(Context.ConnectionId, room_id.ToString());
 
-            _connections[Context.ConnectionId] = room_id;
-
             var fullName = _userServices.GetSelfProfile(user_id).FullName;
 
             await Clients.Group(room_id.ToString()).SendAsync("ReceiveMessage", "Bot chat", $"{fullName} đã tham gia hội thoại.");
@@ -47,8 +44,6 @@ namespace BadmintonMatching.RealtimeHub
                 throw new Exception("không thể rời đoạn hội thoại");
             }
 
-            _connections.Remove(Context.ConnectionId);
-
             var fullName = _userServices.GetSelfProfile(user_id).FullName;
 
             await Clients.Group(room_id.ToString()).SendAsync("ReceiveMessage", "Bot chat", $"{fullName} đã tham gia hội thoại.");
@@ -59,12 +54,12 @@ namespace BadmintonMatching.RealtimeHub
             var user = await _chatService.SendMessage(user_id, new SendMessageRequest
             {
                 Message = message,
-                RoomId = _connections[Context.ConnectionId]
+                RoomId = int.Parse(Context.ConnectionId)
             });
 
             if (user != null)
             {
-                await Clients.Group(_connections[Context.ConnectionId].ToString())
+                await Clients.Group(Context.ConnectionId)
                     .SendAsync("ReceiveMessage", $"{user.FullName}", message);
             }
             else
