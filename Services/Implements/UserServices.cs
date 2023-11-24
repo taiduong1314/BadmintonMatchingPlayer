@@ -500,6 +500,19 @@ namespace Services.Implements
                 }).ToList();
             return res;
         }
+        public List<Subscription> GetListSubed(int user_id)
+        {
+            var res = _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id, false).Select(X => new Subscription
+            {
+                Id =X.Id,
+                UserId = X.UserId,
+                IsBanded = X.IsBanded,
+                IsSubcription  = X.IsSubcription,
+                UserSubId = X.UserSubId,
+                
+            }).ToList();
+            return res;
+        }
 
         public SelfProfile GetSelfProfile(int user_id)
         {
@@ -758,5 +771,7 @@ namespace Services.Implements
             await _repositoryManager.SaveAsync();
             return 1;
         }
+
+        
     }
 }
