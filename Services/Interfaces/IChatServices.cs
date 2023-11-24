@@ -15,6 +15,7 @@ namespace Services.Interfaces
         Task<List<MessageDetail>> GetRoomDetail(int roomIds, int pageSize, int pageNum);
         Task<List<JoinedChatRoom>> GetRoomOfUser(int user_id);
         Task<bool> JoinRoom(int user_id, int room_id);
+        Task<bool> LeaveRoom(int user_id, int room_id);
         Task<User> SendMessage(int user_id, SendMessageRequest info);
     }
 }

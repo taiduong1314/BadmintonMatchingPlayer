@@ -312,6 +312,7 @@ namespace Services.Implements
             {
                 return res;
             }
+
             foreach(var item in transactions)
             {
                 var slot = _repositoryManager.Slot.FindByCondition(x => x.TransactionId == item.Id, false)

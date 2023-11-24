@@ -61,7 +61,7 @@ namespace Services.Implements
                             .FindByCondition(x => x.UserId == slot.IdUser && x.RoomId == room.RoomId, false)
                             .FirstOrDefaultAsync();
 
-                        if(userJoined == null)
+                        if (userJoined == null)
                         {
                             _repositoryManager.ChatRoomUser.Create(new Entities.Models.UserChatRoom
                             {
@@ -107,7 +107,7 @@ namespace Services.Implements
                 .ToListAsync();
 
             var res = new List<JoinedChatRoom>();
-            if(joinedRoom.Count() > 0)
+            if (joinedRoom.Count() > 0)
             {
                 res = joinedRoom.Select(x => new JoinedChatRoom
                 {
@@ -134,6 +134,21 @@ namespace Services.Implements
                     RoomId = room_id,
                     UserId = user_id
                 });
+                await _repositoryManager.SaveAsync();
+            }
+
+            return true;
+        }
+
+        public async Task<bool> LeaveRoom(int user_id, int room_id)
+        {
+            var userJoined = await _repositoryManager.ChatRoomUser
+                .FindByCondition(x => x.UserId == user_id && x.RoomId == room_id, false)
+                .FirstOrDefaultAsync();
+
+            if (userJoined != null)
+            {
+                _repositoryManager.ChatRoomUser.Delete(userJoined);
                 await _repositoryManager.SaveAsync();
             }
 

@@ -16,11 +16,15 @@ namespace BadmintonMatching.Controllers
     {
         private readonly IChatServices _chatServices;
         private readonly IHubContext<ChatHub> _chatHub;
+        private readonly IUserServices _userServices;
 
-        public ChatController(IChatServices chatServices, IHubContext<ChatHub> chatHub)
+        public ChatController(IChatServices chatServices, 
+            IHubContext<ChatHub> chatHub,
+            IUserServices userServices)
         {
             _chatServices = chatServices;
             _chatHub = chatHub;
+            _userServices = userServices;
         }
 
         [HttpPost]
@@ -72,7 +76,6 @@ namespace BadmintonMatching.Controllers
             
             if (user != null)
             {
-                var hub = new ChatHub();
                 await _chatHub.Clients.User(info.RoomId.ToString()).SendAsync(info.Message, $"{user.FullName} Image:{user.ImgUrl}");
                 await _chatHub.Clients.All.SendAsync(info.Message, $"{user.FullName} Image:{user.ImgUrl}");
                 return Ok(new SuccessObject<object> { Data = true, Message = Message.SuccessMsg });

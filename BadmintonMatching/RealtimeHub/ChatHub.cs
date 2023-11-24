@@ -1,16 +1,76 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using CloudinaryDotNet.Actions;
+using Entities.Models;
+using Entities.RequestObject;
+using Entities.ResponseObject;
+using Microsoft.AspNetCore.SignalR;
+using Services.Implements;
+using Services.Interfaces;
 
 namespace BadmintonMatching.RealtimeHub
 {
     public class ChatHub : Hub
     {
-        public async Task SendMessage(string message, string user)
+        private static readonly IDictionary<string, int> _connections = new Dictionary<string, int>();
+        private readonly IChatServices _chatService;
+        private readonly IUserServices _userServices;
+
+        public ChatHub(IChatServices chatService, IUserServices userServices)
         {
-            await Clients.All.SendAsync(message, user);
+            _chatService = chatService;
+            _userServices = userServices;
         }
-        public async Task SendMessageByRoom(string message, string user, int roomId)
+
+        public async Task JoinRoom(int room_id, int user_id)
         {
-            await Clients.User(roomId.ToString()).SendAsync(message, user);
+            var joinSuccess = await _chatService.JoinRoom(user_id, room_id);
+
+            if(!joinSuccess)
+            {
+                throw new Exception("không thể tham gia đoạn hội thoại");
+            }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, room_id.ToString());
+
+            _connections[Context.ConnectionId] = room_id;
+
+            var fullName = _userServices.GetSelfProfile(user_id).FullName;
+
+            await Clients.Group(room_id.ToString()).SendAsync("ReceiveMessage", "Bot chat", $"{fullName} đã tham gia hội thoại.");
+        }
+
+        public async Task LeaveRoom(int room_id, int user_id)
+        {
+            var leaveSuccess = await _chatService.LeaveRoom(user_id, room_id);
+
+            if(!leaveSuccess)
+            {
+                throw new Exception("không thể rời đoạn hội thoại");
+            }
+
+            _connections.Remove(Context.ConnectionId);
+
+            var fullName = _userServices.GetSelfProfile(user_id).FullName;
+
+            await Clients.Group(room_id.ToString()).SendAsync("ReceiveMessage", "Bot chat", $"{fullName} đã tham gia hội thoại.");
+        }
+
+        public async Task SendMessage(string message, int user_id)
+        {
+            var user = await _chatService.SendMessage(user_id, new SendMessageRequest
+            {
+                Message = message,
+                RoomId = _connections[Context.ConnectionId]
+            });
+
+            if (user != null)
+            {
+                await Clients.Group(_connections[Context.ConnectionId].ToString())
+                    .SendAsync("ReceiveMessage", $"{user.FullName}", message);
+            }
+            else
+            {
+                throw new Exception("không thể gửi tin nhắn");
+            }
         }
     }
 }
