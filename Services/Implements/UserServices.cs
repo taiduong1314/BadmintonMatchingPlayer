@@ -500,19 +500,7 @@ namespace Services.Implements
                 }).ToList();
             return res;
         }
-        public List<Subscription> GetListSubed(int user_id)
-        {
-            var res = _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id, false).Select(X => new Subscription
-            {
-                Id =X.Id,
-                UserId = X.UserId,
-                IsBanded = X.IsBanded,
-                IsSubcription  = X.IsSubcription,
-                UserSubId = X.UserSubId,
-                
-            }).ToList();
-            return res;
-        }
+        
 
         public SelfProfile GetSelfProfile(int user_id)
         {
@@ -667,6 +655,14 @@ namespace Services.Implements
             _repositoryManager.Comment.Create(saveComment);
             _repositoryManager.SaveAsync().Wait();
             return saveComment.Id;
+        }
+        public bool Subcr(int user_id, int usertarget_id)
+        {
+            var sub = _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id && x.UserSubId == usertarget_id, true).Select(x => new SubcribeModel
+            {
+                IsSub = x.IsSubcription
+            });
+            return sub != null;
         }
 
         public bool UpdatePassword(string email, UpdatePassword info)

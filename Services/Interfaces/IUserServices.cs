@@ -43,6 +43,6 @@ namespace Services.Interfaces
         List<UserReport> GetReports(int user_id);
         Task<int> SubUnSub(int user_id, int target_id);
         Task<int> SettingPassword(int user_id, SettingPasswordRequest info);
-        List<Subscription> GetListSubed(int user_id);
+        bool Subcr(int user_id, int usertarget_id);
     }
 }

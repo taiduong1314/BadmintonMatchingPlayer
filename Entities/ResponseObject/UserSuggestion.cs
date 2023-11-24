@@ -6,6 +6,5 @@
         public string? Name { get; set; }
         public string? ShortProfile { get; set; }
         public double? Rating { get; set; }
-        public bool? IsSub {  get; set; }
     }
 }

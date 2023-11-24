@@ -433,11 +433,20 @@ namespace BadmintonMatching.Controllers
         #region List Subcribe By User
         [HttpGet]
         [Route("user_id/listsubed")]
-        public async Task<IActionResult> GetListSubed(int user_id)
+        public IActionResult GetListSubed(int user_id,int usertarget_id)
         {
-            List<Subscription> subed = _userServices.GetListSubed(user_id);
+           var subed = _userServices.Subcr(user_id, usertarget_id);
 
-            return Ok(new SuccessObject<List<Subscription>> { Data = subed, Message = Message.SuccessMsg });
+            if (subed)
+            {
+                // Subcribed
+                return Ok(new { message = "Đã Subcribed" });
+            }
+            else
+            {
+                // Not Subcribe
+                return Ok(new { message = "Chưa Subcribed" });
+            }
         }
         #endregion
 
