@@ -430,6 +430,25 @@ namespace BadmintonMatching.Controllers
                 return Ok(new SuccessObject<object?> { Message = "Update Fail" });
             }
         }
+        #region List Subcribe By User
+        [HttpGet]
+        [Route("user_id/listsubed")]
+        public IActionResult GetListSubed(int user_id,int usertarget_id)
+        {
+           var subed = _userServices.Subcr(user_id, usertarget_id);
+
+            if (subed)
+            {
+                // Subcribed
+                return Ok(new { message = "Đã Subcribed" });
+            }
+            else
+            {
+                // Not Subcribe
+                return Ok(new { message = "Chưa Subcribed" });
+            }
+        }
+        #endregion
 
     }
 }
