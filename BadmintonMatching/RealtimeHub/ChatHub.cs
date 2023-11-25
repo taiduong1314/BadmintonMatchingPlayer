@@ -51,6 +51,7 @@ namespace BadmintonMatching.RealtimeHub
 
         public async Task SendMessage(string message, int user_id)
         {
+            Console.WriteLine(Context.ConnectionId);
             var user = await _chatService.SendMessage(user_id, new SendMessageRequest
             {
                 Message = message,
