@@ -70,7 +70,7 @@ namespace BadmintonMatching.RealtimeHub
             if (user != null)
             {
                 await Clients.Group(idRoom.ToString())
-                    .SendAsync("ReceiveMessage", $"{user.FullName}", message);
+                    .SendAsync("ReceiveMessage", $"{user.Id}-{user.FullName}", message);
             }
             else
             {
