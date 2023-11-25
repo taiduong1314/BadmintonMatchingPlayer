@@ -31,6 +31,7 @@ namespace BadmintonMatching.RealtimeHub
 
             await Groups.AddToGroupAsync(Context.ConnectionId, room_id.ToString());
             _connectionIds[Context.ConnectionId] = room_id;
+            Console.WriteLine($"{Context.ConnectionId} is joined to: {room_id}");
 
             var fullName = _userServices.GetSelfProfile(user_id).FullName;
 
@@ -59,6 +60,7 @@ namespace BadmintonMatching.RealtimeHub
             if(!isExist)
                 throw new Exception($"Phòng chat không tồn tại");
 
+            Console.WriteLine($"{Context.ConnectionId} send msg to: {idRoom}");
             var user = await _chatService.SendMessage(user_id, new SendMessageRequest
             {
                 Message = message,
