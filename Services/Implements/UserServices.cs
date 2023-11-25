@@ -316,7 +316,9 @@ namespace Services.Implements
                         Id = x.Id,
                         Name = x.FullName,
                         Rating = x.Rate,
-                        ShortProfile = x.SortProfile
+                        ShortProfile = x.SortProfile,
+                        ImgUrl = x.ImgUrl
+
                     }).ToList();
                 res.AddRange(userInArea);
                 if(res.Count > 16)
@@ -337,7 +339,8 @@ namespace Services.Implements
                         Id = x.Id,
                         Name = x.FullName,
                         Rating = x.Rate,
-                        ShortProfile = x.SortProfile
+                        ShortProfile = x.SortProfile,
+                        ImgUrl = x.ImgUrl
                     }).ToList();
                 res.AddRange(userInArea);
                 if (res.Count > 16)
@@ -356,7 +359,8 @@ namespace Services.Implements
                         Id = x.Id,
                         Name = x.FullName,
                         Rating = x.Rate,
-                        ShortProfile = x.SortProfile
+                        ShortProfile = x.SortProfile,
+                        ImgUrl = x.ImgUrl
                     }).ToList();
             if (users.Count > 0)
             {
