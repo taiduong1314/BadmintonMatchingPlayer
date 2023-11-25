@@ -123,54 +123,102 @@ namespace Services.Implements
             return res;
         }
 
-        public async Task<List<PostOptional>> GetAllPost()
-        {
-            var res = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted ,false).Include(x => x.IdUserToNavigation)
-                .Select(x => new PostOptional
-                {
-                    IdPost = x.Id,
-                    Title = x.Title,
-                    AddressSlot = x.AddressSlot,
-                    ContentPost = x.ContentPost,
-                    ImgUrlPost = x.ImgUrl,
-                    FullName = x.IdUserToNavigation.FullName,
-                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                    HighlightUrl = x.ImgUrl,
-                    UserId = x.IdUserTo
-                })
-                .ToListAsync();
-            return res;
-        }
+        
 
         public List<PostOptional> GetListOptionalPost()
         {
             var optList = _repositoryManager.Post.FindByCondition(x => !x.IsDeleted, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
-                .Select(x => new PostOptional
-                {
-                    IdPost = x.Id,
-                    Title = x.Title,
-                    AddressSlot = x.AddressSlot,
-                    ContentPost = x.ContentPost,
-                    ImgUrlPost = x.ImgUrl,
-                    FullName = x.IdUserToNavigation.FullName,
-                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
-                    HighlightUrl = x.ImgUrl,
-                    UserId = x.IdUserTo
-                }).ToList();
-
-            for(var i = 0; i < optList.Count(); i++)
+                .ToList();
+            var res = new List<PostOptional>();
+            foreach (var post in optList)
             {
-                var cPost = optList[i];
+                if (IsPostValid(post))
+                {
+                    res.Add(new PostOptional
+                    {
+                        IdPost = post.Id,
+                        Title = post.Title,
+                        AddressSlot = post.AddressSlot,
+                        ContentPost = post.ContentPost,
+                        ImgUrlPost = post.ImgUrl,
+                        FullName = post.IdUserToNavigation.FullName,
+                        UserImgUrl = post.IdUserToNavigation.ImgUrl,
+                        HighlightUrl = post.ImgUrl,
+                        UserId = post.IdUserTo
+                    });
+                }
+            }
+
+            for(var i = 0; i < res.Count(); i++)
+            {
+                var cPost = res[i];
                 var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
                 if(post != null)
                 {
                     GetPostOptional(post, ref cPost);
                 }
-                optList[i] = cPost;
+                res[i] = cPost;
             }
-            return optList;
+            return res;
+        }
+        public async Task<List<PostOptional>> GetAllPost()
+        {
+            var listpost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted, false).Include(x => x.IdUserToNavigation).ToListAsync();
+            var res = new List<PostOptional>();
+            foreach (var post in listpost)
+            {
+                if (IsPostValid(post))
+                {
+                    res.Add(new PostOptional
+                    {
+                        IdPost = post.Id,
+                        Title = post.Title,
+                        AddressSlot = post.AddressSlot,
+                        ContentPost = post.ContentPost,
+                        ImgUrlPost = post.ImgUrl,
+                        FullName = post.IdUserToNavigation.FullName,
+                        UserImgUrl = post.IdUserToNavigation.ImgUrl,
+                        HighlightUrl = post.ImgUrl,
+                        UserId = post.IdUserTo
+                    });
+                }
+            }
+
+            for (var i = 0; i < res.Count(); i++)
+            {
+                var cPost = res[i];
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
+                if (post != null)
+                {
+                    GetPostOptional(post, ref cPost);
+                }
+                res[i] = cPost;
+            }
+            return res;
+
+        }
+
+        private bool IsPostValid(Post post)
+        {
+            foreach (var slot in post.SlotsInfo.Split(";"))
+            {
+                if (slot != string.Empty)
+                {
+                    var slotInfo = new SlotInfo(slot);
+                    var joinSlot = _repositoryManager.Slot
+                        .FindByCondition(x =>
+                        !x.IsDeleted &&
+                        x.ContentSlot == slotInfo.StartTime.Value.ToString("dd/MM/yyyy") &&
+                        x.IdPost == post.Id, false).Count();
+                    if (slotInfo.AvailableSlot - joinSlot <= 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         private void GetPostOptional(Post post, ref PostOptional optPost)

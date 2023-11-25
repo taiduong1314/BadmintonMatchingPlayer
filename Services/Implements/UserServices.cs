@@ -662,7 +662,8 @@ namespace Services.Implements
             {
                 IsSub = x.IsSubcription
             });
-            return sub != null;
+
+           return sub != null;
         }
 
         public bool UpdatePassword(string email, UpdatePassword info)
@@ -670,10 +671,26 @@ namespace Services.Implements
             var user = _repositoryManager.User.FindByCondition(x => x.Email == email, true).FirstOrDefault();
             if(user != null)
             {
-                user.UserPassword = info.NewPassword;
-                _repositoryManager.User.Update(user);
-                _repositoryManager.SaveAsync().Wait();
-                return true;
+                // Check if the new password is different from the current one
+                if (user.UserPassword != info.NewPassword)
+                {
+                    user.UserPassword = info.NewPassword;
+
+                    // Update the user in the repository
+                    _repositoryManager.User.Update(user);
+
+                    // Save changes asynchronously
+                    _repositoryManager.SaveAsync().Wait();
+
+                    return true;
+                }
+                else
+                {
+                    // New password is the same as the current one, return false or handle as needed
+                    Console.WriteLine("Error: New password must be different from the current password.");
+                    return false;
+                }
+
             }
             return false;
         }
@@ -768,6 +785,41 @@ namespace Services.Implements
             return 1;
         }
 
-        
+        public UserInformation GetDetailUser(int user_id)
+        {
+            var res = new UserInformation();
+            var user = _repositoryManager.User.FindByCondition(x => x.Id == user_id, true)
+                .Include(x => x.Wallets)
+                .FirstOrDefault();
+            if (user != null)
+            {
+                var isNewUser = user.PlayingArea == null || user.PlayingLevel == 0 || user.PlayingWay == null;
+                res = new UserInformation
+                {
+                    Avatar = user.ImgUrl,
+                    Id = user.Id,
+                    UserName = user.FullName,
+                    Token = _jwtSupport.CreateToken(user.UserRole.Value, user.Id, isNewUser),
+                    PlayingArea = user.PlayingArea,
+                    PlayingLevel = user.PlayingLevel,
+                    PlayingWay = user.PlayingWay,
+                    IsNewUser = isNewUser,
+                    FullName = user.FullName,
+                    PhoneNumber = user.PhoneNumber,
+                    SortProfile = user.SortProfile,
+                    Balance = user.Wallets != null ? user.Wallets.ToList()[0].Balance : 0,
+                    Role = user.UserRole != null && user.UserRole == (int)UserRole.Admin ? "Admin" : user.UserRole != null && user.UserRole == (int)UserRole.Staff ? "Staff" : "User"
+                };
+
+                if (user.IsBanFromLogin)
+                {
+                    res.Id = -1;
+                }
+
+                user.LastLoginDate = DateTime.UtcNow.AddHours(7);
+                _repositoryManager.SaveAsync().Wait();
+            }
+            return res;
+        }
     }
 }

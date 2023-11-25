@@ -432,12 +432,12 @@ namespace BadmintonMatching.Controllers
         }
         #region List Subcribe By User
         [HttpGet]
-        [Route("user_id/listsubed")]
+        [Route("{user_id}/listsubed")]
         public IActionResult GetListSubed(int user_id,int usertarget_id)
         {
            var subed = _userServices.Subcr(user_id, usertarget_id);
 
-            if (subed)
+            if (subed == true)
             {
                 // Subcribed
                 return Ok(new { message = "Đã Subcribed" });
@@ -450,5 +450,14 @@ namespace BadmintonMatching.Controllers
         }
         #endregion
 
+        #region Detail user by id
+        [HttpGet]
+        [Route("{user_id}/getdetail")]
+        public IActionResult GetDetailUser(int user_id)
+        {
+            var userdetail = _userServices.GetDetailUser(user_id);
+            return Ok(new SuccessObject<UserInformation> { Data = userdetail, Message = Message.SuccessMsg });
+        }
+        #endregion
     }
 }
