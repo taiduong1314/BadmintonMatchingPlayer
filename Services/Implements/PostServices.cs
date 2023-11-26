@@ -83,6 +83,26 @@ namespace Services.Implements
                 };
                 _repositoryManager.Post.Create(newPost);
                 _repositoryManager.SaveAsync().Wait();
+
+                foreach(var item in info.Slots)
+                {
+                    var roomEnt = new Entities.Models.ChatRoom
+                    {
+                        Code = $"{newPost.Id}_{item.StartTime.Value.ToString("dd/MM/yyyy")}",
+                        Name = $"Play date: {item.StartTime.Value.ToString("dd/MM/yyyy")}",
+                        CoverImage = newPost.ImgUrl
+                    };
+                    _repositoryManager.ChatRoom.Create(roomEnt);
+                    _repositoryManager.SaveAsync().Wait();
+
+                    _repositoryManager.ChatRoomUser.Create(new Entities.Models.UserChatRoom
+                    {
+                        RoomId = roomEnt.Id,
+                        UserId = user_id
+                    });
+                    await _repositoryManager.SaveAsync();
+                }
+
                 return newPost.Id;
             }
             catch
