@@ -1,11 +1,12 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
+using Repositories.Intefaces;
 
 namespace Services.Util
 {
     public class ServicesUtil
     {
-        public static bool IsInTimePost(Post post)
+        public static bool IsInTimePost(Post post, IRepositoryManager repositoryManager)
         {
             if(post.SlotsInfo == null)
                 return false;
