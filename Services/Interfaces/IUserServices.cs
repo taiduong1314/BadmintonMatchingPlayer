@@ -44,5 +44,6 @@ namespace Services.Interfaces
         Task<int> SubUnSub(int user_id, int target_id);
         Task<int> SettingPassword(int user_id, SettingPasswordRequest info);
         bool Subcr(int user_id, int usertarget_id);
+        UserInformation GetDetailUser(int user_id);
     }
 }
