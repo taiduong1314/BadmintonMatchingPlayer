@@ -4,6 +4,7 @@ using Entities.ResponseObject;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
+using System;
 
 namespace Services.Implements
 {
@@ -104,6 +105,7 @@ namespace Services.Implements
                 .Include(x => x.ChatRoom)
                 .ThenInclude(x => x.Messages)
                 .ThenInclude(x => x.User)
+                .OrderByDescending(x => x.ChatRoom.UpdateTime)
                 .ToListAsync();
 
             var res = new List<JoinedChatRoom>();
@@ -157,7 +159,7 @@ namespace Services.Implements
 
         public async Task<User> SendMessage(int user_id, SendMessageRequest info)
         {
-            var room = await _repositoryManager.ChatRoom.FindByCondition(x => x.Id == info.RoomId, false).FirstOrDefaultAsync();
+            var room = await _repositoryManager.ChatRoom.FindByCondition(x => x.Id == info.RoomId, true).FirstOrDefaultAsync();
 
             if (room == null)
                 return null;
@@ -169,6 +171,7 @@ namespace Services.Implements
                 SendTime = DateTime.UtcNow.AddHours(7),
                 UserId = user_id
             };
+            room.UpdateTime = DateTime.UtcNow.AddHours(7);
             _repositoryManager.Message.Create(msg);
             await _repositoryManager.SaveAsync();
             var res = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, false).FirstOrDefaultAsync();

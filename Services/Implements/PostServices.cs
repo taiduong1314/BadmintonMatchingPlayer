@@ -90,7 +90,8 @@ namespace Services.Implements
                     {
                         Code = $"{newPost.Id}_{item.StartTime.Value.ToString("dd/MM/yyyy")}",
                         Name = $"Play date: {item.StartTime.Value.ToString("dd/MM/yyyy")}",
-                        CoverImage = newPost.ImgUrl
+                        CoverImage = newPost.ImgUrl,
+                        UpdateTime = DateTime.UtcNow.AddHours(7),
                     };
                     _repositoryManager.ChatRoom.Create(roomEnt);
                     _repositoryManager.SaveAsync().Wait();
