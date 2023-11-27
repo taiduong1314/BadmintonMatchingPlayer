@@ -43,6 +43,8 @@
         public DateTime? CreateDate { get; set; }
         public DateTime? LastLoginDate { get; set; }
         public bool IsBanFromLogin { get; set; }
+        public string? LogingingDevice { get; set; }
+        public bool IsAndroidDevice { get; set; }
 
         public virtual Role? UserRoleNavigation { get; set; }
         public virtual ICollection<Post> Posts { get; set; }

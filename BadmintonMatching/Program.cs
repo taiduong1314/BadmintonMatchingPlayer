@@ -9,6 +9,9 @@ using Services.Implements;
 using Services.Interfaces;
 using System.Reflection;
 using BadmintonMatching.Payment;
+using CorePush.Google;
+using CorePush.Apple;
+using Entities.ResponseObject;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +62,10 @@ builder.Services.AddScoped<IWalletServices, WalletServices>();
 builder.Services.AddScoped<ITransactionServices, TransactionServices>();
 builder.Services.AddScoped<IChatServices, ChatService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
+builder.Services.AddScoped<INotificationServices, NotificationServices>();
+builder.Services.AddHttpClient<FcmSender>();
+builder.Services.AddHttpClient<ApnSender>();
+builder.Services.Configure<FcmNotificationSetting>(builder.Configuration.GetSection("FcmNotification"));
 builder.Services.Configure<VnPayOption>(builder.Configuration.GetSection("PaymentConfig:VnPay"));
 builder.Services.AddHangfire(configuration => configuration
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
@@ -66,7 +73,7 @@ builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 var port = Environment.GetEnvironmentVariable("PORT");
-app.Urls.Add($"http://*:{port}");
+//app.Urls.Add($"http://*:{port}");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

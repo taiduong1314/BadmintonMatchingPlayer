@@ -468,6 +468,8 @@ namespace Services.Implements
                 }
 
                 user.LastLoginDate = DateTime.UtcNow.AddHours(7);
+                user.LogingingDevice = info.DeviceId;
+                user.IsAndroidDevice = info.IsAndroidDevice;
                 _repositoryManager.SaveAsync().Wait();
             }
             return res;

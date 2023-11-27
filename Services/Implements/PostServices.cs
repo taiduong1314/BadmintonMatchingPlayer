@@ -123,28 +123,6 @@ namespace Services.Implements
             return false;
         }
 
-        public List<string?> GetAllPlayGround()
-        {
-            var posts = _repositoryManager.Post.FindByCondition(
-                x => x.AddressSlot != null
-                    && !x.IsDeleted
-                    , true)
-                .ToList();
-
-            var res = new List<string?>();
-            foreach (var item in posts)
-            {
-                if (ServicesUtil.IsInTimePost(item))
-                {
-                    res.Add(item.AddressSlot);
-                }
-            }
-
-            return res;
-        }
-
-        
-
         public List<PostOptional> GetListOptionalPost()
         {
             var optList = _repositoryManager.Post.FindByCondition(x => !x.IsDeleted, true)
@@ -163,8 +141,8 @@ namespace Services.Implements
                         AddressSlot = post.AddressSlot,
                         ContentPost = post.ContentPost,
                         ImgUrlPost = post.ImgUrl,
-                        FullName = post.IdUserToNavigation.FullName,
-                        UserImgUrl = post.IdUserToNavigation.ImgUrl,
+                        FullName = post.IdUserToNavigation?.FullName,
+                        UserImgUrl = post.IdUserToNavigation?.ImgUrl,
                         HighlightUrl = post.ImgUrl,
                         UserId = post.IdUserTo
                     });
@@ -198,8 +176,8 @@ namespace Services.Implements
                         AddressSlot = post.AddressSlot,
                         ContentPost = post.ContentPost,
                         ImgUrlPost = post.ImgUrl,
-                        FullName = post.IdUserToNavigation.FullName,
-                        UserImgUrl = post.IdUserToNavigation.ImgUrl,
+                        FullName = post.IdUserToNavigation?.FullName,
+                        UserImgUrl = post.IdUserToNavigation?.ImgUrl,
                         HighlightUrl = post.ImgUrl,
                         UserId = post.IdUserTo
                     });
@@ -305,11 +283,10 @@ namespace Services.Implements
 
         public List<PostInfomation> GetPostByPlayGround(string play_ground)
         {
-            var targetTime = DateTime.UtcNow.AddHours(2);
             var res = new List<PostInfomation>();
             var posts = _repositoryManager.Post.FindByCondition(
                 x => x.AddressSlot != null
-                && x.AddressSlot == play_ground
+                && x.AddressSlot.Contains(play_ground)
                 && !x.IsDeleted
                 , true)
                 .Include(x => x.IdUserToNavigation)
@@ -318,7 +295,7 @@ namespace Services.Implements
 
             foreach (var item in posts)
             {
-                if (ServicesUtil.IsInTimePost(item))
+                if (IsPostValid(item))
                 {
                     res.Add(new PostInfomation(item));
                 }
@@ -362,7 +339,7 @@ namespace Services.Implements
 
                 foreach (var item in posts)
                 {
-                    if (ServicesUtil.IsInTimePost(item))
+                    if (IsPostValid(item))
                     {
                         res.Add(new PostInfomation(item));
                     }

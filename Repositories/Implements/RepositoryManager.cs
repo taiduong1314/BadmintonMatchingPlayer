@@ -30,6 +30,7 @@ namespace Repositories.Implements
         private IUserChatRoomRepository _chatRoomUser;
         private IChatRoomRepository _chatRoom;
         private IMessageRepository _message;
+        private INotificationRepository _notification;
 
         public RepositoryManager(DataContext context)
         {
@@ -52,6 +53,7 @@ namespace Repositories.Implements
             _chatRoomUser = new UserChatRoomRepository(_context);
             _chatRoom = new ChatRoomRepository(_context);
             _message = new MessageRepository(_context);
+            _notification = new NotificationRepository(_context);
         }
         public IHistoryTransactionRepository HistoryTransaction
         {
@@ -179,6 +181,15 @@ namespace Repositories.Implements
                 return _message;
             }
         }
+
+        public INotificationRepository Notification
+        {
+            get
+            {
+                return _notification;
+            }
+        }
+
         public Task SaveAsync() => _context.SaveChangesAsync();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Entities.ResponseObject
 {
-    public class FirebaseResponseModel
+    public class NotiResponseModel
     {
         [JsonProperty("isSuccess")]
         public bool IsSuccess { get; set; }

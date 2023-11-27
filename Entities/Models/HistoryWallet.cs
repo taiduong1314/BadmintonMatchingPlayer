@@ -1,5 +1,11 @@
 ﻿namespace Entities.Models
 {
+    public enum HistoryWalletStatus
+    {
+        Success = 1,
+        Fail = 0
+    }
+
     public partial class HistoryWallet
     {
         public int Id { get; set; }

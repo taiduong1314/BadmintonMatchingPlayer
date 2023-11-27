@@ -1,10 +1,9 @@
 ﻿using BadmintonMatching.Payment;
+using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Services.Implements;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -26,15 +25,14 @@ namespace BadmintonMatching.Controllers
 
         [HttpPut]
         [Route("{user_id}")]
-
         public IActionResult UpdateWallet(int user_id, UpdateWallet updateWallet)
         {
             var newBalance = _walletServices.UpdateBalance(updateWallet.Changes, user_id);
-            if(newBalance == -1)
+            if (newBalance == -1)
             {
                 return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
             }
-            else if (newBalance == -2) 
+            else if (newBalance == -2)
             {
                 return Ok(new SuccessObject<object> { Message = $"Wallet of user {user_id} isn't found" });
             }
@@ -43,6 +41,7 @@ namespace BadmintonMatching.Controllers
                 return Ok(new SuccessObject<object> { Data = new { NewBalance = newBalance }, Message = Message.SuccessMsg });
             }
         }
+
         [HttpPost]
         [Route("create-vnpay")]
         public async Task<IActionResult> CreateVnPay(UpdateWallet wallet)
@@ -67,6 +66,7 @@ namespace BadmintonMatching.Controllers
                 Data = responseUriVnPay
             });
         }
+
         [HttpGet]
         [Route("vnpay-callback")]
         public async Task<IActionResult> VnPayCallback()
@@ -94,6 +94,20 @@ namespace BadmintonMatching.Controllers
             var transactionId = string.Empty; // Lấy transaction id và gán lại
 
             return Redirect(_options.Value.FEUrlCallback + $"?success=true&amount={money}");
+        }
+
+        [HttpGet]
+        [Route("user/{user_id}/history")]
+        public async Task<IActionResult> GetWalletHistory(int user_id)
+        {
+            List<HistoryWalletModel> history = _walletServices.GetHistory(user_id);
+
+            if(history.Count() == 0)
+            {
+                return Ok(new SuccessObject<object> { Data = null, Message = "No history found" });
+            }
+
+            return Ok(new SuccessObject<List<HistoryWalletModel>> { Data = history, Message = "No history found" });
         }
     }
 }

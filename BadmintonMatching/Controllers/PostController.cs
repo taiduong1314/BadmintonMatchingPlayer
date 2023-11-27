@@ -61,14 +61,6 @@ namespace BadmintonMatching.Controllers
         }
 
         [HttpGet]
-        [Route("play_ground")]
-        public IActionResult GetPostPlayGround()
-        {
-            var res = _postServices.GetAllPlayGround();
-            return Ok(new SuccessObject<List<string?>> { Data = res, Message = Message.SuccessMsg });
-        }
-
-        [HttpGet]
         [Route("play_ground/{play_ground}")]
         public IActionResult GetPostByPlayGround(string play_ground)
         {

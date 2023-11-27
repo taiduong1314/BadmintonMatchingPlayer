@@ -46,5 +46,12 @@ namespace BadmintonMatching.Controllers
                 return Ok(new SuccessObject<object> { Data = new { ReportId = report_id }, Message = Message.SuccessMsg });
             }
         }
+
+        //[HttpPost]
+        //[Route("post/{post_id}")]
+        //public async Task<IActionResult> ReportPost(int post_id)
+        //{
+
+        //}
     }
 }

@@ -8,5 +8,7 @@ namespace Entities.RequestObject
         public string? Email { get; set; }
         [Required]
         public string? Password { get; set; }
+        public string? DeviceId { get; set; }
+        public bool IsAndroidDevice { get; set; } = true;
     }
 }
