@@ -6,8 +6,7 @@ using Entities.ResponseObject;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
-using Services.Util;
-using System.Security.Cryptography.X509Certificates;
+using System.Xml.Linq;
 
 namespace Services.Implements
 {
@@ -84,12 +83,12 @@ namespace Services.Implements
                 _repositoryManager.Post.Create(newPost);
                 _repositoryManager.SaveAsync().Wait();
 
-                foreach(var item in info.Slots)
+                foreach (var item in info.Slots)
                 {
                     var roomEnt = new Entities.Models.ChatRoom
                     {
                         Code = $"{newPost.Id}_{item.StartTime.Value.ToString("dd/MM/yyyy")}",
-                        Name = $"Play date: {item.StartTime.Value.ToString("dd/MM/yyyy")}",
+                        Name = $"{item.StartTime.Value.ToString("dd/MM/yyyy")}",
                         CoverImage = newPost.ImgUrl,
                         UpdateTime = DateTime.UtcNow.AddHours(7),
                     };
@@ -150,11 +149,11 @@ namespace Services.Implements
                 }
             }
 
-            for(var i = 0; i < res.Count(); i++)
+            for (var i = 0; i < res.Count(); i++)
             {
                 var cPost = res[i];
                 var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
-                if(post != null)
+                if (post != null)
                 {
                     GetPostOptional(post, ref cPost);
                 }
@@ -196,11 +195,11 @@ namespace Services.Implements
                 res[i] = cPost;
             }
             return res;
-
         }
 
         private bool IsPostValid(Post post)
         {
+            var lastSlot = new SlotInfo(post.SlotsInfo.Split(";")[0]);
             foreach (var slot in post.SlotsInfo.Split(";"))
             {
                 if (slot != string.Empty)
@@ -215,7 +214,15 @@ namespace Services.Implements
                     {
                         return false;
                     }
+                    if(slotInfo.StartTime > lastSlot.StartTime)
+                    {
+                        lastSlot = slotInfo;
+                    }
                 }
+            }
+            if(lastSlot.StartTime < DateTime.UtcNow.AddHours(-7))
+            {
+                return false;
             }
             return true;
         }
@@ -226,7 +233,7 @@ namespace Services.Implements
             int joinedSlot = 0;
             foreach (var slot in post.SlotsInfo.Split(";"))
             {
-                if(slot != string.Empty)
+                if (slot != string.Empty)
                 {
                     var slotInfo = new SlotInfo(slot);
                     var joinSlot = _repositoryManager.Slot
@@ -282,26 +289,38 @@ namespace Services.Implements
                 .Select(x => new PostInfomation(x)).ToList();
         }
 
-        public List<PostInfomation> GetPostByPlayGround(string play_ground)
+        public List<PostOptional> GetPostByPlayGround(string play_ground)
         {
-            var res = new List<PostInfomation>();
-            var posts = _repositoryManager.Post.FindByCondition(
-                x => x.AddressSlot != null
+            var listpost = _repositoryManager.Post.FindByCondition(x => x.AddressSlot != null
                 && x.AddressSlot.Contains(play_ground)
-                && !x.IsDeleted
-                , true)
+                && !x.IsDeleted, false)
                 .Include(x => x.IdUserToNavigation)
-                .Include(x => x.Slots)
+                .OrderByDescending(x => x.Id)
+                .Select(x => new PostOptional
+                {
+                    IdPost = x.Id,
+                    Title = x.Title,
+                    AddressSlot = x.AddressSlot,
+                    ContentPost = x.ContentPost,
+                    ImgUrlPost = x.ImgUrl,
+                    FullName = x.IdUserToNavigation.FullName,
+                    UserImgUrl = x.IdUserToNavigation.ImgUrl,
+                    HighlightUrl = x.ImgUrl,
+                    UserId = x.IdUserTo
+                })
                 .ToList();
 
-            foreach (var item in posts)
+            var res = new List<PostOptional>();
+            for (var i = 0; i < res.Count(); i++)
             {
-                if (IsPostValid(item))
+                var cPost = res[i];
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
+                if (post != null)
                 {
-                    res.Add(new PostInfomation(item));
+                    GetPostOptional(post, ref cPost);
                 }
+                res[i] = cPost;
             }
-
             return res;
         }
 
@@ -314,7 +333,7 @@ namespace Services.Implements
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
                 .FirstOrDefault();
-            if(x != null)
+            if (x != null)
             {
                 var postDetail = new PostDetail(x);
                 postDetail.ImageUrls = x.ImageUrls.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -353,13 +372,16 @@ namespace Services.Implements
         {
             var res = new List<JoinedPost>();
 
-            var transactions = _repositoryManager.Transaction.FindByCondition(x => x.IdUser == user_id, false).ToList();
-            if(transactions == null || transactions.Count == 0)
+            var transactions = _repositoryManager.Transaction
+                .FindByCondition(x => x.IdUser == user_id, false)
+                .OrderByDescending(x => x.Id)
+                .ToList();
+            if (transactions == null || transactions.Count == 0)
             {
                 return res;
             }
 
-            foreach(var item in transactions)
+            foreach (var item in transactions)
             {
                 var slot = _repositoryManager.Slot.FindByCondition(x => x.TransactionId == item.Id, false)
                     .FirstOrDefault();
@@ -374,7 +396,7 @@ namespace Services.Implements
                 var finalInfo = new SlotInfo();
                 int joinedSlot = 0;
                 var bookedInfos = new List<BookedSlotInfo>();
-                foreach(var infoStr in post.SlotsInfo.Split(';'))
+                foreach (var infoStr in post.SlotsInfo.Split(';'))
                 {
                     if (infoStr != string.Empty)
                     {
@@ -413,6 +435,36 @@ namespace Services.Implements
                     StartTime = finalInfo.StartTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
                     CoverImage = post.ImgUrl
                 });
+            }
+            return res;
+        }
+
+        public async Task<List<Room>> GetChatRooms(int post_id)
+        {
+            var post = await _repositoryManager.Post.FindByCondition(x => x.Id == post_id, false).FirstOrDefaultAsync();
+
+            if (post == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            var res = new List<Room>();
+            foreach (var infoStr in post.SlotsInfo.Split(';'))
+            {
+                var info = new SlotInfo(infoStr);
+                var room = await _repositoryManager.ChatRoom
+                    .FindByCondition(x => 
+                    x.Name == $"{info.StartTime.Value.ToString("dd/MM/yyyy")}" &&
+                    x.Code == $"{post.Id}_{info.StartTime.Value.ToString("dd/MM/yyyy")}"
+                    , false)
+                    .Select(x => new Room
+                    {
+                        Id = x.Id,
+                        PlayDate = x.Name
+                    }).FirstOrDefaultAsync();
+
+                if (room != null)
+                res.Add(room);
             }
             return res;
         }

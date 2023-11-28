@@ -64,8 +64,8 @@ namespace BadmintonMatching.Controllers
         [Route("play_ground/{play_ground}")]
         public IActionResult GetPostByPlayGround(string play_ground)
         {
-            List<PostInfomation> res = _postServices.GetPostByPlayGround(play_ground);
-            return Ok(new SuccessObject<List<PostInfomation>> { Data = res, Message = Message.SuccessMsg });
+            List<PostOptional> res = _postServices.GetPostByPlayGround(play_ground);
+            return Ok(new SuccessObject<List<PostOptional>> { Data = res, Message = Message.SuccessMsg });
         }
 
         [HttpGet]
@@ -163,6 +163,21 @@ namespace BadmintonMatching.Controllers
             else
             {
                 return Ok(new SuccessObject<List<JoinedPost>?> { Message = "Invalid request"});
+            }
+        }
+
+        [HttpGet]
+        [Route("{post_id}/chat_rooms")]
+        public async Task<IActionResult> GetChatRooms(int post_id)
+        {
+            try
+            {
+                List<Room> rooms = await _postServices.GetChatRooms(post_id);
+                return Ok(new SuccessObject<List<Room>> { Data = rooms, Message = Message.SuccessMsg });
+            }
+            catch (NotImplementedException) 
+            {
+                return Ok(new SuccessObject<object> { Data = null, Message = "Invalid post" });
             }
         }
     }

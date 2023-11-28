@@ -37,7 +37,6 @@ namespace Entities.ResponseObject
             }
             AvailableSlot = finalInfo.AvailableSlot - joinedSlot;
             Time = $"{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}: {finalInfo.StartTime.Value.ToString("HH:mm")} - {finalInfo.EndTime.Value.ToString("HH:mm")}";
-            
         }
         //public List<AllSlot>? AllSlotInfo { get; set; }
         public string? Title {  get; set; }
@@ -60,5 +59,11 @@ namespace Entities.ResponseObject
         //    public string? Level { get; set; }
         //    public string? TotalRate {  get; set; }
         //}
+    }
+
+    public class Room
+    {
+        public string? PlayDate { get; set; }
+        public int Id { get; set; }
     }
 }

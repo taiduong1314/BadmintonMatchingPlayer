@@ -36,7 +36,11 @@ namespace Entities.ResponseObject
                     x.ContentSlot == slotInfo.StartTime.Value.ToString("dd/MM/yyyy"))
                     .Count();
                 slotInfo.AvailableSlot -= joinSlot;
-                SlotInfos.Add(slotInfo);
+
+                if(slotInfo.StartTime >= DateTime.UtcNow.AddHours(-7))
+                {
+                    SlotInfos.Add(slotInfo);
+                }
             }
         }
 

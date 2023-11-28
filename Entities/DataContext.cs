@@ -77,7 +77,7 @@ namespace Entities
                 entity.ToTable("HistoryWallet");
 
                 entity.Property(e => e.Id)
-                    .ValueGeneratedNever()
+                    .ValueGeneratedOnAdd()
                     .HasColumnName("id");
 
                 entity.Property(e => e.Amount).HasColumnName("amount");

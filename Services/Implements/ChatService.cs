@@ -44,7 +44,7 @@ namespace Services.Implements
                         var roomEnt = new Entities.Models.ChatRoom
                         {
                             Code = $"{slot.IdPost}_{slot.ContentSlot}",
-                            Name = $"Play date: {slot.ContentSlot}",
+                            Name = $"{slot.ContentSlot}",
                             CoverImage = slot.IdPostNavigation.ImgUrl
                         };
                         _repositoryManager.ChatRoom.Create(roomEnt);

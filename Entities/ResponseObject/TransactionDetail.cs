@@ -21,5 +21,7 @@
         public string? Address { get; set; }
         public string? StartTime { get; set; }
         public string? EndTime { get; set; }
+        public string? CreateUser { get; set; }
+        public string? CategorySlot { get; set; }
     }
 }

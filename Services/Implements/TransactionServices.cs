@@ -29,7 +29,7 @@ namespace Services.Implements
             {
                 DeadLine = new DateTime(int.Parse(date[2]), int.Parse(date[1]), int.Parse(date[0])).AddDays(1),
                 IdUser = info.IdUser,
-                MoneyTrans = slot.Price*info.IdSlot.Count,
+                MoneyTrans = slot.Price * info.IdSlot.Count,
                 MethodTrans = "buy_slot",
                 TypeTrans = "buy _slot",
                 TimeTrans = DateTime.UtcNow.AddHours(7),
@@ -37,7 +37,7 @@ namespace Services.Implements
             };
             _repositoryManager.Transaction.Create(tran);
             await _repositoryManager.SaveAsync();
-            if(tran.Id > 0)
+            if (tran.Id > 0)
             {
                 var slots = _repositoryManager.Slot.FindByCondition(x => info.IdSlot.Contains(x.Id), true).ToList();
                 tran.Slots = slots;
@@ -50,7 +50,7 @@ namespace Services.Implements
         public async Task DeleteSlot(int transaction_id)
         {
             var slots = _repositoryManager.Slot.FindByCondition(x => x.TransactionId == transaction_id, true).ToList();
-            foreach(var slot in slots)
+            foreach (var slot in slots)
             {
                 _repositoryManager.Slot.Delete(slot);
             }
@@ -60,7 +60,7 @@ namespace Services.Implements
         public async Task DeleteTran(int transaction_id)
         {
             var transaction = await _repositoryManager.Transaction.FindByCondition(x => x.Id == transaction_id, true).FirstOrDefaultAsync();
-            if(transaction != null)
+            if (transaction != null)
             {
                 _repositoryManager.Transaction.Delete(transaction);
                 await _repositoryManager.SaveAsync();
@@ -74,7 +74,7 @@ namespace Services.Implements
 
         public async Task<TransactionDetail> GetDetail(int transaction_id)
         {
-            var tran = await _repositoryManager.Transaction.FindByCondition(x => x.Id ==  transaction_id, false)
+            var tran = await _repositoryManager.Transaction.FindByCondition(x => x.Id == transaction_id, false)
                 .Select(x => new TransactionDetail
                 {
                     Id = x.Id,
@@ -88,11 +88,14 @@ namespace Services.Implements
                     }).ToList(),
                     Total = x.MoneyTrans.Value.ToString(),
                 }).FirstOrDefaultAsync();
-            if(tran != null && tran.Slots != null && tran.Slots[0] != null)
+            if (tran != null && tran.Slots != null && tran.Slots[0] != null)
             {
                 var slotId = tran.Slots[0].Id;
-                var slot = await _repositoryManager.Slot.FindByCondition(x => x.Id == slotId, false).Include(x =>x.IdPostNavigation).FirstOrDefaultAsync();
-                if(slot != null && slot.IdPostNavigation != null)
+                var slot = await _repositoryManager.Slot.FindByCondition(x => x.Id == slotId, false)
+                    .Include(x => x.IdPostNavigation)
+                    .ThenInclude(x => x.IdUserToNavigation)
+                    .FirstOrDefaultAsync();
+                if (slot != null && slot.IdPostNavigation != null)
                 {
                     tran.Post = new PostInTransaction
                     {
@@ -100,12 +103,14 @@ namespace Services.Implements
                         Id = slot.IdPostNavigation.Id,
                         ImageUrls = slot.IdPostNavigation.ImageUrls.Split(";").ToList(),
                         Title = slot.IdPostNavigation.Title,
-                        TitleImage = slot.IdPostNavigation.ImgUrl
+                        TitleImage = slot.IdPostNavigation.ImgUrl,
+                        CategorySlot = slot.IdPostNavigation.CategorySlot,
+                        CreateUser = slot.IdPostNavigation.IdUserToNavigation.FullName
                     };
-                    foreach(var infoSlot in slot.IdPostNavigation.SlotsInfo.Split(";"))
+                    foreach (var infoSlot in slot.IdPostNavigation.SlotsInfo.Split(";"))
                     {
                         var info = new SlotInfo(infoSlot);
-                        if(info.StartTime.Value.ToString("dd/MM/yyyy") == slot.ContentSlot)
+                        if (info.StartTime.Value.ToString("dd/MM/yyyy") == slot.ContentSlot)
                         {
                             tran.Post.StartTime = info.StartTime.Value.ToString("dd/MM/yyyy HH:mm");
                             tran.Post.EndTime = info.EndTime.Value.ToString("dd/MM/yyyy HH:mm");
@@ -149,7 +154,7 @@ namespace Services.Implements
                 .ToList();
 
             var postId = idPosts[0];
-            foreach(var id in idPosts)
+            foreach (var id in idPosts)
             {
                 if (id != postId)
                     return true;
@@ -174,7 +179,8 @@ namespace Services.Implements
                 {
                     //implement hangfire here
                     //Delete auto charge
-                }else if (tranStatus == TransactionStatus.Played)
+                }
+                else if (tranStatus == TransactionStatus.Played)
                 {
 
                     //Delete auto charge
