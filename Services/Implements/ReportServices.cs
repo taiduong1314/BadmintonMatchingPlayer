@@ -15,10 +15,12 @@ namespace Services.Implements
     public class ReportServices : IReportServices
     {
         private readonly IRepositoryManager _repositoryManager;
+        private readonly ITransactionServices _transactionServices;
 
-        public ReportServices(IRepositoryManager repositoryManager)
+        public ReportServices(IRepositoryManager repositoryManager, ITransactionServices transactionServices)
         {
             _repositoryManager = repositoryManager;
+            _transactionServices = transactionServices;
         }
         public async Task<int> CreateFromTransaction(int tran_id, ReportContent info)
         {
@@ -44,6 +46,8 @@ namespace Services.Implements
                 };
                 _repositoryManager.Report.Create(report);
                 await _repositoryManager.SaveAsync();
+
+                await _transactionServices.UpdateStatus(tran_id, TransactionStatus.Reporting);
                 return report.Id;
             }
         }
