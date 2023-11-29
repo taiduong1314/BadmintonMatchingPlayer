@@ -31,6 +31,7 @@ namespace Repositories.Implements
         private IChatRoomRepository _chatRoom;
         private IMessageRepository _message;
         private INotificationRepository _notification;
+        private IHangfireJobRepository _hangfireJob;
 
         public RepositoryManager(DataContext context)
         {
@@ -54,6 +55,7 @@ namespace Repositories.Implements
             _chatRoom = new ChatRoomRepository(_context);
             _message = new MessageRepository(_context);
             _notification = new NotificationRepository(_context);
+            _hangfireJob = new HangfireJobRepository(_context);
         }
         public IHistoryTransactionRepository HistoryTransaction
         {
@@ -187,6 +189,14 @@ namespace Repositories.Implements
             get
             {
                 return _notification;
+            }
+        }
+
+        public IHangfireJobRepository HangfireJob
+        {
+            get
+            {
+                return _hangfireJob;
             }
         }
 

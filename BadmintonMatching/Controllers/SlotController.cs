@@ -72,34 +72,23 @@ namespace BadmintonMatching.Controllers
                     return Ok(new SuccessObject<object> { Message = "Slot not found" });
                 }
 
-                if (!info.IsVnpay)
+                var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value);
+                if (newBalance == -1 || newBalance == -2)
                 {
-                    var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value);
-                    if (newBalance == -1 || newBalance == -2)
+                    await _transactionRepository.DeleteSlot(tran.Id);
+                    await _transactionRepository.DeleteTran(tran.Id);
+                    if (newBalance == -1)
                     {
-                        await _transactionRepository.DeleteSlot(tran.Id);
-                        await _transactionRepository.DeleteTran(tran.Id);
-                        if (newBalance == -1)
-                        {
-                            return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
-                        }
-                        else if (newBalance == -2)
-                        {
-                            return Ok(new SuccessObject<object> { Message = $"Wallet of user {createInfo.IdUser.Value} isn't found" });
-                        }
+                        return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
                     }
-                    else
+                    else if (newBalance == -2)
                     {
-                        await _transactionRepository.UpdateStatus(tran.Id, Entities.Models.TransactionStatus.PaymentSuccess);
+                        return Ok(new SuccessObject<object> { Message = $"Wallet of user {createInfo.IdUser.Value} isn't found" });
                     }
                 }
                 else
                 {
-                    //Charge ví VNPAY với value là tran.MoneyTrans.Value
-
-                    //Thành công chạy tiếp
-
-                    //
+                    await _transactionRepository.UpdateStatus(tran.Id, Entities.Models.TransactionStatus.PaymentSuccess);
                 }
 
                 var chatRoom = await _chatServices.GetChatRoom(tran.Id);

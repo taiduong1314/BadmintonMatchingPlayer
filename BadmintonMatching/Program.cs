@@ -73,7 +73,7 @@ builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 var port = Environment.GetEnvironmentVariable("PORT");
-app.Urls.Add($"http://*:{port}");
+//app.Urls.Add($"http://*:{port}");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -89,7 +89,14 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseHangfireDashboard("/badminton_hangfire");
+app.UseHangfireDashboard("/badminton_hangfire", new DashboardOptions
+{
+    DashboardTitle = "Transaction schedules job",
+    Authorization = new[]
+                {
+                    new HangfireAuthorizationFilter("admin")
+                }
+});
 
 app.UseRouting(); 
 app.UseCors(acceptAllCors);

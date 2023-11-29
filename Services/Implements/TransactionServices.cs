@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
@@ -172,18 +173,25 @@ namespace Services.Implements
             {
                 if (tranStatus == TransactionStatus.PaymentSuccess)
                 {
-                    //implement hangfire here
-                    //Create auto charge for played
+                    var deadline = DateTime.SpecifyKind(tran.DeadLine.Value, DateTimeKind.Local);
+                    var scheduledId = BackgroundJob.Schedule(() => UpdateStatus(tran.Id, TransactionStatus.Played), deadline);
+                    var newJob = new HangfireJob { ScheduledId = scheduledId, TransactionId = tran.Id };
+                    _repositoryManager.HangfireJob.Create(newJob);
+                    await _repositoryManager.SaveAsync();
                 }
                 else if (tranStatus == TransactionStatus.Reporting)
                 {
-                    //implement hangfire here
-                    //Delete auto charge
+                    var scheduled = await _repositoryManager.HangfireJob.FindByCondition(x => x.TransactionId == tran.Id, true).FirstOrDefaultAsync();
+                    
+                    if(scheduled != null)
+                    {
+                        BackgroundJob.Delete(scheduled.ScheduledId);
+                        _repositoryManager.HangfireJob.Delete(scheduled);
+                        await _repositoryManager.SaveAsync();
+                    }
                 }
                 else if (tranStatus == TransactionStatus.Played)
                 {
-
-                    //Delete auto charge
                     var tranHistory = new HistoryTransaction
                     {
                         IdUserFrom = tran.IdUser,
@@ -193,8 +201,42 @@ namespace Services.Implements
                         Status = true,
                         Deadline = tran.DeadLine
                     };
+
                     _repositoryManager.HistoryTransaction.Create(tranHistory);
-                    await _repositoryManager.SaveAsync();
+
+                    var wallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == tranHistory.IdUserTo, true).FirstOrDefaultAsync();
+                    if(wallet != null)
+                    {
+                        wallet.Balance += tranHistory.MoneyTrans;
+                    }
+
+                    var scheduled = await _repositoryManager.HangfireJob.FindByCondition(x => x.TransactionId == tran.Id, true).FirstOrDefaultAsync();
+
+                    if (scheduled != null)
+                    {
+                        BackgroundJob.Delete(scheduled.ScheduledId);
+                        _repositoryManager.HangfireJob.Delete(scheduled);
+                    }
+                }
+                else if (tranStatus == TransactionStatus.ReportResolved)
+                {
+                    var tranHistory = new HistoryTransaction
+                    {
+                        IdUserFrom = tran.IdUser,
+                        IdUserTo = tran.IdUser,
+                        IdTransaction = tran.Id,
+                        MoneyTrans = tran.MoneyTrans,
+                        Status = true,
+                        Deadline = tran.DeadLine
+                    };
+
+                    _repositoryManager.HistoryTransaction.Create(tranHistory);
+
+                    var wallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == tranHistory.IdUserTo, true).FirstOrDefaultAsync();
+                    if(wallet != null)
+                    {
+                        wallet.Balance += tranHistory.MoneyTrans;
+                    }
                 }
                 tran.Status = (int)tranStatus;
                 await _repositoryManager.SaveAsync();

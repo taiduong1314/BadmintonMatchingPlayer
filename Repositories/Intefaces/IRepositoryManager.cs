@@ -27,6 +27,7 @@ namespace Repositories.Intefaces
         IChatRoomRepository ChatRoom { get; }
         IMessageRepository Message { get; }
         INotificationRepository Notification { get; }
+        IHangfireJobRepository HangfireJob { get; }
         Task SaveAsync();
     }
 }

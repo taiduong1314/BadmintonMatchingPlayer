@@ -17,6 +17,7 @@
             HistoryTransactions = new HashSet<HistoryTransaction>();
             Reports = new HashSet<Report>();
             Slots = new HashSet<Slot>();
+            ScheduledJob = new HashSet<HangfireJob>();
         }
 
         public int Id { get; set; }
@@ -33,5 +34,6 @@
         public virtual ICollection<HistoryTransaction> HistoryTransactions { get; set; }
         public virtual ICollection<Report> Reports { get; set; }
         public virtual ICollection<Slot> Slots { get; set; }
+        public virtual ICollection<HangfireJob> ScheduledJob { get; set; }
     }
 }

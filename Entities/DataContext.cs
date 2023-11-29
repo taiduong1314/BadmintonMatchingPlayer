@@ -33,6 +33,7 @@ namespace Entities
         public virtual DbSet<ChatRoom> ChatRooms { get; set; } = null!;
         public virtual DbSet<UserChatRoom> UserChatRooms { get; set; } = null!;
         public virtual DbSet<Messages> Messages { get; set; } = null!;
+        public virtual DbSet<HangfireJob> ScheduledJob { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -198,6 +199,16 @@ namespace Entities
                     .WithMany(p => p.Messages)
                     .HasForeignKey(d => d.RoomId)
                     .HasConstraintName("FK_Message_Room");
+            });
+
+            modelBuilder.Entity<HangfireJob>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.HasOne(d => d.Transaction)
+                    .WithMany(p => p.ScheduledJob)
+                    .HasForeignKey(d => d.TransactionId)
+                    .HasConstraintName("FK_HangfireJob_Transaction");
             });
 
             modelBuilder.Entity<Role>(entity =>
