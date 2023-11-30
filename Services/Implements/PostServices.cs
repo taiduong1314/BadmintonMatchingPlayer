@@ -421,6 +421,10 @@ namespace Services.Implements
                     }
                 }
 
+                var roomId = _repositoryManager.ChatRoom
+                    .FindByCondition(x => x.Code == $"{post.Id}_{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}", false)
+                    .Select(x => x.Id).FirstOrDefault();
+
                 res.Add(new JoinedPost
                 {
                     AreaName = post.AddressSlot,
@@ -435,9 +439,7 @@ namespace Services.Implements
                     StartTime = finalInfo.StartTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
                     CoverImage = post.ImgUrl,
                     CanReport = DateTime.UtcNow.AddHours(7) < finalInfo.EndTime.Value,
-                    ChatRoomId = _repositoryManager.ChatRoom
-                    .FindByCondition(x => x.Code == $"{post.Id}_{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}", false)
-                    .Select(x => x.Id).FirstOrDefault()
+                    ChatRoomUrl = $"https://badminton-matching-24832d1c4b03.herokuapp.com/chatHub?id={roomId}"
                 });
             }
             return res;

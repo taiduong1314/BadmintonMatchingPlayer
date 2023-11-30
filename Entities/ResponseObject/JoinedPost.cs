@@ -19,7 +19,7 @@ namespace Entities.ResponseObject
         public int TransacionId { get; set; }
         public string? CoverImage { get; set; }
         public bool CanReport { get; set; }
-        public int ChatRoomId { get; set; }
+        public string? ChatRoomUrl { get; set; }
         public List<BookedSlotInfo>? BookedInfos { get; set; }
     }
 
@@ -27,6 +27,6 @@ namespace Entities.ResponseObject
     {
         public int CreateSlot { get; set; }
         public int BookedSlot { get; set; }
-        public List<string> ImageUrls { get; set; }
+        public List<string>? ImageUrls { get; set; }
     }
 }
