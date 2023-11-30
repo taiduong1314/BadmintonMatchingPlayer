@@ -30,7 +30,7 @@ namespace Services.Implements
                     IdUser = x.IdUser,
                     Amount = x.Amount,
                     Status = ((HistoryWalletStatus)x.Status).ToString(),
-                    Time = x.Time.Value.ToString("dd/MM/yyyy hh:mm")
+                    Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm")
                 })
                 .ToList();
 
