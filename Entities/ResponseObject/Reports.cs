@@ -13,5 +13,7 @@ namespace Entities.ResponseObject
         public string? Title { get; set; }
         public string? DateReceive { get; set; }
         public string? Status { get; set; }
+        public int? NavigationId { get; set; }
+        public string? ObjectNavigation { get; set; }
     }
 }

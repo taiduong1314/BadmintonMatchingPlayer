@@ -141,9 +141,12 @@ namespace BadmintonMatching.Controllers
         [Route("{admin_id}/delete/{post_id}")]
         public IActionResult DeletePost(int post_id, int admin_id)
         {
-            if (_userServices.IsAdmin(admin_id) == false)
+            if (!_userServices.IsAdmin(admin_id))
             {
-                return Ok(new SuccessObject<object> { Message = "Not admin" });
+                if(!_userServices.IsPostOwner(admin_id, post_id))
+                {
+                    return Ok(new SuccessObject<object> { Message = "Not permission to delete" });
+                }
             }
 
             var res = _postServices.DeletePost(post_id);

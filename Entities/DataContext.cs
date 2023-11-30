@@ -158,6 +158,11 @@ namespace Entities
                     .WithMany(p => p.Reports)
                     .HasForeignKey(d => d.IdTransaction)
                     .HasConstraintName("FK_Transaction_Reports");
+
+                entity.HasOne(d => d.Post)
+                    .WithMany(p => p.Reports)
+                    .HasForeignKey(d => d.IdPost)
+                    .HasConstraintName("FK_Post_Reports");
             });
 
             modelBuilder.Entity<ChatRoom>(entity =>

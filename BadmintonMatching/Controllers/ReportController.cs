@@ -6,13 +6,6 @@ using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
 {
-    public enum ReportType
-    {
-        Post = 0,
-        User = 1,
-        Transaction = 2
-    }
-
     [ApiController]
     [Route("api/reports")]
     public class ReportController : ControllerBase
@@ -54,18 +47,27 @@ namespace BadmintonMatching.Controllers
             }
         }
 
-        //[HttpGet]
-        //[Route("type/{report_type}")]
-        //public async Task<IActionResult> GetReportByType(int report_type)
-        //{
+        [HttpPost]
+        [Route("sender/{user_id}/from_post/{post_id}")]
+        public async Task<IActionResult> CreateFromPost(int user_id, int post_id, ReportContent info)
+        {
+            var report_id = await _reportServices.CreateFromPost(user_id, post_id, info);
+            if (report_id == 0)
+            {
+                return Ok(new SuccessObject<object> { Message = "Fail to create" });
+            }
+            else
+            {
+                return Ok(new SuccessObject<object> { Data = new { ReportId = report_id }, Message = Message.SuccessMsg });
+            }
+        }
 
-        //}
-
-        //[HttpPost]
-        //[Route("post/{post_id}")]
-        //public async Task<IActionResult> ReportPost(int post_id)
-        //{
-
-        //}
+        [HttpGet]
+        [Route("type/{report_type}")]
+        public async Task<IActionResult> GetReportByType(int report_type)
+        {
+            var reports = await _reportServices.GetReportByType((ReportCreateType)report_type);
+            return Ok(new SuccessObject<List<Reports>> { Data = reports, Message = Message.SuccessMsg });
+        }
     }
 }

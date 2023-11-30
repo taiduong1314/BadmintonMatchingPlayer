@@ -15,13 +15,36 @@ namespace Services.Implements
     public class ReportServices : IReportServices
     {
         private readonly IRepositoryManager _repositoryManager;
-        private readonly ITransactionServices _transactionServices;
 
-        public ReportServices(IRepositoryManager repositoryManager, ITransactionServices transactionServices)
+        public ReportServices(IRepositoryManager repositoryManager)
         {
             _repositoryManager = repositoryManager;
-            _transactionServices = transactionServices;
         }
+
+        public async Task<int> CreateFromPost(int user_id, int post_id, ReportContent info)
+        {
+            var post = await _repositoryManager.Post.FindByCondition(x => x.Id == post_id, false)
+                .FirstOrDefaultAsync();
+            if (post == null)
+            {
+                return 0;
+            }
+
+            var report = new Report
+            {
+                IdUserFrom = user_id,
+                IdUserTo = post.IdUserTo,
+                reportContent = info.reportContent,
+                ReportTitle = info.ReportTitle,
+                Status = (int)ReportStatus.Pending,
+                TimeReport = DateTime.UtcNow.AddHours(7),
+                IdPost = post.Id
+            };
+            _repositoryManager.Report.Create(report);
+            await _repositoryManager.SaveAsync();
+            return report.Id;
+        }
+
         public async Task<int> CreateFromTransaction(int tran_id, ReportContent info)
         {
             var tran = await _repositoryManager.Transaction.FindByCondition(x => x.Id == tran_id, false)
@@ -46,8 +69,6 @@ namespace Services.Implements
                 };
                 _repositoryManager.Report.Create(report);
                 await _repositoryManager.SaveAsync();
-
-                await _transactionServices.UpdateStatus(tran_id, TransactionStatus.Reporting);
                 return report.Id;
             }
         }
@@ -106,6 +127,62 @@ namespace Services.Implements
                         return reports;
                     }
             }
+        }
+
+        public async Task<List<Reports>> GetReportByType(ReportCreateType report_type)
+        {
+            var res = new List<Reports>();
+
+            switch (report_type)
+            {
+                case ReportCreateType.Post:
+                    {
+                        res = await _repositoryManager.Report.FindByCondition(x => x.Post != null, false)
+                            .Select(x => new Reports
+                            {
+                                Content = x.reportContent,
+                                Status = ((ReportStatus)x.Status).ToString(),
+                                DateReceive = x.TimeReport.Value.ToString("d"),
+                                Id = x.Id,
+                                Title = x.ReportTitle,
+                                NavigationId = x.Id,
+                                ObjectNavigation = "Post"
+                            }).ToListAsync();
+                        break;
+                    }
+                case ReportCreateType.User:
+                    {
+                        res = await _repositoryManager.Report.FindByCondition(x => x.Post == null && x.IdTransaction == null, false)
+                            .Select(x => new Reports
+                            {
+                                Content = x.reportContent,
+                                Status = ((ReportStatus)x.Status).ToString(),
+                                DateReceive = x.TimeReport.Value.ToString("d"),
+                                Id = x.Id,
+                                Title = x.ReportTitle,
+                                NavigationId = x.Id,
+                                ObjectNavigation = "User"
+                            }).ToListAsync();
+                        break;
+                    }
+                default:
+                    {
+                        res = await _repositoryManager.Report.FindByCondition(x => x.IdTransaction != null, false)
+                            .Select(x => new Reports
+                            {
+                                Content = x.reportContent,
+                                Status = ((ReportStatus)x.Status).ToString(),
+                                DateReceive = x.TimeReport.Value.ToString("d"),
+                                Id = x.Id,
+                                Title = x.ReportTitle,
+                                NavigationId = x.Id,
+                                ObjectNavigation = "Transaction"
+                            }).ToListAsync();
+                        break;
+                    }
+            }
+
+            return res;
         }
     }
 }

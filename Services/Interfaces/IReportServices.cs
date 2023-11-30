@@ -11,7 +11,9 @@ namespace Services.Interfaces
 {
     public interface IReportServices
     {
+        Task<int> CreateFromPost(int user_id, int post_id, ReportContent info);
         Task<int> CreateFromTransaction(int tran_id, ReportContent info);
         Task<List<Reports>> GetByStatus(ReportStatus status);
+        Task<List<Reports>> GetReportByType(ReportCreateType report_type);
     }
 }

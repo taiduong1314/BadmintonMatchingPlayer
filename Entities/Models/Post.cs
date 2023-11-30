@@ -5,6 +5,7 @@
         public Post()
         {
             Slots = new HashSet<Slot>();
+            Reports = new HashSet<Report>();
         }
 
         public int Id { get; set; }
@@ -23,6 +24,7 @@
         public virtual TypePost? IdTypeNavigation { get; set; }
         public virtual User? IdUserToNavigation { get; set; }
         public virtual ICollection<Slot> Slots { get; set; }
+        public virtual ICollection<Report> Reports { get; set; }
         public DateTime SavedDate { get; set; }
         public string? ImageUrls { get; set; }
     }

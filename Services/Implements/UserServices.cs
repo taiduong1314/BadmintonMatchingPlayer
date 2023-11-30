@@ -827,5 +827,10 @@ namespace Services.Implements
             }
             return res;
         }
+
+        public bool IsPostOwner(int admin_id, int post_id)
+        {
+            return _repositoryManager.Post.FindByCondition(x => x.Id == post_id && x.IdUserTo == admin_id, false).Any();
+        }
     }
 }
