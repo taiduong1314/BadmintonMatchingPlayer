@@ -18,6 +18,8 @@ namespace Entities.ResponseObject
         public decimal? MoneyPaid { get; set; }
         public int TransacionId { get; set; }
         public string? CoverImage { get; set; }
+        public bool CanReport { get; set; }
+        public int ChatRoomId { get; set; }
         public List<BookedSlotInfo>? BookedInfos { get; set; }
     }
 

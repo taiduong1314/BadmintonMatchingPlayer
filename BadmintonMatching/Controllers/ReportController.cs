@@ -54,12 +54,12 @@ namespace BadmintonMatching.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("type/{report_type}")]
-        public async Task<IActionResult> GetReportByType(int report_type)
-        {
+        //[HttpGet]
+        //[Route("type/{report_type}")]
+        //public async Task<IActionResult> GetReportByType(int report_type)
+        //{
 
-        }
+        //}
 
         //[HttpPost]
         //[Route("post/{post_id}")]

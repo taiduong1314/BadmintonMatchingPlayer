@@ -433,7 +433,11 @@ namespace Services.Implements
                     AvailableSlot = (finalInfo.AvailableSlot - joinedSlot).ToString(),
                     EndTime = finalInfo.EndTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
                     StartTime = finalInfo.StartTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
-                    CoverImage = post.ImgUrl
+                    CoverImage = post.ImgUrl,
+                    CanReport = DateTime.UtcNow.AddHours(7) < finalInfo.EndTime.Value,
+                    ChatRoomId = _repositoryManager.ChatRoom
+                    .FindByCondition(x => x.Code == $"{post.Id}_{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}", false)
+                    .Select(x => x.Id).FirstOrDefault()
                 });
             }
             return res;
