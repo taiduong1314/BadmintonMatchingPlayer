@@ -13,6 +13,6 @@ namespace Entities.ResponseObject
         public int? IdUser { get; set; }
         public string? Amount { get; set; }
         public string? Status { get; set; }
-        public DateTime? Time { get; set; }
+        public string? Time { get; set; }
     }
 }

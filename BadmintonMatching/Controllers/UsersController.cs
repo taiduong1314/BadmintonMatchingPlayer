@@ -61,7 +61,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpPost]
         [Route("{user_id}/playing_area")]
-        [ProducesResponseType(typeof(SuccessObject<List<Reports>>), 200)]
         public IActionResult AddPlayingArea(int user_id, NewPlayingArea info)
         {
             if (!_userServices.ExistUserId(user_id))
@@ -77,7 +76,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpPost]
         [Route("{user_id}/playing_level")]
-        [ProducesResponseType(typeof(SuccessObject<List<Reports>>), 200)]
         public IActionResult AddPlayingLevel(int user_id, NewPlayingLevel info)
         {
             if (!_userServices.ExistUserId(user_id))
@@ -93,7 +91,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpPost]
         [Route("{user_id}/playing_way")]
-        [ProducesResponseType(typeof(SuccessObject<List<Reports>>), 200)]
         public IActionResult AddPlayingWay(int user_id, NewPlayingWay info)
         {
             if (!_userServices.ExistUserId(user_id))
@@ -143,7 +140,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("{email}/verify_token")]
-        [ProducesResponseType(typeof(SuccessObject<List<Reports>>), 200)]
         public async Task<IActionResult> GetVerifyToken(string email)
         {
             if (!_userServices.IsUserExist(email))
@@ -282,7 +278,6 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("{admin_id}/report/{user_id}")]
-        [ProducesResponseType(typeof(SuccessObject<List<UserReport>>), 200)]
         public IActionResult GetUserReports(int admin_id, int user_id)
         {
             if (!_userServices.IsAdmin(admin_id))

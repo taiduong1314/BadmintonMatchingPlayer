@@ -6,6 +6,13 @@ using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
 {
+    public enum ReportType
+    {
+        Post = 0,
+        User = 1,
+        Transaction = 2
+    }
+
     [ApiController]
     [Route("api/reports")]
     public class ReportController : ControllerBase
@@ -45,6 +52,13 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Data = new { ReportId = report_id }, Message = Message.SuccessMsg });
             }
+        }
+
+        [HttpGet]
+        [Route("type/{report_type}")]
+        public async Task<IActionResult> GetReportByType(int report_type)
+        {
+
         }
 
         //[HttpPost]
