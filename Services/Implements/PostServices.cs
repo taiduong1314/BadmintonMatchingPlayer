@@ -439,7 +439,8 @@ namespace Services.Implements
                     StartTime = finalInfo.StartTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
                     CoverImage = post.ImgUrl,
                     CanReport = DateTime.UtcNow.AddHours(7) < finalInfo.EndTime.Value,
-                    ChatRoomUrl = $"https://badminton-matching-24832d1c4b03.herokuapp.com/chatHub?id={roomId}"
+                    ChatRoomUrl = $"https://badminton-matching-24832d1c4b03.herokuapp.com/chatHub?id={roomId}",
+                    ChatRoomId = roomId
                 });
             }
             return res;

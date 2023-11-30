@@ -20,6 +20,7 @@ namespace Entities.ResponseObject
         public string? CoverImage { get; set; }
         public bool CanReport { get; set; }
         public string? ChatRoomUrl { get; set; }
+        public int ChatRoomId { get; set; }
         public List<BookedSlotInfo>? BookedInfos { get; set; }
     }
 
