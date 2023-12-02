@@ -21,6 +21,7 @@ namespace Entities.ResponseObject
         public bool CanReport { get; set; }
         public string? ChatRoomUrl { get; set; }
         public int ChatRoomId { get; set; }
+        public bool IsCancel { get; set; }
         public List<BookedSlotInfo>? BookedInfos { get; set; }
     }
 

@@ -5,6 +5,7 @@ using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
+using System.Globalization;
 
 namespace Services.Implements
 {
@@ -19,18 +20,30 @@ namespace Services.Implements
 
         public async Task<Transaction> CreateForBuySlot(TransactionCreateInfo info)
         {
-            var slot = await _repositoryManager.Slot.FindByCondition(x => x.Id == info.IdSlot[0], false).FirstOrDefaultAsync();
-            if (slot == null || slot.ContentSlot == null)
+            var slots = await _repositoryManager.Slot.FindByCondition(x => info.IdSlot.Contains(x.Id) && !x.IsDeleted, false).ToListAsync();
+            if (slots.Count() == 0)
             {
                 return null;
             }
 
-            var date = slot.ContentSlot.Split('/');
+            var deadLine = DateTime.MinValue;
+            decimal price = 0;
+
+            foreach(var slot in slots)
+            {
+                var slotTime = DateTime.Parse(slot.ContentSlot);
+                if(slotTime > deadLine)
+                {
+                    deadLine = slotTime;
+                }
+                price += slot.Price.Value;
+            }
+
             var tran = new Transaction
             {
-                DeadLine = new DateTime(int.Parse(date[2]), int.Parse(date[1]), int.Parse(date[0])).AddDays(1),
+                DeadLine = deadLine.AddDays(1),
                 IdUser = info.IdUser,
-                MoneyTrans = slot.Price * info.IdSlot.Count,
+                MoneyTrans = price,
                 MethodTrans = "buy_slot",
                 TypeTrans = "buy _slot",
                 TimeTrans = DateTime.UtcNow.AddHours(7),
@@ -40,8 +53,8 @@ namespace Services.Implements
             await _repositoryManager.SaveAsync();
             if (tran.Id > 0)
             {
-                var slots = _repositoryManager.Slot.FindByCondition(x => info.IdSlot.Contains(x.Id), true).ToList();
-                tran.Slots = slots;
+                var slotsEnt = _repositoryManager.Slot.FindByCondition(x => info.IdSlot.Contains(x.Id), true).ToList();
+                tran.Slots = slotsEnt;
                 _repositoryManager.Transaction.Update(tran);
                 await _repositoryManager.SaveAsync();
             }
@@ -89,6 +102,9 @@ namespace Services.Implements
                     }).ToList(),
                     Total = x.MoneyTrans.Value.ToString(),
                 }).FirstOrDefaultAsync();
+
+            tran.IsCancel = tran.Slots.Select(x => DateTime.ParseExact(x.PlayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture)).Min() > DateTime.UtcNow.AddHours(7);
+
             if (tran != null && tran.Slots != null && tran.Slots[0] != null)
             {
                 var slotId = tran.Slots[0].Id;

@@ -8,6 +8,7 @@
         public string? BuyerName { get; set; }
         public string? PayTime { get; set; }
         public string? Total { get; set; }
+        public bool IsCancel { get; set; }
         public PostInTransaction? Post { get; set; }
     }
 

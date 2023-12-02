@@ -662,16 +662,7 @@ namespace Services.Implements
             _repositoryManager.SaveAsync().Wait();
             return saveComment.Id;
         }
-        public bool Subcr(int user_id, int usertarget_id)
-        {
-            var sub = _repositoryManager.Subscription.FindByCondition(x => x.UserId == user_id && x.UserSubId == usertarget_id, true).Select(x => new SubcribeModel
-            {
-                IsSub = x.IsSubcription
-            });
-
-           return sub != null;
-        }
-
+        
         public bool UpdatePassword(string email, UpdatePassword info)
         {
             var user = _repositoryManager.User.FindByCondition(x => x.Email == email, true).FirstOrDefault();
@@ -831,6 +822,41 @@ namespace Services.Implements
         public bool IsPostOwner(int admin_id, int post_id)
         {
             return _repositoryManager.Post.FindByCondition(x => x.Id == post_id && x.IdUserTo == admin_id, false).Any();
+        }
+
+        public async Task<bool> Rating(RatingUserInfo info)
+        {
+            _repositoryManager.UserRating.Create(new UserRating
+            {
+                Content = info.Content,
+                Friendly = info.Friendly,
+                Helpful = info.Helpful,
+                IdTransaction = info.IdTransaction,
+                IdUserRate = info.IdUserRate,
+                IdUserRated = info.IdUserRated,
+                LevelSkill = info.LevelSkill,
+                Time = DateTime.UtcNow.AddHours(7),
+                Trusted = info.Trusted,
+            });
+            await _repositoryManager.SaveAsync();
+            return true;
+        }
+
+        public async Task<List<NotificationReturn>> GetNotifications(int user_id)
+        {
+            var noti = await _repositoryManager.Notification.FindByCondition(x => x.UserId == user_id, false)
+                .Select(x => new NotificationReturn
+                {
+                    About = ((NotificationType)x.About).ToString(),
+                    Content = x.Content,
+                    Id = x.Id,
+                    IsRead = x.IsRead,
+                    NotiDate = x.NotiDate.ToString("dd/MM/yyyy HH:mm"),
+                    Title = x.Title,
+                    ReferenceId = x.ReferenceInfo
+                }).ToListAsync();
+
+            return noti;
         }
     }
 }

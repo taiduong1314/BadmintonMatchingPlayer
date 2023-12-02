@@ -1,6 +1,7 @@
 ﻿using CorePush.Apple;
 using CorePush.Google;
 using Entities.Models;
+using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -19,6 +20,20 @@ namespace Services.Implements
         {
             _settings = settings;
             _repositoryManager = repositoryManager;
+        }
+
+        public async Task<bool> ReadedAll(ReadedNoti info)
+        {
+            foreach(var id in info.NotiIds)
+            {
+                var noti = _repositoryManager.Notification.FindByCondition(x => x.Id == id, false)
+                    .FirstOrDefault();
+
+                noti.IsRead = true;
+                _repositoryManager.Notification.Update(noti);
+            }
+            await _repositoryManager.SaveAsync();
+            return true;
         }
 
         public async Task<NotiResponseModel> SendNotification(NotificationModel notificationModel)
@@ -82,7 +97,7 @@ namespace Services.Implements
             }
         }
 
-        public async Task<NotiResponseModel> SendNotification(int userId, string title, string message)
+        public async Task<NotiResponseModel> SendNotification(int userId, string title, string message, NotificationType type, int referenceInfo)
         {
             var user = await _repositoryManager.User.FindByCondition(x => x.Id == userId, false).FirstOrDefaultAsync();
 
@@ -97,7 +112,9 @@ namespace Services.Implements
                 IsRead = false,
                 NotiDate = DateTime.UtcNow.AddHours(7),
                 Title = title,
-                UserId = userId
+                UserId = userId,
+                About = (int)type,
+                ReferenceInfo = referenceInfo
             };
 
             _repositoryManager.Notification.Create(savedNoti);

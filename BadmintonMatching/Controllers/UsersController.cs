@@ -425,25 +425,6 @@ namespace BadmintonMatching.Controllers
                 return Ok(new SuccessObject<object?> { Message = "Update Fail" });
             }
         }
-        #region List Subcribe By User
-        [HttpGet]
-        [Route("{user_id}/listsubed")]
-        public IActionResult GetListSubed(int user_id,int usertarget_id)
-        {
-           var subed = _userServices.Subcr(user_id, usertarget_id);
-
-            if (subed == true)
-            {
-                // Subcribed
-                return Ok(new { message = "Đã Subcribed" });
-            }
-            else
-            {
-                // Not Subcribe
-                return Ok(new { message = "Chưa Subcribed" });
-            }
-        }
-        #endregion
 
         #region Detail user by id
         [HttpGet]
@@ -454,5 +435,28 @@ namespace BadmintonMatching.Controllers
             return Ok(new SuccessObject<UserInformation> { Data = userdetail, Message = Message.SuccessMsg });
         }
         #endregion
+
+        [HttpPost]
+        [Route("rating_to")]
+        public async Task<IActionResult> RatingUser(RatingUserInfo info)
+        {
+            if (await _userServices.Rating(info))
+            {
+                return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = true });
+            }
+            else
+            {
+                return Ok(new SuccessObject<object> { Message = "Fail to rating" });
+            }
+        }
+
+        [HttpGet]
+        [Route("{user_id}/notification")]
+        public async Task<IActionResult> GetNotifications(int user_id)
+        {
+            var notifications = await _userServices.GetNotifications(user_id);
+            return Ok(new SuccessObject<List<NotificationReturn>> { Data = notifications, Message = Message.SuccessMsg });
+        }
+
     }
 }

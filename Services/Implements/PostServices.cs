@@ -394,6 +394,10 @@ namespace Services.Implements
                     .FirstOrDefault();
 
                 var finalInfo = new SlotInfo();
+                var firstInfo = new SlotInfo()
+                {
+                    StartTime = DateTime.MaxValue
+                };
                 int joinedSlot = 0;
                 var bookedInfos = new List<BookedSlotInfo>();
                 foreach (var infoStr in post.SlotsInfo.Split(';'))
@@ -413,6 +417,11 @@ namespace Services.Implements
                             !x.IsDeleted &&
                             x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy") &&
                             x.IdPost == post.Id, false).Count();
+
+                        if(info.StartTime < firstInfo.StartTime)
+                        {
+                            firstInfo = info;
+                        }
                         if (info.AvailableSlot - joinSlot >= finalInfo.AvailableSlot)
                         {
                             finalInfo = info;
@@ -421,9 +430,11 @@ namespace Services.Implements
                     }
                 }
 
+                var isCancel = firstInfo.StartTime.Value.AddHours(-24) >= DateTime.UtcNow.AddHours(7);
                 var roomId = _repositoryManager.ChatRoom
                     .FindByCondition(x => x.Code == $"{post.Id}_{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}", false)
                     .Select(x => x.Id).FirstOrDefault();
+
 
                 res.Add(new JoinedPost
                 {
@@ -440,7 +451,8 @@ namespace Services.Implements
                     CoverImage = post.ImgUrl,
                     CanReport = DateTime.UtcNow.AddHours(7) < finalInfo.EndTime.Value,
                     ChatRoomUrl = $"https://badminton-matching-24832d1c4b03.herokuapp.com/chatHub?id={roomId}",
-                    ChatRoomId = roomId
+                    ChatRoomId = roomId,
+                    IsCancel = isCancel
                 });
             }
             return res;

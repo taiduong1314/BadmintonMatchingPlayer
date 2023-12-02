@@ -43,8 +43,9 @@ namespace Services.Interfaces
         List<UserReport> GetReports(int user_id);
         Task<int> SubUnSub(int user_id, int target_id);
         Task<int> SettingPassword(int user_id, SettingPasswordRequest info);
-        bool Subcr(int user_id, int usertarget_id);
         UserInformation GetDetailUser(int user_id);
         bool IsPostOwner(int admin_id, int post_id);
+        Task<bool> Rating(RatingUserInfo info);
+        Task<List<NotificationReturn>> GetNotifications(int user_id);
     }
 }
