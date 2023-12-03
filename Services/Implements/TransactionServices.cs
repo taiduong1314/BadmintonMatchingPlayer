@@ -208,10 +208,16 @@ namespace Services.Implements
                 }
                 else if (tranStatus == TransactionStatus.Played)
                 {
+                    var idUserTo = await _repositoryManager.Slot
+                        .FindByCondition(x => x.TransactionId == tran.Id, false)
+                        .Include(x => x.IdPostNavigation)
+                        .Select(x => x.IdPostNavigation.IdUserTo)
+                        .FirstOrDefaultAsync();
+
                     var tranHistory = new HistoryTransaction
                     {
                         IdUserFrom = tran.IdUser,
-                        IdUserTo = tran.IdSlotNavigation.IdPostNavigation.IdUserTo,
+                        IdUserTo = idUserTo,
                         IdTransaction = tran.Id,
                         MoneyTrans = tran.MoneyTrans,
                         Status = true,
