@@ -158,7 +158,7 @@ namespace BadmintonMatching.Controllers
         [Route("user/{user_id}/joined")]
         public async Task<IActionResult> GetJoinedPost(int user_id)
         {
-            List<JoinedPost> res = _postServices.GetJoined(user_id);
+            List<JoinedPost> res = await _postServices.GetJoined(user_id);
             if(res != null)
             {
                 return Ok(new SuccessObject<List<JoinedPost>> { Data = res, Message = Message.SuccessMsg });

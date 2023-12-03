@@ -16,6 +16,14 @@ namespace Services.Implements
         Blog = 2
     }
 
+    public class TempTransaction
+    {
+        public int Id { get; set; }
+        public decimal? MoneyTrans { get; set; }
+        public int? Status { get; set; }
+        public List<string> ContentSlots { get; set; }
+    }
+
     public class PostServices : IPostServices
     {
         private readonly IRepositoryManager _repositoryManager;
@@ -378,14 +386,22 @@ namespace Services.Implements
             return res;
         }
 
-        public List<JoinedPost> GetJoined(int user_id)
+        public async Task<List<JoinedPost>> GetJoined(int user_id)
         {
             var res = new List<JoinedPost>();
 
-            var transactions = _repositoryManager.Transaction
+            var transactions = await _repositoryManager.Transaction
                 .FindByCondition(x => x.IdUser == user_id, false)
+                .Include(x => x.Slots)
+                .Select(x => new TempTransaction
+                {
+                    Id = x.Id,
+                    MoneyTrans = x.MoneyTrans,
+                    Status = x.Status,
+                    ContentSlots = x.Slots.Select(y => y.ContentSlot).ToList()
+                })
                 .OrderByDescending(x => x.Id)
-                .ToList();
+                .ToListAsync();
             if (transactions == null || transactions.Count == 0)
             {
                 return res;
@@ -393,15 +409,13 @@ namespace Services.Implements
 
             foreach (var item in transactions)
             {
-                var slot = _repositoryManager.Slot.FindByCondition(x => x.TransactionId == item.Id, false)
-                    .FirstOrDefault();
-                if (slot == null)
+                var post = await _repositoryManager.Post.FindByCondition(x => x.Slots.Any(y => y.TransactionId == item.Id), false)
+                    .Include(x => x.Slots.Where(y => item.ContentSlots.Contains(y.ContentSlot)))
+                    .ThenInclude(x => x.User)
+                    .FirstOrDefaultAsync();
+
+                if (post == null)
                     continue;
-
-                var post = _repositoryManager.Post.FindByCondition(x => x.Id == slot.IdPost && x.IdType == (int)PostType.MatchingPost, false)
-                    .FirstOrDefault();
-
-                var slots = _repositoryManager.Slot.FindByCondition(x => x.IdPost == post.Id, false).Include(x => x.User).ToList();
 
                 var finalInfo = new SlotInfo();
                 var firstInfo = new SlotInfo()
@@ -417,9 +431,9 @@ namespace Services.Implements
                         var info = new SlotInfo(infoStr);
                         bookedInfos.Add(new BookedSlotInfo
                         {
-                            BookedSlot = slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Count(),
+                            BookedSlot = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Count(),
                             CreateSlot = info.AvailableSlot,
-                            ImageUrls = slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Select(x => x.User.ImgUrl).ToList()
+                            ImageUrls = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Select(x => x.User.ImgUrl).ToList()
                         });
 
                         var joinSlot = _repositoryManager.Slot
