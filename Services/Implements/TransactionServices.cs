@@ -230,6 +230,15 @@ namespace Services.Implements
                     if(wallet != null)
                     {
                         wallet.Balance += tranHistory.MoneyTrans;
+
+                        _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                        {
+                            Amount = tranHistory.MoneyTrans.ToString(),
+                            IdUser = tranHistory.IdUserTo,
+                            IdWallet = wallet.Id,
+                            Status = (int)HistoryWalletStatus.Success,
+                            Time = DateTime.UtcNow.AddHours(7)
+                        });
                     }
 
                     var scheduled = await _repositoryManager.HangfireJob.FindByCondition(x => x.TransactionId == tran.Id, true).FirstOrDefaultAsync();
@@ -258,6 +267,15 @@ namespace Services.Implements
                     if(wallet != null)
                     {
                         wallet.Balance += tranHistory.MoneyTrans;
+
+                        _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                        {
+                            Amount = tranHistory.MoneyTrans.ToString(),
+                            IdUser = tranHistory.IdUserTo,
+                            IdWallet = wallet.Id,
+                            Status = (int)HistoryWalletStatus.Success,
+                            Time = DateTime.UtcNow.AddHours(7)
+                        });
                     }
                 }
                 tran.Status = (int)tranStatus;

@@ -319,15 +319,15 @@ namespace Services.Implements
                 .ToList();
 
             var res = new List<PostOptional>();
-            for (var i = 0; i < res.Count(); i++)
+            for (var i = 0; i < listpost.Count(); i++)
             {
-                var cPost = res[i];
+                var cPost = listpost[i];
                 var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
                 if (post != null)
                 {
                     GetPostOptional(post, ref cPost);
                 }
-                res[i] = cPost;
+                res.Add(cPost);
             }
             return res;
         }
