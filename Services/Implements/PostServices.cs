@@ -400,7 +400,7 @@ namespace Services.Implements
 
                 var post = _repositoryManager.Post.FindByCondition(x => x.Id == slot.IdPost && x.IdType == (int)PostType.MatchingPost, false)
                     .Include(x => x.Slots)
-                    .ThenInclude(x => x.User)
+                    //.ThenInclude(x => x.User)
                     .FirstOrDefault();
 
                 var finalInfo = new SlotInfo();
@@ -419,7 +419,7 @@ namespace Services.Implements
                         {
                             BookedSlot = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Count(),
                             CreateSlot = info.AvailableSlot,
-                            ImageUrls = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Select(x => x.User.ImgUrl).ToList()
+                            //ImageUrls = post.Slots.Where(x => x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy")).Select(x => x.User.ImgUrl).ToList()
                         });
 
                         var joinSlot = _repositoryManager.Slot
