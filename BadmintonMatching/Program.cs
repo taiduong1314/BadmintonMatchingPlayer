@@ -51,8 +51,9 @@ builder.Services.AddSwaggerGen(opt =>
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddHttpClient<UserServices>();
+
+builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
 builder.Services.AddScoped<IHasingServices, HasingServices>();
 builder.Services.AddScoped<IJwtSupport, JwtServices>();
 builder.Services.AddScoped<IUserServices, UserServices>();
@@ -64,10 +65,13 @@ builder.Services.AddScoped<ITransactionServices, TransactionServices>();
 builder.Services.AddScoped<IChatServices, ChatService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<INotificationServices, NotificationServices>();
+
 builder.Services.AddHttpClient<FcmSender>();
 builder.Services.AddHttpClient<ApnSender>();
 builder.Services.Configure<FcmNotificationSetting>(builder.Configuration.GetSection("FcmNotification"));
+
 builder.Services.Configure<VnPayOption>(builder.Configuration.GetSection("PaymentConfig:VnPay"));
+
 builder.Services.AddHangfire(configuration => configuration
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection")));
 builder.Services.AddHangfireServer();

@@ -10,6 +10,12 @@ using System.Xml.Linq;
 
 namespace Services.Implements
 {
+    public enum PostType
+    {
+        MatchingPost = 1,
+        Blog = 2
+    }
+
     public class PostServices : IPostServices
     {
         private readonly IRepositoryManager _repositoryManager;
@@ -78,7 +84,8 @@ namespace Services.Implements
                     ImgUrl = await HandleImg(info.HighlightUrl),
                     ImageUrls = urls,
                     IdUserTo = user_id,
-                    SlotsInfo = info.SlotsToString()
+                    SlotsInfo = info.SlotsToString(),
+                    IdType = (int)PostType.MatchingPost
                 };
                 _repositoryManager.Post.Create(newPost);
                 _repositoryManager.SaveAsync().Wait();
@@ -113,7 +120,7 @@ namespace Services.Implements
 
         public bool DeletePost(int post_id)
         {
-            var post = _repositoryManager.Post.FindByCondition(x => x.Id == post_id && !x.IsDeleted, true).FirstOrDefault();
+            var post = _repositoryManager.Post.FindByCondition(x => x.Id == post_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true).FirstOrDefault();
             if (post != null)
             {
                 post.IsDeleted = true;
@@ -125,7 +132,7 @@ namespace Services.Implements
 
         public List<PostOptional> GetListOptionalPost()
         {
-            var optList = _repositoryManager.Post.FindByCondition(x => !x.IsDeleted, true)
+            var optList = _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
                 .ToList();
@@ -163,7 +170,7 @@ namespace Services.Implements
         }
         public async Task<List<PostOptional>> GetAllPost()
         {
-            var listpost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted, false).Include(x => x.IdUserToNavigation).ToListAsync();
+            var listpost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, false).Include(x => x.IdUserToNavigation).ToListAsync();
             var res = new List<PostOptional>();
             foreach (var post in listpost)
             {
@@ -257,7 +264,7 @@ namespace Services.Implements
 
         public List<ListPostByAdmin> GetListPostByAdmin()
         {
-            return _repositoryManager.Post.FindAll(true)
+            return _repositoryManager.Post.FindByCondition(x => x.IdType == (int)PostType.MatchingPost, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation).ThenInclude(x => x.UserRoleNavigation)
                 .Select(x => new ListPostByAdmin
@@ -273,7 +280,7 @@ namespace Services.Implements
 
         public List<PostInfomation> GetManagedPost(int user_id)
         {
-            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted, true)
+            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
@@ -282,7 +289,7 @@ namespace Services.Implements
 
         public List<PostInfomation> GetManagedPostAdmin(int user_id)
         {
-            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted, true)
+            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
@@ -293,7 +300,8 @@ namespace Services.Implements
         {
             var listpost = _repositoryManager.Post.FindByCondition(x => x.AddressSlot != null
                 && x.AddressSlot.Contains(play_ground)
-                && !x.IsDeleted, false)
+                && !x.IsDeleted
+                && x.IdType == (int)PostType.MatchingPost, false)
                 .Include(x => x.IdUserToNavigation)
                 .OrderByDescending(x => x.Id)
                 .Select(x => new PostOptional
@@ -329,7 +337,8 @@ namespace Services.Implements
             var x = _repositoryManager.Post
                 .FindByCondition(x =>
                 x.Id == id_post
-                && !x.IsDeleted, false)
+                && !x.IsDeleted
+                && x.IdType == (int)PostType.MatchingPost, false)
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
                 .FirstOrDefault();
@@ -352,6 +361,7 @@ namespace Services.Implements
                     x => x.AddressSlot != null
                     && user.PlayingArea.Contains(x.AddressSlot)
                     && !x.IsDeleted
+                    && x.IdType == (int)PostType.MatchingPost
                         , true)
                     .Include(x => x.IdUserToNavigation)
                     .Include(x => x.Slots)
@@ -388,7 +398,7 @@ namespace Services.Implements
                 if (slot == null)
                     continue;
 
-                var post = _repositoryManager.Post.FindByCondition(x => x.Id == slot.IdPost, false)
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == slot.IdPost && x.IdType == (int)PostType.MatchingPost, false)
                     .Include(x => x.Slots)
                     .ThenInclude(x => x.User)
                     .FirstOrDefault();
@@ -460,7 +470,7 @@ namespace Services.Implements
 
         public async Task<List<Room>> GetChatRooms(int post_id)
         {
-            var post = await _repositoryManager.Post.FindByCondition(x => x.Id == post_id, false).FirstOrDefaultAsync();
+            var post = await _repositoryManager.Post.FindByCondition(x => x.Id == post_id && x.IdType == (int)PostType.MatchingPost, false).FirstOrDefaultAsync();
 
             if (post == null)
             {
@@ -486,6 +496,56 @@ namespace Services.Implements
                 res.Add(room);
             }
             return res;
+        }
+
+        public async Task<bool> CreateBlog(int user_id, NewBlogInfo info)
+        {
+            var post = new Post
+            {
+                Title = info.Title,
+                ContentPost = info.Description,
+                IdUserTo = user_id,
+                IdType = (int)PostType.Blog,
+                SavedDate = DateTime.UtcNow.AddHours(7),
+                IsDeleted = false
+            };
+
+            _repositoryManager.Post.Create(post);
+            await _repositoryManager.SaveAsync();
+            return true;
+        }
+
+        public async Task<List<BlogInList>> GetAllBlogs()
+        {
+            var blogs = await _repositoryManager.Post
+                .FindByCondition(x => x.IdType == (int)PostType.Blog && !x.IsDeleted, false)
+                .Select(x => new BlogInList 
+                {
+                    Id = x.Id,
+                    CreateTime = x.SavedDate.ToString("dd/MM/yyyy HH:mm"),
+                    ShortDescription = x.ContentPost.Substring(0, 100),
+                    Title = x.Title,
+                    UserCreateName = x.IdUserToNavigation.FullName
+                })
+                .ToListAsync();
+
+            return blogs;
+        }
+
+        public async Task<BlogDetail> GetBlogDetail(int blog_id)
+        {
+            var blog = await _repositoryManager.Post
+                .FindByCondition(x => x.IdType == (int)PostType.Blog && x.Id == blog_id && !x.IsDeleted, false)
+                .Select(x => new BlogDetail
+                {
+                    Id = x.Id,
+                    CreateTime = x.SavedDate.ToString("dd/MM/yyyy HH:mm"),
+                    Description = x.ContentPost,
+                    Title = x.Title,
+                    UserCreateName = x.IdUserToNavigation.FullName
+                }).FirstOrDefaultAsync();
+
+            return blog;
         }
     }
 }

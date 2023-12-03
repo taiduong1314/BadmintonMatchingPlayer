@@ -6,9 +6,12 @@ namespace Services.Interfaces
 {
     public interface IPostServices
     {
+        Task<bool> CreateBlog(int user_id, NewBlogInfo info);
         Task<int> CreatePost(int user_id, NewPostInfo info);
         bool DeletePost(int post_id);
+        Task<List<BlogInList>> GetAllBlogs();
         Task<List<PostOptional>> GetAllPost();
+        Task<BlogDetail> GetBlogDetail(int blog_id);
         Task<List<Room>> GetChatRooms(int post_id);
         List<JoinedPost> GetJoined(int user_id);
         List<PostOptional> GetListOptionalPost();

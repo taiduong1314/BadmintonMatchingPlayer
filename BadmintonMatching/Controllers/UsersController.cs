@@ -2,6 +2,7 @@
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
+using Services.Implements;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -12,12 +13,13 @@ namespace BadmintonMatching.Controllers
     {
         private readonly IUserServices _userServices;
         private readonly IJwtSupport _jwtServices;
+        private readonly INotificationServices _notificationServices;
 
-
-        public UsersController(IUserServices userServices, IJwtSupport jwtServices)
+        public UsersController(IUserServices userServices, IJwtSupport jwtServices, INotificationServices notificationServices)
         {
             _userServices = userServices;
             _jwtServices = jwtServices;
+            _notificationServices = notificationServices;
         }
 
         [HttpPost]
@@ -394,6 +396,10 @@ namespace BadmintonMatching.Controllers
                 default:
                     {
                         var addTxt = res == 0 ? "Unsubcribe" : "Subcribe";
+                        if(res == 1)
+                        {
+                            await _notificationServices.SendNotification(target_id, "Tương tác", "Bạn đã có một lượt đăng kí", NotificationType.User, user_id);
+                        }
                         return Ok(new SuccessObject<object?> { Data = true, Message = $"{addTxt} success!" });
                     }
             }
@@ -458,5 +464,51 @@ namespace BadmintonMatching.Controllers
             return Ok(new SuccessObject<List<NotificationReturn>> { Data = notifications, Message = Message.SuccessMsg });
         }
 
+
+        [HttpGet]
+        [Route("admin/{admin_id}/user/{user_id}/detail")]
+        public async Task<IActionResult> GetManagedProfile(int admin_id, int user_id)
+        {
+            try
+            {
+                if (!_userServices.IsAdmin(admin_id))
+                    throw new Exception("Not admin to get");
+
+                var res = await _userServices.GetManagedProfile(user_id);
+                return Ok(new SuccessObject<ManagedDetailUser> { Data = res, Message = Message.SuccessMsg });
+            } catch (Exception ex)
+            {
+                return Ok(new SuccessObject<object> { Message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user_id"></param>
+        /// <param name="role_id">2: User, 3: Staff</param>
+        /// <param name="admin_id"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("{user_id}/to/{role_id}/by/{admin_id}")]
+        public async Task<IActionResult> UpdateRole(int user_id, int role_id, int admin_id)
+        {
+            try
+            {
+                if (!_userServices.IsAdmin(admin_id))
+                    throw new Exception("Not admin to get");
+
+                if (await _userServices.UpdateRole(user_id, (UserRole)role_id))
+                    return Ok(new SuccessObject<object> { Data = true, Message = Message.SuccessMsg });
+                else
+                {
+                    throw new Exception("Fail to update");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Ok(new SuccessObject<object> { Message = ex.Message });
+            }
+        }
     }
 }

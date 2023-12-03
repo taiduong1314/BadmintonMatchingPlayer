@@ -858,5 +858,52 @@ namespace Services.Implements
 
             return noti;
         }
+
+        public async Task<ManagedDetailUser> GetManagedProfile(int user_id)
+        {
+            var user = await _repositoryManager.User
+                .FindByCondition(x => x.Id == user_id, false)
+                .Include(x => x.Posts).ThenInclude(x => x.Reports)
+                .Select(x => new ManagedDetailUser
+                {
+                    Id = x.Id,
+                    FullName = x.FullName,
+                    IsBanded = x.IsBanFromLogin,
+                    Role = ((UserRole)x.UserRole).ToString(),
+                    Posts = x.Posts.Select(y => new UserManagedPost
+                    {
+                        Id = y.Id,
+                        NumOfReport = y.Reports.Count(),
+                        PostTime = y.SavedDate.ToString("dd/MM/yyyy HH:mm")
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+                throw new Exception("Invalid user id");
+
+            return user;
+        }
+
+        public async Task<bool> UpdateRole(int user_id, UserRole role_id)
+        {
+            var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).FirstOrDefaultAsync();
+
+            if (user == null)
+                throw new Exception("Invalid user id");
+
+            if(user.UserRole != (int)role_id)
+            {
+                user.UserRole = (int)role_id;
+                await _repositoryManager.SaveAsync();
+            }
+
+            return true;
+        }
+
+        public async Task<bool> IsStaff(int user_id)
+        {
+            return await _repositoryManager.User.FindByCondition(x => x.Id == user_id && x.UserRole == (int)UserRole.Staff, false).AnyAsync();
+        }
     }
 }

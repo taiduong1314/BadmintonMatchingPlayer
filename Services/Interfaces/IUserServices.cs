@@ -2,6 +2,7 @@
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
+using Services.Implements;
 
 namespace Services.Interfaces
 {
@@ -47,5 +48,8 @@ namespace Services.Interfaces
         bool IsPostOwner(int admin_id, int post_id);
         Task<bool> Rating(RatingUserInfo info);
         Task<List<NotificationReturn>> GetNotifications(int user_id);
+        Task<ManagedDetailUser> GetManagedProfile(int user_id);
+        Task<bool> UpdateRole(int user_id, UserRole role_id);
+        Task<bool> IsStaff(int user_id);
     }
 }
