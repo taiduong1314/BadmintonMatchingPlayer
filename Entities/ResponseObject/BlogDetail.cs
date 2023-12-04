@@ -14,5 +14,7 @@ namespace Entities.ResponseObject
         public string? Description { get; set; }
         public string? UserCreateName { get; set; }
         public bool CanDelete { get; set; }
+        public string? Summary { get; set; }
+        public string? ImgUrl { get; set; }
     }
 }
