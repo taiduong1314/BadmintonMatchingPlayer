@@ -515,6 +515,18 @@ namespace Services.Implements
 
         public async Task<bool> CreateBlog(int user_id, NewBlogInfo info)
         {
+            var urls = "";
+            foreach (var url in info.ImgUrls)
+            {
+                try
+                {
+                    urls += $"{await HandleImg(url)};";
+                }
+                catch
+                {
+                    return false;
+                }
+            }
             var post = new Post
             {
                 Title = info.Title,
@@ -522,7 +534,11 @@ namespace Services.Implements
                 IdUserTo = user_id,
                 IdType = (int)PostType.Blog,
                 SavedDate = DateTime.UtcNow.AddHours(7),
-                IsDeleted = false
+                IsDeleted = false,
+                ImageUrls = urls,
+                AddressSlot = info.Summary,
+                ImgUrl = await HandleImg(info.HighlightImg)
+
             };
 
             _repositoryManager.Post.Create(post);
@@ -540,7 +556,10 @@ namespace Services.Implements
                     CreateTime = x.SavedDate.ToString("dd/MM/yyyy HH:mm"),
                     ShortDescription = x.ContentPost.Substring(0, 100),
                     Title = x.Title,
-                    UserCreateName = x.IdUserToNavigation.FullName
+                    UserCreateName = x.IdUserToNavigation.FullName,
+                    Summary = x.AddressSlot,
+                    ImgUrl = x.ImgUrl,
+                   
                 })
                 .ToListAsync();
 
@@ -557,7 +576,9 @@ namespace Services.Implements
                     CreateTime = x.SavedDate.ToString("dd/MM/yyyy HH:mm"),
                     Description = x.ContentPost,
                     Title = x.Title,
-                    UserCreateName = x.IdUserToNavigation.FullName
+                    UserCreateName = x.IdUserToNavigation.FullName,
+                    Summary = x.AddressSlot,
+                    ImgUrl = x.ImgUrl
                 }).FirstOrDefaultAsync();
 
             return blog;
