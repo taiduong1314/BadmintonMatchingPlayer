@@ -30,14 +30,15 @@ namespace Services.Implements
                     IdUser = x.IdUser,
                     Amount = x.Amount,
                     Status = ((HistoryWalletStatus)x.Status).ToString(),
-                    Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm")
+                    Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
+                    Type = x.Type
                 })
                 .ToList();
 
             return histories;
         }
 
-        public decimal UpdateBalance(decimal changes, int user_id)
+        public decimal UpdateBalance(decimal changes, int user_id, bool isFromTran)
         {
             var wallet = _repositoryManager.Wallet.FindByCondition(x => x.IdUser == user_id, true).FirstOrDefault();
             if (wallet != null)
@@ -50,7 +51,8 @@ namespace Services.Implements
                         IdUser = user_id,
                         IdWallet = wallet.Id,
                         Status = (int)HistoryWalletStatus.Fail,
-                        Time = DateTime.UtcNow.AddHours(7)
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = isFromTran ? "Thanh toán đặt sân" : changes < 0 ? "Rút tiền" : "Nạp tiền"
                     });
 
                     _repositoryManager.SaveAsync().Wait();
@@ -67,7 +69,8 @@ namespace Services.Implements
                         IdUser = user_id,
                         IdWallet = wallet.Id,
                         Status = (int)HistoryWalletStatus.Success,
-                        Time = DateTime.UtcNow.AddHours(7)
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = isFromTran ? "Thanh toán đặt sân" : changes < 0 ? "Rút tiền" : "Nạp tiền"
                     });
                     _repositoryManager.SaveAsync().Wait();
 

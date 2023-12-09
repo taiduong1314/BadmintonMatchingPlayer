@@ -101,9 +101,11 @@ namespace Services.Implements
                         PlayDate = y.ContentSlot
                     }).ToList(),
                     Total = x.MoneyTrans.Value.ToString(),
+                    TranStatus = (TransactionStatus)x.Status
                 }).FirstOrDefaultAsync();
 
-            tran.IsCancel = tran.Slots.Select(x => DateTime.ParseExact(x.PlayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture)).Min() > DateTime.UtcNow.AddHours(7);
+            tran.IsCancel = tran.Slots.Select(x => DateTime.ParseExact(x.PlayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture)).Min() > DateTime.UtcNow.AddHours(7)
+                && (tran.TranStatus == TransactionStatus.Processing || tran.TranStatus == TransactionStatus.PaymentSuccess);
 
             if (tran != null && tran.Slots != null && tran.Slots[0] != null)
             {
@@ -237,7 +239,8 @@ namespace Services.Implements
                             IdUser = tranHistory.IdUserTo,
                             IdWallet = wallet.Id,
                             Status = (int)HistoryWalletStatus.Success,
-                            Time = DateTime.UtcNow.AddHours(7)
+                            Time = DateTime.UtcNow.AddHours(7),
+                            Type = "Nhận tiền sân"
                         });
                     }
 
@@ -274,7 +277,8 @@ namespace Services.Implements
                             IdUser = tranHistory.IdUserTo,
                             IdWallet = wallet.Id,
                             Status = (int)HistoryWalletStatus.Success,
-                            Time = DateTime.UtcNow.AddHours(7)
+                            Time = DateTime.UtcNow.AddHours(7),
+                            Type = "Hoàn tiền sân"
                         });
                     }
                 }

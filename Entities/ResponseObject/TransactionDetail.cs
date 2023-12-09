@@ -1,4 +1,6 @@
-﻿namespace Entities.ResponseObject
+﻿using Entities.Models;
+
+namespace Entities.ResponseObject
 {
     public class TransactionDetail
     {
@@ -9,12 +11,15 @@
         public string? PayTime { get; set; }
         public string? Total { get; set; }
         public bool IsCancel { get; set; }
+        public TransactionStatus TranStatus { get; set; }
         public PostInTransaction? Post { get; set; }
     }
 
     public class PostInTransaction
     {
         public int? Id { get; set; }
+        public int? UserId { get; set; }
+        public string? UserImg { get; set; }
         public string? Title { get; set; }
         public string? TitleImage { get; set; }
         public List<string>? ImageUrls { get; set; }

@@ -418,7 +418,7 @@ namespace Services.Implements
                 {
                     Content = x.Content,
                     SavedDate = x.SavedDate,
-                    UserId = user_id
+                    UserId = x.UserId
                 }).ToList();
 
             for(var i = 0; i < comments.Count; i++)
@@ -470,6 +470,7 @@ namespace Services.Implements
                 user.LastLoginDate = DateTime.UtcNow.AddHours(7);
                 user.LogingingDevice = info.DeviceId;
                 user.IsAndroidDevice = info.IsAndroidDevice;
+                _repositoryManager.User.Update(user);
                 _repositoryManager.SaveAsync().Wait();
             }
             return res;

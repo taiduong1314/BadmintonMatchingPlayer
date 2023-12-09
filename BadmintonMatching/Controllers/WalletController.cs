@@ -27,7 +27,7 @@ namespace BadmintonMatching.Controllers
         [Route("{user_id}")]
         public IActionResult UpdateWallet(int user_id, UpdateWallet updateWallet)
         {
-            var newBalance = _walletServices.UpdateBalance(updateWallet.Changes, user_id);
+            var newBalance = _walletServices.UpdateBalance(updateWallet.Changes, user_id, false);
             if (newBalance == -1)
             {
                 return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });

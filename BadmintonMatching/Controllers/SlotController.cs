@@ -72,7 +72,7 @@ namespace BadmintonMatching.Controllers
                     return Ok(new SuccessObject<object> { Message = "Slot not found" });
                 }
 
-                var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value);
+                var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value, true);
                 if (newBalance == -1 || newBalance == -2)
                 {
                     await _transactionRepository.DeleteSlot(tran.Id);

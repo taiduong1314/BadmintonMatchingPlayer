@@ -13,6 +13,7 @@
         Transaction = 1,
         User = 2
     }
+
     public partial class Report
     {
         public int Id { get; set; }

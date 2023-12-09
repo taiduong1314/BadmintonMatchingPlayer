@@ -454,7 +454,8 @@ namespace Services.Implements
                     }
                 }
 
-                var isCancel = firstInfo.StartTime.Value.AddHours(-24) >= DateTime.UtcNow.AddHours(7);
+                var isCancel = firstInfo.StartTime.Value.AddHours(-24) >= DateTime.UtcNow.AddHours(7) 
+                    && (item.Status == (int)TransactionStatus.Processing || item.Status == (int)TransactionStatus.PaymentSuccess);
                 var roomId = _repositoryManager.ChatRoom
                     .FindByCondition(x => x.Code == $"{post.Id}_{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}", false)
                     .Select(x => x.Id).FirstOrDefault();

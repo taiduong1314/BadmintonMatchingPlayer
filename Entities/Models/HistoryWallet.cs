@@ -6,6 +6,13 @@
         Fail = 0
     }
 
+    public enum HistoryWalletType
+    {
+        MoneyIn = 0,
+        MoneyOut = 1,
+        FromAToB = 2
+    }
+
     public partial class HistoryWallet
     {
         public int Id { get; set; }
@@ -14,7 +21,7 @@
         public string? Amount { get; set; }
         public int? Status { get; set; }
         public DateTime? Time { get; set; }
-        public int? Type { get; set; }
+        public string? Type { get; set; }
 
         public virtual Wallet? IdWalletNavigation { get; set; }
     }
