@@ -17,6 +17,42 @@ namespace Services.Implements
             _repositoryManager = repositoryManager;
         }
 
+        public async Task<int> CreateRoom(int admin_id, int reportId)
+        {
+            var report = await _repositoryManager.Report.FindByCondition(x => x.Id == reportId, false)
+                .Include(x => x.Transaction)
+                .FirstOrDefaultAsync();
+
+            if(report == null)
+            {
+                throw new Exception("Report not found");
+            }
+
+            if(report.IdTransaction == null)
+            {
+                throw new Exception("Report not about transaction to open chat");
+            }
+
+            var chatRoom = new ChatRoom
+            {
+                Code = $"Transaction-{report.IdTransaction}",
+                Name = $"{report.Transaction.TimeTrans.Value.ToString("dd/MM HH:mm")}",
+                UpdateTime = DateTime.UtcNow.AddHours(7),
+                CoverImage = "https://res.cloudinary.com/dbjvirvym/image/upload/v1702103595/98b0ecf8-7461-4e4e-bb02-5174d035d88a.png"
+            };
+            _repositoryManager.ChatRoom.Create(chatRoom);
+            await _repositoryManager.SaveAsync();
+
+            if (chatRoom.Id == 0)
+                throw new Exception("Không thể tạo chat");
+
+            await JoinRoom(admin_id, chatRoom.Id);
+            await JoinRoom(report.IdUserFrom.Value, chatRoom.Id);
+            await JoinRoom(report.IdUserTo.Value, chatRoom.Id);
+
+            return chatRoom.Id;
+        }
+
         public async Task<List<ChatInfos>> GetChatRoom(int transactionId)
         {
             var slots = await _repositoryManager.Slot
@@ -117,7 +153,8 @@ namespace Services.Implements
                     CoverImg = x.ChatRoom.CoverImage,
                     LastSendMsg = x.ChatRoom.Messages.Count > 0 ? x.ChatRoom.Messages.Select(y => $"{y.User.FullName}: {y.Message}").Last() : string.Empty,
                     LastSendTime = x.ChatRoom.Messages.Count > 0 ? x.ChatRoom.Messages.Select(y => y.SendTime).Last().ToString("dd/MM/yyyy HH:mm") : string.Empty,
-                    RoomId = x.RoomId.Value
+                    RoomId = x.RoomId.Value,
+                    TransactionId = x.ChatRoom.Code.Contains("Transaction") ? int.Parse(x.ChatRoom.Code.Substring(x.ChatRoom.Code.IndexOf("-"))+1) : null
                 }).ToList();
             }
             return res;

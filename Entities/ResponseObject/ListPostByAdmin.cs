@@ -14,5 +14,6 @@ namespace Entities.ResponseObject
         public string? RoleUser {  get; set; }
         public bool? Status { get; set; }
         public string? TotalViewer { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 }

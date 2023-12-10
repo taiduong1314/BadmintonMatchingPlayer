@@ -11,6 +11,7 @@ namespace Services.Interfaces
 {
     public interface IChatServices
     {
+        Task<int> CreateRoom(int admin_id, int reportId);
         Task<List<ChatInfos>> GetChatRoom(int transactionId);
         Task<List<MessageDetail>> GetRoomDetail(int roomIds, int pageSize, int pageNum);
         Task<List<JoinedChatRoom>> GetRoomOfUser(int user_id);

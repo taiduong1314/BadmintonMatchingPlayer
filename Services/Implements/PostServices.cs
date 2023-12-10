@@ -282,7 +282,8 @@ namespace Services.Implements
                     IdUser = x.IdUserTo,
                     RoleUser = x.IdUserToNavigation.UserRoleNavigation.RoleName,
                     Status = x.Status,
-                    TotalViewer = x.TotalViewer
+                    TotalViewer = x.TotalViewer,
+                    IsDeleted = x.IsDeleted
                 }).ToList();
         }
 
@@ -409,7 +410,7 @@ namespace Services.Implements
 
             foreach (var item in transactions)
             {
-                var post = await _repositoryManager.Post.FindByCondition(x => x.Slots.Any(y => y.TransactionId == item.Id), false)
+                var post = await _repositoryManager.Post.FindByCondition(x => x.Slots.Any(y => y.TransactionId == item.Id) && !x.IsDeleted, false)
                     .Include(x => x.Slots.Where(y => item.ContentSlots.Contains(y.ContentSlot)))
                     .ThenInclude(x => x.User)
                     .FirstOrDefaultAsync();

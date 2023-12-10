@@ -85,5 +85,30 @@ namespace BadmintonMatching.Controllers
                 return Ok(new SuccessObject<object> { Data = null, Message = "Fail to saved message" });
             }
         }
+
+        [HttpPost]
+        [Route("by_admin/{admin_id}/report/{report_id}")]
+        public async Task<IActionResult> CreateRoomFromReport(int admin_id, int report_id)
+        {
+            try
+            {
+                if (!_userServices.IsAdmin(admin_id))
+                {
+                    throw new Exception("Not admin to create");
+                }
+                int roomId = await _chatServices.CreateRoom(admin_id, report_id);
+
+                if(roomId == 0)
+                {
+                    throw new Exception("Fail to create room");
+                }
+
+                return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = new { RoomId = roomId} });
+            }
+            catch(Exception ex) 
+            {
+                return Ok(new SuccessObject<object> { Message = ex.Message });
+            }
+        }
     }
 }
