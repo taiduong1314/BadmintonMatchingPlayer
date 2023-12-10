@@ -12,8 +12,8 @@ namespace Entities.Migrations
                 name: "TotalViewer",
                 table: "Posts",
                 type: "int",
-                nullable: false,
-                defaultValue: 0,
+                nullable: true,
+                defaultValue: 50,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true);
