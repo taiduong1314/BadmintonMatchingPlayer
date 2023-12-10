@@ -906,5 +906,10 @@ namespace Services.Implements
         {
             return await _repositoryManager.User.FindByCondition(x => x.Id == user_id && x.UserRole == (int)UserRole.Staff, false).AnyAsync();
         }
+
+        public async Task<List<int>> GetSubcribeUser(int user_id)
+        {
+            return await _repositoryManager.Subscription.FindByCondition(x => x.UserSubId == user_id && x.IsSubcription == true, false).Select(x => x.UserId).ToListAsync();
+        }
     }
 }

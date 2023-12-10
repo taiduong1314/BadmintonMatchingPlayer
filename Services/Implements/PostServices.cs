@@ -584,5 +584,10 @@ namespace Services.Implements
 
             return blog;
         }
+
+        public async Task<int> GetUserId(int post_id)
+        {
+            return await _repositoryManager.Post.FindByCondition(x => x.Id == post_id, false).Select(x => x.IdUserTo.Value).FirstOrDefaultAsync();
+        }
     }
 }

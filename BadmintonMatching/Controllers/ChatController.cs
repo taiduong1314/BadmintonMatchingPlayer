@@ -17,14 +17,17 @@ namespace BadmintonMatching.Controllers
         private readonly IChatServices _chatServices;
         private readonly IHubContext<ChatHub> _chatHub;
         private readonly IUserServices _userServices;
+        private readonly INotificationServices _notificationServices;
 
         public ChatController(IChatServices chatServices, 
             IHubContext<ChatHub> chatHub,
-            IUserServices userServices)
+            IUserServices userServices,
+            INotificationServices notificationServices)
         {
             _chatServices = chatServices;
             _chatHub = chatHub;
             _userServices = userServices;
+            _notificationServices = notificationServices;
         }
 
         [HttpPost]

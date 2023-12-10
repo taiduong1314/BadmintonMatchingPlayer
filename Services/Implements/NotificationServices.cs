@@ -120,23 +120,82 @@ namespace Services.Implements
             _repositoryManager.Notification.Create(savedNoti);
             await _repositoryManager.SaveAsync();
 
-            if(user.LogingingDevice == null)
-            {
-                return new NotiResponseModel 
-                {
-                    IsSuccess = true,
-                    Message = "User don't have device to send noti"
-                };
-            }
+            //if(user.LogingingDevice == null)
+            //{
+            //    return new NotiResponseModel 
+            //    {
+            //        IsSuccess = true,
+            //        Message = "User don't have device to send noti"
+            //    };
+            //}
 
-            var res = await SendNotification(new NotificationModel
+            //var res = await SendNotification(new NotificationModel
+            //{
+            //    Body = message,
+            //    DeviceId = user.LogingingDevice,
+            //    IsAndroiodDevice = user.IsAndroidDevice,
+            //    Title = title
+            //});
+
+            //return res;
+
+            return new NotiResponseModel
             {
-                Body = message,
-                DeviceId = user.LogingingDevice,
-                IsAndroiodDevice = user.IsAndroidDevice,
-                Title = title
-            });
-            return res;
+                IsSuccess = true,
+                Message = "Send Success"
+            };
+        }
+
+        public async Task<NotiResponseModel> SendNotification(List<int> userIds, string title, string message, NotificationType type, int referenceInfo)
+        {
+            foreach(var userId in userIds)
+            {
+                var user = await _repositoryManager.User.FindByCondition(x => x.Id == userId, false).FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    throw new Exception("User not found");
+                }
+
+                var savedNoti = new Notification
+                {
+                    Content = message,
+                    IsRead = false,
+                    NotiDate = DateTime.UtcNow.AddHours(7),
+                    Title = title,
+                    UserId = userId,
+                    About = (int)type,
+                    ReferenceInfo = referenceInfo
+                };
+
+                _repositoryManager.Notification.Create(savedNoti);
+
+                //if(user.LogingingDevice == null)
+                //{
+                //    return new NotiResponseModel 
+                //    {
+                //        IsSuccess = true,
+                //        Message = "User don't have device to send noti"
+                //    };
+                //}
+
+                //var res = await SendNotification(new NotificationModel
+                //{
+                //    Body = message,
+                //    DeviceId = user.LogingingDevice,
+                //    IsAndroiodDevice = user.IsAndroidDevice,
+                //    Title = title
+                //});
+
+                //return res;
+            }
+            await _repositoryManager.SaveAsync();
+
+            return new NotiResponseModel
+            {
+                IsSuccess = true,
+                Message = "Send Success"
+            };
         }
     }
 }

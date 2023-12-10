@@ -510,5 +510,13 @@ namespace BadmintonMatching.Controllers
                 return Ok(new SuccessObject<object> { Message = ex.Message });
             }
         }
+
+        [HttpPost]
+        [Route("notice/to/{user_id}")]
+        public async Task<IActionResult> SendNotices(int user_id, NoticesRequest info)
+        {
+            await _notificationServices.SendNotification(user_id, "Nhắc nhở từ Admin", info.Message, NotificationType.User, user_id);
+            return Ok(new SuccessObject<object> { Message = "Nhắc nhở thành công", Data = true });
+        }
     }
 }

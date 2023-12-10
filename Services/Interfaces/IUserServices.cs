@@ -51,5 +51,6 @@ namespace Services.Interfaces
         Task<ManagedDetailUser> GetManagedProfile(int user_id);
         Task<bool> UpdateRole(int user_id, UserRole role_id);
         Task<bool> IsStaff(int user_id);
+        Task<List<int>> GetSubcribeUser(int user_id);
     }
 }

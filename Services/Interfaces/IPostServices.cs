@@ -22,5 +22,6 @@ namespace Services.Interfaces
         PostDetail GetPostDetail(int id_post);
         List<PostInfomation> GetSuggestionPost(int user_id);
         Task<string> HandleImg(string imgUrl);
+        Task<int> GetUserId(int post_id);
     }
 }

@@ -2,6 +2,7 @@
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
+using Services.Implements;
 using Services.Interfaces;
 using System.Text.Json.Nodes;
 
@@ -18,11 +19,13 @@ namespace BadmintonMatching.Controllers
         };
         private readonly IPostServices _postServices;
         private readonly IUserServices _userServices;
+        private readonly INotificationServices _notificationServices;
 
-        public PostController(IPostServices postServices, IUserServices userServices)
+        public PostController(IPostServices postServices, IUserServices userServices, INotificationServices notificationServices)
         {
             _postServices = postServices;
             _userServices = userServices;
+            _notificationServices = notificationServices;
         }
 
         [HttpGet]
@@ -52,12 +55,16 @@ namespace BadmintonMatching.Controllers
             }
             else if (postId != 0)
             {
+                var subIds = await _userServices.GetSubcribeUser(user_id);
+                await _notificationServices.SendNotification(subIds, "Hoạt động mới", "Một người mà bạn đăng kí vừa đăng bài", NotificationType.Post, postId);
+
                 return Ok(new SuccessObject<object> { Data = new { PostId = postId }, Message = Message.SuccessMsg });
             }
             else
             {
                 return Ok(new SuccessObject<object> { Message = "Save fail" });
             }
+
         }
 
         [HttpGet]
@@ -182,6 +189,15 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Data = null, Message = "Invalid post" });
             }
+        }
+
+        [HttpPost]
+        [Route("notice/to/{post_id}")]
+        public async Task<IActionResult> SendNotices(int post_id, NoticesRequest info)
+        {
+            var user_id = await _postServices.GetUserId(post_id);
+            await _notificationServices.SendNotification(user_id, "Nhắc nhở từ Admin", info.Message, NotificationType.User, post_id);
+            return Ok(new SuccessObject<object> { Message = "Nhắc nhở thành công", Data = true });
         }
     }
 }
