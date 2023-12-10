@@ -8,5 +8,6 @@
         public string? Role { get; set; }
         public string? Status { get; set; }
         public string? LastLogin { get; set; }
+        public bool IsBanded { get; set; }
     }
 }

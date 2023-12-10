@@ -558,7 +558,8 @@ namespace Services.Implements
                     LastLogin = x.LastLoginDate.Value.ToString("dd/MM/yyyy"),
                     Role = x.UserRole == (int)UserRole.User ? "User" : x.UserRole == (int)UserRole.Staff ? "Staff" : "Admin",
                     Status = "Active",
-                    UserId = x.Id
+                    UserId = x.Id,
+                    IsBanded = x.IsBanFromLogin
                 })
                 .ToList();
             return res;

@@ -13,7 +13,7 @@
         public bool IsDeleted  { get; set; }
         public int? IdUserTo { get; set; }
         public string? Title { get; set; }
-        public string? TotalViewer { get; set; }
+        public int TotalViewer { get; set; }
         public string? AddressSlot { get; set; }
         public string? LevelSlot { get; set; }
         public string? CategorySlot { get; set; }

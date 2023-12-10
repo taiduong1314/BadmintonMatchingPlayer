@@ -282,7 +282,7 @@ namespace Services.Implements
                     IdUser = x.IdUserTo,
                     RoleUser = x.IdUserToNavigation.UserRoleNavigation.RoleName,
                     Status = x.Status,
-                    TotalViewer = x.TotalViewer,
+                    TotalViewer = x.TotalViewer.ToString(),
                     IsDeleted = x.IsDeleted
                 }).ToList();
         }
@@ -347,12 +347,14 @@ namespace Services.Implements
                 .FindByCondition(x =>
                 x.Id == id_post
                 && !x.IsDeleted
-                && x.IdType == (int)PostType.MatchingPost, false)
+                && x.IdType == (int)PostType.MatchingPost, true)
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
                 .FirstOrDefault();
             if (x != null)
             {
+                x.TotalViewer++;
+                _repositoryManager.SaveAsync().Wait();
                 var postDetail = new PostDetail(x);
                 postDetail.ImageUrls = x.ImageUrls.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
                 return postDetail;
@@ -538,8 +540,8 @@ namespace Services.Implements
                 IsDeleted = false,
                 ImageUrls = urls,
                 AddressSlot = info.Summary,
-                ImgUrl = await HandleImg(info.HighlightImg)
-
+                ImgUrl = await HandleImg(info.HighlightImg),
+                TotalViewer = 50,
             };
 
             _repositoryManager.Post.Create(post);
