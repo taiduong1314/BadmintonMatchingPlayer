@@ -21,7 +21,7 @@
         public string? Amount { get; set; }
         public int? Status { get; set; }
         public DateTime? Time { get; set; }
-        public string? Type { get; set; }
+      public string? Type { get; set; }
 
         public virtual Wallet? IdWalletNavigation { get; set; }
     }
