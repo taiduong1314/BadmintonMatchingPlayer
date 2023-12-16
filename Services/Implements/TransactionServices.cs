@@ -31,7 +31,7 @@ namespace Services.Implements
 
             foreach(var slot in slots)
             {
-                var slotTime = DateTime.Parse(slot.ContentSlot);
+                var slotTime = DateTime.ParseExact(slot.ContentSlot, "dd/MM/yyyy", CultureInfo.InvariantCulture);
                 if(slotTime > deadLine)
                 {
                     deadLine = slotTime;
