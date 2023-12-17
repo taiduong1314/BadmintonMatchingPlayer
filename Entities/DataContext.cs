@@ -34,7 +34,7 @@ namespace Entities
         public virtual DbSet<UserChatRoom> UserChatRooms { get; set; } = null!;
         public virtual DbSet<Messages> Messages { get; set; } = null!;
         public virtual DbSet<HangfireJob> ScheduledJob { get; set; } = null!;
-
+        public virtual DbSet<Setting> Settings { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -356,7 +356,7 @@ namespace Entities
 
                 entity.Property(e => e.TotalRate).HasColumnName("totalRate");
 
-               
+
 
                 entity.Property(e => e.UserName).HasColumnName("userName");
 
@@ -445,6 +445,21 @@ namespace Entities
                     .HasForeignKey(d => d.IdUser)
                     .HasConstraintName("FK_Wishlist_Users");
             });
+
+
+            modelBuilder.Entity<Setting>(entity =>
+            {
+                entity.ToTable("Settings");
+
+                entity.Property(e => e.SettingId).HasColumnName("settingId");
+
+                entity.Property(e => e.SettingName)
+                    .HasColumnName("settingName");
+
+                entity.Property(e => e.SettingAmount).HasColumnName("settingAmount");
+            });
+
+
 
             OnModelCreatingPartial(modelBuilder);
         }
