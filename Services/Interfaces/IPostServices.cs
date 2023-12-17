@@ -23,5 +23,7 @@ namespace Services.Interfaces
         List<PostInfomation> GetSuggestionPost(int user_id);
         Task<string> HandleImg(string imgUrl);
         Task<int> GetUserId(int post_id);
+        Task<bool> CheckPostInMonth(int user_id);
+        Task<int> UpdateFreePosting(int userId);
     }
 }
