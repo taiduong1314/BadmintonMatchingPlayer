@@ -228,16 +228,16 @@ namespace Services.Implements
                 res[i] = cPost;
             }
 
-           var returnList =new List<PostOptional>();
-            foreach(var postOptional in res)
-            {
-                if(postOptional.QuantitySlot!=null && postOptional.QuantitySlot != 0) 
-                {
-                    returnList.Add(postOptional);
-                }
-            }
+           //var returnList =new List<PostOptional>();
+           // foreach(var postOptional in res)
+           // {
+           //     if(postOptional.QuantitySlot!=null && postOptional.QuantitySlot != 0) 
+           //     {
+           //         returnList.Add(postOptional);
+           //     }
+           // }
 
-            return returnList;
+            return res;
         }
 
         private bool IsPostValid(Post post)
