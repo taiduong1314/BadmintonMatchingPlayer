@@ -195,7 +195,7 @@ namespace Services.Implements
         }
         public async Task<List<PostOptional>> GetAllPost()
         {
-            var listpost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, false).Include(x => x.IdUserToNavigation).ToListAsync();
+            var listpost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, false).OrderByDescending(x => x.SavedDate).Include(x => x.IdUserToNavigation).ToListAsync();
             var res = new List<PostOptional>();
             foreach (var post in listpost)
             {
@@ -219,7 +219,8 @@ namespace Services.Implements
             for (var i = 0; i < res.Count(); i++)
             {
                 var cPost = res[i];
-                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).OrderByDescending(x=>x.SavedDate).Include(x => x.Slots).FirstOrDefault();
+                
                 if (post != null)
                 {
                     
@@ -236,6 +237,8 @@ namespace Services.Implements
                     returnList.Add(postOptional);
                 }
             }
+
+            
 
             return returnList;
         }
@@ -779,6 +782,132 @@ namespace Services.Implements
             {
                 return -1;
             }
+        }
+
+        public async Task<int> UpdateBoost(int userId)
+        {
+            try
+            {
+                int adminId = 1;
+                var SettingBooking = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == ((int)SettingType.PostingSetting), false).FirstOrDefaultAsync();
+                var boostfee = SettingBooking.SettingAmount;
+                var userWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == userId, true).FirstOrDefaultAsync();
+
+                var userTrans = new Transaction
+                {
+                    Id = 0,
+                    DeadLine = null,
+                    IdUser = userId,
+                    MoneyTrans = boostfee,
+                    MethodTrans = "boosting_free",
+                    TypeTrans = "boosting_free",
+                    TimeTrans = DateTime.UtcNow.AddHours(7),
+                    Status = (int)TransactionStatus.PaymentSuccess,
+                };
+                _repositoryManager.Transaction.Create(userTrans);
+                await _repositoryManager.SaveAsync();
+
+                var UsertranHistory = new HistoryTransaction
+                {
+                    IdUserFrom = userId,
+                    IdUserTo = adminId,
+                    IdTransaction = userTrans.Id,
+                    MoneyTrans = boostfee,
+                    Status = true,
+                    Deadline = null
+                };
+                _repositoryManager.HistoryTransaction.Create(UsertranHistory);
+
+                var adminWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == adminId, true).FirstOrDefaultAsync();
+                //Create admin transaction
+                var admintrans = new Transaction
+                {
+                    Id = 0,
+                    DeadLine = null,
+                    IdUser = adminId,
+                    MoneyTrans = boostfee,
+                    MethodTrans = "boosting_free",
+                    TypeTrans = "boosting_free",
+                    TimeTrans = DateTime.UtcNow.AddHours(7),
+                    Status = (int)TransactionStatus.PaymentSuccess,
+                };
+                _repositoryManager.Transaction.Create(admintrans);
+                await _repositoryManager.SaveAsync();
+
+                var adminTranHistory = new HistoryTransaction
+                {
+                    IdUserFrom = userId,
+                    IdUserTo = adminId,
+                    IdTransaction = admintrans.Id,
+                    MoneyTrans = boostfee,
+                    Status = true,
+                    Deadline = null
+                };
+                _repositoryManager.HistoryTransaction.Create(adminTranHistory);
+
+                //Create admin history wallet
+                if (adminWallet != null)
+                {
+                    adminWallet.Balance += boostfee;
+
+
+                    _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                    {
+                        Amount = boostfee.ToString(),
+                        IdUser = adminId,
+                        IdWallet = adminWallet.Id,
+                        Status = (int)HistoryWalletStatus.Success,
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = "Nhận tiền đẩy bài đăng của đơn hàng :  " + userTrans.Id,
+                    });
+                }
+
+
+                if (userWallet != null)
+                {
+                    userWallet.Balance -= boostfee;
+
+
+                    _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                    {
+                        Amount = "-" + boostfee.ToString(),
+                        IdUser = userWallet.IdUser,
+                        IdWallet = userWallet.Id,
+                        Status = (int)HistoryWalletStatus.Success,
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = "Thanh toán phí đẩy bài đăng"
+                    });
+                }
+
+                await _repositoryManager.SaveAsync();
+                return 1;
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+        }
+
+        public async Task<bool> BoostPost(int idPost)
+        {
+            try
+            {
+                var post =await _repositoryManager.Post.FindByCondition(x => x.Id == idPost, false).FirstOrDefaultAsync();
+                if (post != null)
+                {
+                    post.SavedDate= DateTime.Now;
+                    _repositoryManager.Post.Update(post);
+                    await _repositoryManager.SaveAsync();
+                  
+                }
+            }
+            catch (Exception e)
+            {
+
+                return false;
+            }
+
+            return true;
         }
     }
 }

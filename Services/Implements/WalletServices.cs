@@ -1,5 +1,6 @@
 ﻿using Entities.Models;
 using Entities.ResponseObject;
+using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
 using System;
@@ -80,7 +81,22 @@ namespace Services.Implements
             return -2;
         }
 
+        public async Task<Wallet> getWallerByUserId(int userId)
+        {
+            try
+            {
+                var userWallet =await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == userId,false).FirstOrDefaultAsync();
+                if( userWallet != null)
+                {
+                    return userWallet;
+                }
+            }
+            catch (Exception)
+            {
 
-
+                throw;
+            }
+            return null;
+        }
     }
 }

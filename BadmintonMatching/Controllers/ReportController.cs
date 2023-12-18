@@ -1,4 +1,7 @@
-﻿using Entities.Models;
+﻿using System.Text;
+using CloudinaryDotNet;
+using System.Web;
+using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
@@ -69,5 +72,26 @@ namespace BadmintonMatching.Controllers
             var reports = await _reportServices.GetReportByType((ReportCreateType)report_type);
             return Ok(new SuccessObject<List<Reports>> { Data = reports, Message = Message.SuccessMsg });
         }
+
+        [HttpGet]
+        [Route("{month}${year}/report_income_inMonth")]
+        public async Task<IActionResult> GetReportIncomeInMonth(string month,string year)
+        {
+            var reportIncomeModel =  _reportServices.GetIncomeByInMonth(month, year);
+            return Ok(new SuccessObject<ReportIncomeModel> { Data = reportIncomeModel, Message = Message.SuccessMsg });
+        }
+        [HttpGet]
+        [Route("{startDate}&{endDate}/report_income_Month")]
+        public async Task<IActionResult> GetReportIncomeMonth(string startDate, string endDate)
+
+
+        {
+            startDate = HttpUtility.UrlDecode((startDate));
+            endDate= HttpUtility.UrlDecode((endDate));
+
+            var reportIncomeModel = _reportServices.GetIncomeByMonth( startDate, endDate);
+            return Ok(new SuccessObject<ReportIncomeModel> { Data = reportIncomeModel, Message = Message.SuccessMsg });
+        }
+
     }
 }

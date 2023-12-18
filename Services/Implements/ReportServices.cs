@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace Services.Implements
 {
+
     public class ReportServices : IReportServices
     {
         private readonly IRepositoryManager _repositoryManager;
@@ -183,6 +184,58 @@ namespace Services.Implements
             }
 
             return res;
+        }
+
+        public ReportIncomeModel GetIncomeByInMonth(string month, string year) 
+        {
+            var adminId = 1;
+            var listHistoryWallet =  _repositoryManager.HistoryWallet.FindByCondition(x => x.Time.Value.Month.ToString().Equals(month)
+            && x.Time.Value.Year.ToString().Equals(year) && x.IdUser== adminId, false)
+                .Select(x => new HistoryWalletModel
+            {
+                IdWallet = x.IdWallet,
+                Id = x.Id,
+                IdUser = x.IdUser,
+                Amount = x.Amount,
+                Status = ((HistoryWalletStatus)x.Status).ToString(),
+                Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
+                Type = x.Type
+            }).ToList();
+            var total = listHistoryWallet.Sum(x => Convert.ToDecimal(x.Amount));
+
+            var reportIncome = new ReportIncomeModel();
+            reportIncome.historyWalletModels = listHistoryWallet;
+            reportIncome.Total = total;
+
+            return reportIncome;
+        }
+
+
+        public ReportIncomeModel GetIncomeByMonth(string startDate, string endDate)
+        {
+            var adminId = 1;
+            var dStartDate=DateTime.Parse(startDate);
+            var dEndDate = DateTime.Parse(endDate);
+
+            var listHistoryWallet = _repositoryManager.HistoryWallet.FindByCondition(x => x.Time>= dStartDate && x.Time<= dEndDate && x.IdUser == adminId, false)
+                .Select(x => new HistoryWalletModel
+                {
+                    IdWallet = x.IdWallet,
+                    Id = x.Id,
+                    IdUser = x.IdUser,
+                    Amount = x.Amount,
+                    Status = ((HistoryWalletStatus)x.Status).ToString(),
+                    Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
+                    Type = x.Type
+                }).ToList();
+
+            var total = listHistoryWallet.Sum(x=> Convert.ToDecimal(x.Amount));
+
+            var reportIncome = new ReportIncomeModel();
+            reportIncome.historyWalletModels = listHistoryWallet;
+            reportIncome.Total = total;
+
+            return reportIncome;
         }
     }
 }

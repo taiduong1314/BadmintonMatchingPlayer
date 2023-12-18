@@ -22,15 +22,17 @@ namespace BadmintonMatching.Controllers
         private readonly IPostServices _postServices;
         private readonly IUserServices _userServices;
         private readonly INotificationServices _notificationServices;
+        private readonly IRepositoryManager _repositoryManager;
 
 
         public PostController(IPostServices postServices, IUserServices userServices,
-            INotificationServices notificationServices
+            INotificationServices notificationServices, IRepositoryManager repositoryManager
             )
         {
             _postServices = postServices;
             _userServices = userServices;
             _notificationServices = notificationServices;
+            _repositoryManager = repositoryManager;
 
         }
 
@@ -73,7 +75,7 @@ namespace BadmintonMatching.Controllers
 
         }
 
-        [HttpGet]
+        [HttpPut]
         [Route("{user_id}/create_post_charge")]
         public async Task<IActionResult> CheckAvailableWalletMoney(int user_id)
         {
@@ -233,10 +235,12 @@ namespace BadmintonMatching.Controllers
             return Ok(new SuccessObject<object> { Message = "Nhắc nhở thành công", Data = true });
         }
 
-        [HttpGet]
+        [HttpPut]
         [Route("{user_id}/check_user_post")]
         public async Task<IActionResult> CheckUserPostInMonth(int user_id)
         {
+            var setting = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == (int)SettingType.NumberPostFree,false).FirstOrDefaultAsync();
+            var numberPostFee = (int)setting.SettingAmount.Value;
             try
             {
                 bool enought = await _postServices.CheckPostInMonth(user_id);
@@ -250,8 +254,9 @@ namespace BadmintonMatching.Controllers
                     return Ok(new SuccessObject<CreateChargerResponse> {
                         Data = new CreateChargerResponse()
                         {
-                            isUser = user_id,
-                        }, Message = "The limit for free posts has been exceeded for the month" });
+                           isUser = user_id,
+                        }, Message = "Bạn đã hết "+ numberPostFee.ToString()+ " lượt đăng bài miễn phí trong tháng này !"
+                    } );
 
                 }
 
@@ -260,6 +265,47 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Data = null, Message = "Invalid post" });
             }
+        }
+
+ 
+        [HttpPut]
+        [Route("{idPost}/create_boost_charge")]
+        public async Task<IActionResult> CheckAvailableWalletMoneyForBoost(int idPost)
+        {
+
+            var updateWalletCheck = await _postServices.UpdateBoost(idPost);
+             if (updateWalletCheck == -1)
+            {
+                return Ok(new SuccessObject<object> { Message = $"Update Error" });
+            }
+            return Ok(new SuccessObject<CreateChargerResponse>
+            {
+                Data = new CreateChargerResponse
+                {
+                    idPost = idPost,
+                },
+                Message = Message.SuccessMsg
+            });
+        }
+
+
+        [HttpPut]
+        [Route("{postId}/boost_post")]
+        public async Task<IActionResult> BoostPost(int postId)
+        {
+            var isSeccess = await _postServices.BoostPost(postId);
+                if (!isSeccess)
+                {
+                    return Ok(new SuccessObject<object> { Message = "Boost post fail !" });
+               }
+            return Ok(new SuccessObject<CreateChargerResponse>
+            {
+                Data = new CreateChargerResponse()
+                {
+                    isUser = postId,
+                },
+                Message = Message.SuccessMsg
+            });
         }
     }
 }

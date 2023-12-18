@@ -109,5 +109,19 @@ namespace BadmintonMatching.Controllers
 
             return Ok(new SuccessObject<List<HistoryWalletModel>> { Data = history, Message = "No history found" });
         }
+
+        [HttpGet]
+        [Route("{user_id}/user_wallet")]
+        public async Task<IActionResult> GetUserWaller(int user_id)
+        {
+            var userWallet =await _walletServices.getWallerByUserId(user_id);
+            if (userWallet.Id!=0)
+            {
+                return Ok(new SuccessObject<object> {Data= new { balance = userWallet.Balance }, Message= Message.SuccessMsg});
+            }      
+            {
+                return Ok(new SuccessObject<object> { Data = null, Message = "Không tìm thấy ví có id người dùng là "+user_id.ToString() });
+            }
+        }
     }
 }

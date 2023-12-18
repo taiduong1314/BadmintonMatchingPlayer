@@ -1,4 +1,5 @@
-﻿using Entities.ResponseObject;
+﻿using Entities.Models;
+using Entities.ResponseObject;
 
 namespace Services.Interfaces
 {
@@ -6,5 +7,6 @@ namespace Services.Interfaces
     {
         List<HistoryWalletModel> GetHistory(int user_id);
         decimal UpdateBalance(decimal? changes, int user_id, bool isFromTran);
+        Task<Wallet> getWallerByUserId(int userId);
     }
 }

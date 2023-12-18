@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Entities.ResponseObject
 {
-    public class CreateChargerResponse
+    public class ReportIncomeModel
     {
-        public int isUser { get; set; }
-        public int idPost { get; set; }
-        public decimal postingFree { get; set; }
-
+      public  List<HistoryWalletModel> historyWalletModels { get; set; }
+        public decimal Total { get; set; }
     }
+
 }
