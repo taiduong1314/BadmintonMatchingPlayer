@@ -3,9 +3,12 @@ using CloudinaryDotNet.Actions;
 using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
+using System.Globalization;
+using System.Net.WebSockets;
 using System.Xml.Linq;
 
 namespace Services.Implements
@@ -27,10 +30,13 @@ namespace Services.Implements
     public class PostServices : IPostServices
     {
         private readonly IRepositoryManager _repositoryManager;
+    
 
         public PostServices(IRepositoryManager repositoryManager)
         {
             _repositoryManager = repositoryManager;
+            
+            
         }
 
         public async Task<string> HandleImg(string base64encodedstring)
@@ -126,6 +132,8 @@ namespace Services.Implements
             }
         }
 
+
+
         public bool DeletePost(int post_id)
         {
             var post = _repositoryManager.Post.FindByCondition(x => x.Id == post_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true).FirstOrDefault();
@@ -141,9 +149,9 @@ namespace Services.Implements
         public List<PostOptional> GetListOptionalPost()
         {
             var optList = _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true)
-                .OrderByDescending(x => x.SavedDate)
-                .Include(x => x.IdUserToNavigation)
-                .ToList();
+               .OrderByDescending(x => x.SavedDate)
+               .Include(x => x.IdUserToNavigation)
+               .ToList();
             var res = new List<PostOptional>();
             foreach (var post in optList)
             {
@@ -174,7 +182,16 @@ namespace Services.Implements
                 }
                 res[i] = cPost;
             }
-            return res;
+
+            var returnList = new List<PostOptional>();
+            foreach (var postOptional in res)
+            {
+                if (postOptional.QuantitySlot != null && postOptional.QuantitySlot != 0)
+                {
+                    returnList.Add(postOptional);
+                }
+            }         
+            return returnList;
         }
         public async Task<List<PostOptional>> GetAllPost()
         {
@@ -205,37 +222,65 @@ namespace Services.Implements
                 var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
                 if (post != null)
                 {
+                    
                     GetPostOptional(post, ref cPost);
                 }
                 res[i] = cPost;
             }
-            return res;
+
+           var returnList =new List<PostOptional>();
+            foreach(var postOptional in res)
+            {
+                if(postOptional.QuantitySlot!=null && postOptional.QuantitySlot != 0) 
+                {
+                    returnList.Add(postOptional);
+                }
+            }
+
+            return returnList;
         }
 
         private bool IsPostValid(Post post)
         {
             var lastSlot = new SlotInfo(post.SlotsInfo.Split(";")[0]);
+         
+
             foreach (var slot in post.SlotsInfo.Split(";"))
             {
                 if (slot != string.Empty)
                 {
                     var slotInfo = new SlotInfo(slot);
+
                     var joinSlot = _repositoryManager.Slot
                         .FindByCondition(x =>
                         !x.IsDeleted &&
                         x.ContentSlot == slotInfo.StartTime.Value.ToString("dd/MM/yyyy") &&
                         x.IdPost == post.Id, false).Count();
-                    if (slotInfo.AvailableSlot - joinSlot <= 0)
+
+
+                    if (slotInfo.AvailableSlot - joinSlot >= 0 )
                     {
-                        return false;
+                        if (slotInfo.StartTime > lastSlot.StartTime)
+                        {
+                            lastSlot = slotInfo;
+                        }
                     }
-                    if(slotInfo.StartTime > lastSlot.StartTime)
+                    else
                     {
-                        lastSlot = slotInfo;
+                        if (slotInfo.AvailableSlot - joinSlot <= 0)
+                        {
+                            return false;
+                        }
+                        if (slotInfo.StartTime > lastSlot.StartTime)
+                        {
+                            lastSlot = slotInfo;
+                        }
                     }
+
+                  
                 }
             }
-            if(lastSlot.StartTime < DateTime.UtcNow.AddHours(-7))
+            if (lastSlot.StartTime < DateTime.UtcNow.AddHours(-7))
             {
                 return false;
             }
@@ -244,10 +289,11 @@ namespace Services.Implements
 
         private void GetPostOptional(Post post, ref PostOptional optPost)
         {
-            var finalInfo = new SlotInfo();
+            List<SlotInfor> l_slotInfor = new List<SlotInfor>();
             int joinedSlot = 0;
             foreach (var slot in post.SlotsInfo.Split(";"))
             {
+                var finalInfo = new SlotInfo();
                 if (slot != string.Empty)
                 {
                     var slotInfo = new SlotInfo(slot);
@@ -262,12 +308,34 @@ namespace Services.Implements
                         joinedSlot = joinSlot;
                     }
                 }
+
+                SlotInfor slotInfor = new SlotInfor()
+                {
+                    IdPost = optPost.IdPost,
+                    Days = finalInfo.StartTime.Value.ToString("dd/MM/yyyy"),
+                    StartTime = finalInfo.StartTime.Value.ToString("HH:mm"),
+                    EndTime = finalInfo.EndTime.Value.ToString("HH:mm"),
+                    QuantitySlot = finalInfo.AvailableSlot - joinedSlot,
+                    Price = finalInfo.Price
+
+                };
+                DateTime slotDateTime = DateTime.ParseExact(slotInfor.Days + " " + slotInfor.StartTime, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                if (slotDateTime >= DateTime.UtcNow.AddHours(-7) && slotInfor.QuantitySlot>0 && slotInfor.QuantitySlot!=null)                               
+                {
+                    l_slotInfor.Add(slotInfor);
+                }
             }
-            optPost.Days = finalInfo.StartTime.Value.ToString("dd/MM/yyyy");
-            optPost.StartTime = finalInfo.StartTime.Value.ToString("HH:mm");
-            optPost.EndTime = finalInfo.EndTime.Value.ToString("HH:mm");
-            optPost.QuantitySlot = finalInfo.AvailableSlot - joinedSlot;
-            optPost.Price = finalInfo.Price;
+
+            l_slotInfor = l_slotInfor.OrderBy(s => s.Days).ToList();
+
+            if (l_slotInfor.Count != 0)
+            {
+                optPost.Days = l_slotInfor[0].Days;
+                optPost.StartTime = l_slotInfor[0].StartTime;
+                optPost.EndTime = l_slotInfor[0].EndTime;
+                optPost.QuantitySlot = l_slotInfor[0].QuantitySlot;
+                optPost.Price = l_slotInfor[0].Price;
+            }
         }
 
         public List<ListPostByAdmin> GetListPostByAdmin()
@@ -590,6 +658,127 @@ namespace Services.Implements
         public async Task<int> GetUserId(int post_id)
         {
             return await _repositoryManager.Post.FindByCondition(x => x.Id == post_id, false).Select(x => x.IdUserTo.Value).FirstOrDefaultAsync();
+        }
+
+        
+        public async Task<bool> CheckPostInMonth(int user_id)
+        {
+            var cmonth = DateTime.UtcNow.Month;
+            var numberPostFree = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == (int)SettingType.NumberPostFree,false).FirstOrDefaultAsync();
+            var listpost = await _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && x.SavedDate.Month == cmonth, false).ToListAsync();
+            if (listpost.Count() >= numberPostFree.SettingAmount)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public async Task<int> UpdateFreePosting(int userId)
+        {
+            try
+            {
+                int adminId = 1;
+                var SettingBooking = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == ((int)SettingType.PostingSetting), false).FirstOrDefaultAsync();
+                var postingFree = SettingBooking.SettingAmount;
+                var userWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == userId, true).FirstOrDefaultAsync();
+              
+                if(userWallet.Balance- postingFree < 0)
+                {
+                    return 0;
+                }
+
+                var userTrans = new Transaction
+                {
+                    Id = 0,
+                    DeadLine = null,
+                    IdUser = userId,
+                    MoneyTrans = postingFree,
+                    MethodTrans = "posting_free",
+                    TypeTrans = "posting_free",
+                    TimeTrans = DateTime.UtcNow.AddHours(7),
+                    Status = (int)TransactionStatus.PaymentSuccess,
+                };
+                _repositoryManager.Transaction.Create(userTrans);
+                await _repositoryManager.SaveAsync();
+
+                var UsertranHistory = new HistoryTransaction
+                {
+                    IdUserFrom = userId,
+                    IdUserTo = adminId,
+                    IdTransaction = userTrans.Id,
+                    MoneyTrans = postingFree,
+                    Status = true,
+                    Deadline = null
+                };
+                _repositoryManager.HistoryTransaction.Create(UsertranHistory);
+
+                var adminWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == adminId, true).FirstOrDefaultAsync();
+                //Create admin transaction
+                var admintrans = new Transaction
+                {
+                    Id = 0,
+                    DeadLine = null,
+                    IdUser = adminId,
+                    MoneyTrans = postingFree,
+                    MethodTrans = "posting_free",
+                    TypeTrans = "posting_free",
+                    TimeTrans = DateTime.UtcNow.AddHours(7),
+                    Status = (int)TransactionStatus.PaymentSuccess,
+                };
+                _repositoryManager.Transaction.Create(admintrans);
+               await _repositoryManager.SaveAsync();
+
+                var adminTranHistory = new HistoryTransaction
+                {
+                    IdUserFrom = userId,
+                    IdUserTo = adminId,
+                    IdTransaction = admintrans.Id,
+                    MoneyTrans = postingFree,
+                    Status = true,
+                    Deadline = null
+                };
+                _repositoryManager.HistoryTransaction.Create(adminTranHistory);
+
+                //Create admin history wallet
+                if (adminWallet != null)
+                {
+                    adminWallet.Balance += postingFree;
+
+
+                    _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                    {
+                        Amount = postingFree.ToString(),
+                        IdUser = adminId,
+                        IdWallet = adminWallet.Id,
+                        Status = (int)HistoryWalletStatus.Success,
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = "Nhận tiền hoa hồng book sân của đơn hàng :  " + userTrans.Id,
+                    });
+                }
+
+               
+                if (userWallet != null)
+                {
+                    userWallet.Balance -= postingFree;
+
+
+                    _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                    {
+                        Amount = "-"+postingFree.ToString(),
+                        IdUser = userWallet.IdUser,
+                        IdWallet = userWallet.Id,
+                        Status = (int)HistoryWalletStatus.Success,
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = "Thanh toán phí đăng bài"
+                    });
+                }
+
+                await _repositoryManager.SaveAsync();
+                return 1;
+            }catch(Exception e)
+            {
+                return -1;
+            }
         }
     }
 }

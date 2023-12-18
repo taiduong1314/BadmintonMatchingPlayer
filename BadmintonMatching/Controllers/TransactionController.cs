@@ -40,6 +40,8 @@ namespace BadmintonMatching.Controllers
             }
         }
 
+       
+
         [HttpPut]
         [Route("{tran_id}/status_info/{status_info}")]
         [ProducesResponseType(typeof(SuccessObject<List<Reports>>), 200)]

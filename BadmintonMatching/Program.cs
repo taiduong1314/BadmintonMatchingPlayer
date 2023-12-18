@@ -65,6 +65,8 @@ builder.Services.AddScoped<ITransactionServices, TransactionServices>();
 builder.Services.AddScoped<IChatServices, ChatService>();
 builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<INotificationServices, NotificationServices>();
+builder.Services.AddScoped<ISettingServices, SettingService>();
+
 
 builder.Services.AddHttpClient<FcmSender>();
 builder.Services.AddHttpClient<ApnSender>();
@@ -103,7 +105,7 @@ app.UseHangfireDashboard("/badminton_hangfire", new DashboardOptions
                 }
 });
 
-app.UseRouting(); 
+app.UseRouting();
 app.UseCors(acceptAllCors);
 
 app.UseAuthorization();

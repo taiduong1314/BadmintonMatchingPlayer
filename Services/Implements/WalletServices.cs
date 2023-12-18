@@ -38,7 +38,7 @@ namespace Services.Implements
             return histories;
         }
 
-        public decimal UpdateBalance(decimal changes, int user_id, bool isFromTran)
+        public decimal UpdateBalance(decimal? changes, int user_id, bool isFromTran)
         {
             var wallet = _repositoryManager.Wallet.FindByCondition(x => x.IdUser == user_id, true).FirstOrDefault();
             if (wallet != null)
@@ -79,5 +79,8 @@ namespace Services.Implements
             }
             return -2;
         }
+
+
+
     }
 }

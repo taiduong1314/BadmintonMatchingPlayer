@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using CloudinaryDotNet.Actions;
+using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Hangfire;
@@ -93,7 +94,7 @@ namespace Services.Implements
                 {
                     Id = x.Id,
                     BuyerName = x.IdUserNavigation.FullName,
-                    PayTime = x.TimeTrans.Value.ToString("f"),
+                    PayTime = x.TimeTrans.Value.ToString("dd/MM/yyyy HH:mm"),
                     SlotCount = x.Slots.Count,
                     Slots = x.Slots.Select(y => new SlotBuy
                     {
@@ -104,7 +105,7 @@ namespace Services.Implements
                     TranStatus = (TransactionStatus)x.Status
                 }).FirstOrDefaultAsync();
 
-            tran.IsCancel = tran.Slots.Select(x => DateTime.ParseExact(x.PlayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture)).Min() > DateTime.UtcNow.AddHours(7)
+            tran.IsCancel = tran.Slots.Select(x => DateTime.ParseExact(x.PlayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture)).Min() > DateTime.Now
                 && (tran.TranStatus == TransactionStatus.Processing || tran.TranStatus == TransactionStatus.PaymentSuccess);
 
             if (tran != null && tran.Slots != null && tran.Slots[0] != null)
@@ -187,6 +188,8 @@ namespace Services.Implements
                 .Include(x => x.IdSlotNavigation)
                 .ThenInclude(x => x.IdPostNavigation)
                 .FirstOrDefaultAsync();
+
+
             if (tran != null)
             {
                 if (tranStatus == TransactionStatus.PaymentSuccess)
@@ -194,7 +197,10 @@ namespace Services.Implements
                     var deadline = DateTime.SpecifyKind(tran.DeadLine.Value, DateTimeKind.Local);
                     var scheduledId = BackgroundJob.Schedule(() => UpdateStatus(tran.Id, TransactionStatus.Played), deadline);
                     var newJob = new HangfireJob { ScheduledId = scheduledId, TransactionId = tran.Id };
-                    _repositoryManager.HangfireJob.Create(newJob);
+                  _repositoryManager.HangfireJob.Create(newJob);
+
+
+
                     await _repositoryManager.SaveAsync();
                 }
                 else if (tranStatus == TransactionStatus.Reporting)
@@ -210,34 +216,88 @@ namespace Services.Implements
                 }
                 else if (tranStatus == TransactionStatus.Played)
                 {
+
+                    int adminId = 1;
+
                     var idUserTo = await _repositoryManager.Slot
                         .FindByCondition(x => x.TransactionId == tran.Id, false)
                         .Include(x => x.IdPostNavigation)
                         .Select(x => x.IdPostNavigation.IdUserTo)
                         .FirstOrDefaultAsync();
 
-                    var tranHistory = new HistoryTransaction
+                    var SettingBooking = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == ((int)SettingType.BookingSetting), false).FirstOrDefaultAsync();
+                    var Userbalance = (tran.MoneyTrans * (100 - SettingBooking.SettingAmount) / 100);
+                    var AdminBalance = tran.MoneyTrans - Userbalance;
+
+                    var UsertranHistory = new HistoryTransaction
                     {
                         IdUserFrom = tran.IdUser,
                         IdUserTo = idUserTo,
                         IdTransaction = tran.Id,
-                        MoneyTrans = tran.MoneyTrans,
+                        MoneyTrans = Userbalance,
                         Status = true,
                         Deadline = tran.DeadLine
                     };
+                    _repositoryManager.HistoryTransaction.Create(UsertranHistory);
 
-                    _repositoryManager.HistoryTransaction.Create(tranHistory);
+                   
 
-                    var wallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == tranHistory.IdUserTo, true).FirstOrDefaultAsync();
-                    if(wallet != null)
+                    
+                    var adminWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == adminId, true).FirstOrDefaultAsync();
+                    //Create admin transaction
+                    var admintrans = new Transaction
                     {
-                        wallet.Balance += tranHistory.MoneyTrans;
+                        Id = 0,
+                        DeadLine = null,
+                        IdUser = adminId,
+                        MoneyTrans = AdminBalance,
+                        MethodTrans = "booking_free",
+                        TypeTrans = "booking_free",
+                        TimeTrans = DateTime.UtcNow.AddHours(7),
+                        Status = (int)TransactionStatus.PaymentSuccess,
+                    };
+                    _repositoryManager.Transaction.Create(admintrans);
+                   await _repositoryManager.SaveAsync();
+
+                    var adminTranHistory = new HistoryTransaction
+                    {
+                        IdUserFrom = tran.IdUser,
+                        IdUserTo = adminId,
+                        IdTransaction = admintrans.Id,
+                        MoneyTrans = AdminBalance,
+                        Status = true,
+                        Deadline = null
+                    };
+                    _repositoryManager.HistoryTransaction.Create(adminTranHistory);
+
+                    //Create admin history wallet
+                    if (adminWallet != null)
+                    {
+                        adminWallet.Balance += AdminBalance;
+
 
                         _repositoryManager.HistoryWallet.Create(new HistoryWallet
                         {
-                            Amount = tranHistory.MoneyTrans.ToString(),
-                            IdUser = tranHistory.IdUserTo,
-                            IdWallet = wallet.Id,
+                            Amount = AdminBalance.ToString(),
+                            IdUser = adminId,
+                            IdWallet = adminWallet.Id,
+                            Status = (int)HistoryWalletStatus.Success,
+                            Time = DateTime.UtcNow.AddHours(7),
+                            Type = "Nhận tiền hoa hồng book sân của đơn hàng :  "+ tran_id.ToString(),
+                        });
+                    }
+
+                    var userWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == UsertranHistory.IdUserTo, true).FirstOrDefaultAsync();
+                    if (userWallet != null)
+                    {
+                        userWallet.Balance += Userbalance;
+                     
+
+                        _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                        {
+                            Amount = Userbalance.ToString(),
+                            IdUser = UsertranHistory.IdUserTo,
+                            IdWallet = userWallet.Id,
                             Status = (int)HistoryWalletStatus.Success,
                             Time = DateTime.UtcNow.AddHours(7),
                             Type = "Nhận tiền sân"

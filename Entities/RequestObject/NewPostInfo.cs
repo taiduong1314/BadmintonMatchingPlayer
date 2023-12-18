@@ -1,4 +1,6 @@
-﻿namespace Entities.RequestObject
+﻿using System.Globalization;
+
+namespace Entities.RequestObject
 {
     public class NewPostInfo
     {
@@ -19,7 +21,7 @@
                 for (var i = 0; i < Slots.Count(); i++)
                 {
                     var savedData = Slots[i];
-                    res += i+1 == Slots.Count() ? $"{savedData.SaveData}" : $"{savedData.SaveData};";
+                    res += i + 1 == Slots.Count() ? $"{savedData.SaveData}" : $"{savedData.SaveData};";
                 }
             }
             return res;
@@ -38,12 +40,12 @@
                 {
                     case 0:
                         {
-                            StartTime = DateTime.Parse(temp);
+                            StartTime = DateTime.ParseExact(temp, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                             break;
                         }
                     case 1:
                         {
-                            EndTime = DateTime.Parse(temp);
+                            EndTime = DateTime.ParseExact(temp, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                             break;
                         }
                     case 2:

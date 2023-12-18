@@ -32,6 +32,7 @@ namespace Repositories.Implements
         private IMessageRepository _message;
         private INotificationRepository _notification;
         private IHangfireJobRepository _hangfireJob;
+        private ISettingRepository _Setting;
 
         public RepositoryManager(DataContext context)
         {
@@ -56,6 +57,7 @@ namespace Repositories.Implements
             _message = new MessageRepository(_context);
             _notification = new NotificationRepository(_context);
             _hangfireJob = new HangfireJobRepository(_context);
+            _Setting = new SettingRepository(_context);
         }
         public IHistoryTransactionRepository HistoryTransaction
         {
@@ -199,6 +201,14 @@ namespace Repositories.Implements
                 return _hangfireJob;
             }
         }
+        public ISettingRepository Setting
+        {
+            get
+            {
+                return _Setting;
+            }
+        }
+
 
         public Task SaveAsync() => _context.SaveChangesAsync();
     }

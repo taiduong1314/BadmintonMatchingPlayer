@@ -2,6 +2,8 @@
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Repositories.Intefaces;
 using Services.Implements;
 using Services.Interfaces;
 using System.Text.Json.Nodes;
@@ -21,11 +23,15 @@ namespace BadmintonMatching.Controllers
         private readonly IUserServices _userServices;
         private readonly INotificationServices _notificationServices;
 
-        public PostController(IPostServices postServices, IUserServices userServices, INotificationServices notificationServices)
+
+        public PostController(IPostServices postServices, IUserServices userServices,
+            INotificationServices notificationServices
+            )
         {
             _postServices = postServices;
             _userServices = userServices;
             _notificationServices = notificationServices;
+
         }
 
         [HttpGet]
@@ -48,7 +54,7 @@ namespace BadmintonMatching.Controllers
             {
                 Ok(new SuccessObject<object> { Message = "Can't found user" });
             }
-            var postId = await _postServices.CreatePost(user_id, info); 
+            var postId = await _postServices.CreatePost(user_id, info);
             if (postId == -1)
             {
                 return Ok(new SuccessObject<object> { Message = "Invalid base64 string" });
@@ -66,6 +72,33 @@ namespace BadmintonMatching.Controllers
             }
 
         }
+
+        [HttpGet]
+        [Route("{user_id}/create_post_charge")]
+        public async Task<IActionResult> CheckAvailableWalletMoney(int user_id)
+        {
+
+            var updateWalletCheck = await _postServices.UpdateFreePosting(user_id);
+            if (updateWalletCheck == 0)
+            {
+                return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+            }
+            else if (updateWalletCheck == -1)
+            {
+                return Ok(new SuccessObject<object> { Message = $"Update Error" });
+            }
+            return Ok(new SuccessObject<CreateChargerResponse>
+            {
+                Data = new CreateChargerResponse
+                {
+                    isUser = user_id,
+                },
+                Message = Message.SuccessMsg
+            });
+                
+
+        }
+
 
         [HttpGet]
         [Route("play_ground/{play_ground}")]
@@ -150,14 +183,14 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsAdmin(admin_id))
             {
-                if(!_userServices.IsPostOwner(admin_id, post_id))
+                if (!_userServices.IsPostOwner(admin_id, post_id))
                 {
                     return Ok(new SuccessObject<object> { Message = "Not permission to delete" });
                 }
             }
 
             var res = _postServices.DeletePost(post_id);
-            return Ok(res ? new SuccessObject<object> { Data = true, Message = Message.SuccessMsg }: new SuccessObject<object> { Message = "Update fail" });
+            return Ok(res ? new SuccessObject<object> { Data = true, Message = Message.SuccessMsg } : new SuccessObject<object> { Message = "Update fail" });
         }
         #endregion
 
@@ -166,13 +199,13 @@ namespace BadmintonMatching.Controllers
         public async Task<IActionResult> GetJoinedPost(int user_id)
         {
             List<JoinedPost> res = await _postServices.GetJoined(user_id);
-            if(res != null)
+            if (res != null)
             {
                 return Ok(new SuccessObject<List<JoinedPost>> { Data = res, Message = Message.SuccessMsg });
             }
             else
             {
-                return Ok(new SuccessObject<List<JoinedPost>?> { Message = "Invalid request"});
+                return Ok(new SuccessObject<List<JoinedPost>?> { Message = "Invalid request" });
             }
         }
 
@@ -185,7 +218,7 @@ namespace BadmintonMatching.Controllers
                 List<Room> rooms = await _postServices.GetChatRooms(post_id);
                 return Ok(new SuccessObject<List<Room>> { Data = rooms, Message = Message.SuccessMsg });
             }
-            catch (NotImplementedException) 
+            catch (NotImplementedException)
             {
                 return Ok(new SuccessObject<object> { Data = null, Message = "Invalid post" });
             }
@@ -198,6 +231,35 @@ namespace BadmintonMatching.Controllers
             var user_id = await _postServices.GetUserId(post_id);
             await _notificationServices.SendNotification(user_id, "Nhắc nhở từ Admin", info.Message, NotificationType.User, post_id);
             return Ok(new SuccessObject<object> { Message = "Nhắc nhở thành công", Data = true });
+        }
+
+        [HttpGet]
+        [Route("{user_id}/check_user_post")]
+        public async Task<IActionResult> CheckUserPostInMonth(int user_id)
+        {
+            try
+            {
+                bool enought = await _postServices.CheckPostInMonth(user_id);
+                if (!enought)
+                {
+                    return Ok(new SuccessObject<object> { Data = null, 
+                     Message = "The not limit for free posts has been exceeded for the month" });
+                }
+                else
+                {
+                    return Ok(new SuccessObject<CreateChargerResponse> {
+                        Data = new CreateChargerResponse()
+                        {
+                            isUser = user_id,
+                        }, Message = "The limit for free posts has been exceeded for the month" });
+
+                }
+
+            }
+            catch (NotImplementedException)
+            {
+                return Ok(new SuccessObject<object> { Data = null, Message = "Invalid post" });
+            }
         }
     }
 }
