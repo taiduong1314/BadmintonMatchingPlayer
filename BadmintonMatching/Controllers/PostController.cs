@@ -244,18 +244,22 @@ namespace BadmintonMatching.Controllers
             try
             {
                 bool enought = await _postServices.CheckPostInMonth(user_id);
-                if (!enought)
+                if (enought)
                 {
-                    return Ok(new SuccessObject<object> { Data = null, 
-                     Message = "The not limit for free posts has been exceeded for the month" });
+                    return Ok(new SuccessObject<CreateChargerResponse>
+                    {
+                        Data = new CreateChargerResponse()
+                        {
+                            isUser = user_id,
+                        },
+                         Message = "The not limit for free posts has been exceeded for the month" });
                 }
                 else
                 {
-                    return Ok(new SuccessObject<CreateChargerResponse> {
-                        Data = new CreateChargerResponse()
-                        {
-                           isUser = user_id,
-                        }, Message = "Bạn đã hết "+ numberPostFee.ToString()+ " lượt đăng bài miễn phí trong tháng này !"
+                    return Ok(new SuccessObject<object>
+                    {
+                        Data = null,
+                        Message = "Bạn đã hết "+ numberPostFee.ToString()+ " lượt đăng bài miễn phí trong tháng này !"
                     } );
 
                 }

@@ -79,8 +79,8 @@ builder.Services.AddHangfire(configuration => configuration
 builder.Services.AddHangfireServer();
 
 var app = builder.Build();
-var port = Environment.GetEnvironmentVariable("PORT");
-app.Urls.Add($"http://*:{port}");
+//var port = Environment.GetEnvironmentVariable("PORT");
+//app.Urls.Add($"http://*:{port}");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
