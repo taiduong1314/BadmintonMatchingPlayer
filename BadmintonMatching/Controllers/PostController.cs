@@ -288,6 +288,13 @@ namespace BadmintonMatching.Controllers
             });
         }
 
+        [HttpGet]
+        [Route("{user_id}/post_ai_suggestion")]
+        public IActionResult GetAiIdPost(int user_id)
+        {
+            var res = _postServices.GetPostAiSuggest(user_id);
+            return Ok(new SuccessObject<object> { Data = new { PostId = res }, Message = Message.SuccessMsg });
+        }
 
         [HttpPut]
         [Route("{postId}/boost_post")]

@@ -27,5 +27,6 @@ namespace Services.Interfaces
         Task<int> UpdateFreePosting(int userId);
         Task<int> UpdateBoost(int userId);
         Task<bool> BoostPost(int idPost);
+        Task<int> GetPostAiSuggest(int user_id);
     }
 }

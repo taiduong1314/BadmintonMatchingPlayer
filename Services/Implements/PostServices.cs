@@ -7,9 +7,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
+using System.Data;
 using System.Globalization;
 using System.Net.WebSockets;
 using System.Xml.Linq;
+
+
+using Accord.Statistics.Analysis;
+using Accord.Statistics.Filters;
+using Accord.IO;
+using System.Data;
+using Accord.Math;
+using Accord.MachineLearning;
 
 namespace Services.Implements
 {
@@ -908,6 +917,132 @@ namespace Services.Implements
             }
 
             return true;
+        }
+
+        public async Task<int> GetPostAiSuggest(int user_id)
+        {
+
+            var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, false).FirstOrDefaultAsync();
+
+            string playing_area_full = user.PlayingArea;
+            int playing_level = user.PlayingLevel;
+            string playing_way_raw = user.PlayingWay;
+
+            var playing_area_parts = playing_area_full.Split(',', 2);
+            string district_part = (playing_area_parts.Length > 1) ? playing_area_parts[1].Trim().TrimEnd(';') : "";
+
+            int playing_level_category;
+
+            if (playing_level == 0)
+                playing_level_category = 0;
+            else if (playing_level == 1)
+                playing_level_category = 1;
+            else if (playing_level == 2 || playing_level == 3)
+                playing_level_category = 2;
+            else if (playing_level == 4 || playing_level == 5)
+                playing_level_category = 3;
+            else
+                playing_level_category = 4;
+
+            List<string> selected_skills = new List<string>
+            {
+            "Giành quyền tấn công",
+            "Khai thác đường chéo sân",
+            "Chiến thuật tấn công cuối sân",
+            "Chiến thuật buộc đối thủ đánh cầu trái tay",
+            "Chiến thuật ép đối phương đổi hướng liên tục",
+            "Chiến thuật đánh vào bốn góc sân",
+            "Chiến thuật phòng thủ trước tấn công sau"
+             };
+
+            List<string> district_positions = new List<string>
+            {
+                    "Quận 1", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 10", "Quận 11", "Quận 12",
+                    "Quận Tân Bình", "Quận Bình Tân", "Quận Tân Phú", "Quận Phú Nhuận", "Quận Gò Vấp", "Quận Bình Thạnh",
+                    "Hóc Môn", "Củ Chi", "Quận Thủ Đức", "Quận 9", "Quận 2"
+               };
+
+            string[] categorySlot = { "Mới chơi", "Nghiệp dư", "Chuyên nghiệp" };
+
+            List<string> play_style = new List<string> { "Đánh đơn", "Đánh đôi", "Hỗn hợp" };
+
+            Dictionary<string, int> district_positions_dict = district_positions.Select((value, index) => new { value, index }).ToDictionary(pair => pair.value, pair => pair.index);
+            Dictionary<string, int> play_style_dict = play_style.Select((value, index) => new { value, index }).ToDictionary(pair => pair.value, pair => pair.index);
+            Dictionary<string, int> categorySlotDict = categorySlot.Select((value, index) => new { value, index }).ToDictionary(pair => pair.value, pair => pair.index);
+
+            int district_part_index = district_positions_dict.TryGetValue(district_part, out int districtIndex) ? districtIndex : -1;
+
+            List<string> playing_way_list = playing_way_raw.Split(';').Select(skill => skill.Trim()).Where(skill => !string.IsNullOrEmpty(skill)).ToList();
+
+            List<string> matching_skills = playing_way_list.Where(skill => selected_skills.Contains(skill)).ToList();
+
+            string playing_style;
+
+            if (matching_skills.Count == 1)
+            {
+                int skill_position = selected_skills.IndexOf(matching_skills[0]);
+                if (1 <= skill_position && skill_position <= 4)
+                    playing_style = "Đánh đơn";
+                else if (5 <= skill_position && skill_position <= 7)
+                    playing_style = "Đánh đôi";
+                else
+                    playing_style = "Không xác định";
+            }
+            else if (matching_skills.Count >= 2)
+            {
+                playing_style = "Hỗn hợp";
+            }
+            else
+            {
+                playing_style = "Không xác định";
+            }
+
+            int play_style_index = play_style_dict.TryGetValue(playing_style, out int styleIndex) ? styleIndex : -1;
+
+
+            var listpost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, false).Include(x => x.IdUserToNavigation).ToListAsync();
+            var dataTable = new DataTable();
+            dataTable.Columns.Add("district_part_post", typeof(int));
+            dataTable.Columns.Add("playing_level_post", typeof(int));
+            dataTable.Columns.Add("playing_style_post", typeof(int));
+            dataTable.Columns.Add("post_id", typeof(int));
+
+            foreach (var post in listpost)
+            {
+                var Post_area_parts = post.AddressSlot.Split(',')[1].Trim();
+                int postDistrict_part_index = district_positions_dict.TryGetValue(Post_area_parts, out int districtIndex1) ? districtIndex1 : -1;
+                int postStyle = play_style_dict.TryGetValue(post.CategorySlot, out int postStyleIndex) ? postStyleIndex : -1;
+                int postLevel = categorySlotDict.TryGetValue(post.LevelSlot, out int postLevel1) ? postLevel1 : -1;
+
+                dataTable.Rows.Add(postDistrict_part_index, postLevel, postStyle, post.Id);
+            }
+
+
+            double[][] X = dataTable.ToJagged<double>("district_part_post", "playing_level_post", "playing_style_post");
+            int[] postIdarr = dataTable.Columns["post_id"].ToArray<int>();
+            int[] y = Enumerable.Range(0, postIdarr.Length).OrderBy(i => postIdarr[i]).ToArray(); ;
+
+
+            // Chuẩn hóa dữ liệu
+            var scaler = new Normalization();
+            X = scaler.Apply(X);
+
+            var knn = new KNearestNeighbors(k: 1);
+            knn.Learn(X, y);
+
+            // Lưu KNN model đã được fit
+            // Tương tự như trên, C# không có một cách dễ dàng để serialize và deserialize các đối tượng như Python.
+
+            // Dự đoán giá trị Post_ID cho một user mới
+            double[][] new_user = new double[][] { new double[] { district_part_index, playing_level_category, play_style_index } };
+            double[][] new_user_scaled = scaler.Apply(new_user);
+
+            // Dự đoán giá trị Post_ID từ K-nearest neighbors
+            int[] predicted_post_id_knn = knn.Decide(new_user_scaled);
+
+            int value = postIdarr[predicted_post_id_knn[0]];
+            return value;
+
         }
     }
 }
