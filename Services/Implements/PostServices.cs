@@ -764,7 +764,7 @@ namespace Services.Implements
                         IdWallet = adminWallet.Id,
                         Status = (int)HistoryWalletStatus.Success,
                         Time = DateTime.UtcNow.AddHours(7),
-                        Type = "Nhận tiền hoa hồng book sân của đơn hàng :  " + userTrans.Id,
+                        Type = "Nhận tiền hoa hồng đăng bài của đơn hàng :  " + userTrans.Id,
                     });
                 }
 
@@ -798,9 +798,14 @@ namespace Services.Implements
             try
             {
                 int adminId = 1;
-                var SettingBooking = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == ((int)SettingType.PostingSetting), false).FirstOrDefaultAsync();
+                var SettingBooking = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == ((int)SettingType.BoostPost), false).FirstOrDefaultAsync();
                 var boostfee = SettingBooking.SettingAmount;
                 var userWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == userId, true).FirstOrDefaultAsync();
+
+                if (userWallet.Balance - boostfee < 0)
+                {
+                    return 0;
+                }
 
                 var userTrans = new Transaction
                 {

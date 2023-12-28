@@ -278,6 +278,10 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<object> { Message = $"Update Error" });
             }
+            else if (updateWalletCheck == 0)
+            {
+                return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+            }
             return Ok(new SuccessObject<CreateChargerResponse>
             {
                 Data = new CreateChargerResponse
