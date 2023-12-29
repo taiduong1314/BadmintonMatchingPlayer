@@ -459,7 +459,8 @@ namespace Services.Implements
                     PhoneNumber = user.PhoneNumber,
                     SortProfile = user.SortProfile,
                     Balance = user.Wallets != null ? user.Wallets.ToList()[0].Balance : 0,
-                    Role = user.UserRole != null && user.UserRole == (int)UserRole.Admin ? "Admin" : user.UserRole != null && user.UserRole == (int)UserRole.Staff ? "Staff" : "User"
+                    Role = user.UserRole != null && user.UserRole == (int)UserRole.Admin ? "Admin" : user.UserRole != null && user.UserRole == (int)UserRole.Staff ? "Staff" : "User",
+                    isPolicy=user.IsPolicy,
                 };
 
                 if(user.IsBanFromLogin)
@@ -618,6 +619,17 @@ namespace Services.Implements
             return res;
         }
 
+        public bool IsAdminAndStaff(int user_id)
+        {
+            var res = false;
+            var user = _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).FirstOrDefault();
+            if (user != null && user.UserRole != null)
+            {
+                res = user.UserRole == (int)UserRole.Admin||user.UserRole== (int)UserRole.Staff;
+            }
+            return res;
+        }
+
         public bool IsUserExist(string? email)
         {
             return _repositoryManager.User.FindByCondition(x => x.Email == email, false).FirstOrDefault() != null;
@@ -633,7 +645,9 @@ namespace Services.Implements
                 UserPassword = info.Password,
                 UserName = info.UserName,
                 CreateDate = DateTime.UtcNow.AddHours(7),
-                UserRole = (int)UserRole.User
+                UserRole = (int)UserRole.User,
+                IsPolicy = false
+
             };
             _repositoryManager.User.Create(user);
             _repositoryManager.SaveAsync().Wait();
@@ -760,6 +774,25 @@ namespace Services.Implements
             }
         }
 
+        public async Task<bool> CheckSub(int userId,int userTargetId)
+        {
+        
+            var listUserSub=await _repositoryManager.Subscription.FindByCondition(x=>x.UserId==userId,false).ToListAsync();
+            if (listUserSub == null)
+            {
+                return false;
+            }
+            foreach(var sub in listUserSub)
+            {
+                if (sub.UserSubId == userTargetId)
+                {
+                    return true;
+                 
+                }
+            };
+            return false;
+
+        }
         public async Task<int> SettingPassword(int user_id, SettingPasswordRequest info)
         {
             var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, true).FirstOrDefaultAsync();
@@ -807,7 +840,8 @@ namespace Services.Implements
                     PhoneNumber = user.PhoneNumber,
                     SortProfile = user.SortProfile,
                     Balance = user.Wallets != null ? user.Wallets.ToList()[0].Balance : 0,
-                    Role = user.UserRole != null && user.UserRole == (int)UserRole.Admin ? "Admin" : user.UserRole != null && user.UserRole == (int)UserRole.Staff ? "Staff" : "User"
+                    Role = user.UserRole != null && user.UserRole == (int)UserRole.Admin ? "Admin" : user.UserRole != null && user.UserRole == (int)UserRole.Staff ? "Staff" : "User",
+                    isPolicy=user.IsPolicy,
                 };
 
                 if (user.IsBanFromLogin)
@@ -911,6 +945,19 @@ namespace Services.Implements
         public async Task<List<int>> GetSubcribeUser(int user_id)
         {
             return await _repositoryManager.Subscription.FindByCondition(x => x.UserSubId == user_id && x.IsSubcription == true, false).Select(x => x.UserId).ToListAsync();
+        }
+
+        public async Task<bool>UpdatePolicy(int userId)
+        {
+            var user = await _repositoryManager.User.FindByCondition(x => x.Id == userId, false).FirstOrDefaultAsync();
+            if(user == null)
+            {
+                return false;
+            }
+            user.IsPolicy = true;
+            _repositoryManager.User.Update(user);
+            await _repositoryManager.SaveAsync();
+            return true;
         }
     }
 }

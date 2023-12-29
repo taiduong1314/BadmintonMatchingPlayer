@@ -29,6 +29,7 @@ namespace Services.Interfaces
         List<BandedUsers> GetBandedUsers(int user_id);
         bool BanUnband(int user_id, int user_effect);
         bool IsAdmin(int user_id);
+        bool IsAdminAndStaff(int user_id);
         UserProfile GetUserProfileSetting(int user_id);
         double? GetHelpful(int user_id);
         double? GetFriendly(int user_id);
@@ -52,5 +53,7 @@ namespace Services.Interfaces
         Task<bool> UpdateRole(int user_id, UserRole role_id);
         Task<bool> IsStaff(int user_id);
         Task<List<int>> GetSubcribeUser(int user_id);
+        Task<bool> CheckSub(int userId, int userTargetId);
+        Task<bool> UpdatePolicy(int userId);
     }
 }

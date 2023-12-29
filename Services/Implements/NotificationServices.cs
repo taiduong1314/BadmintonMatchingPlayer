@@ -1,4 +1,6 @@
-﻿using CorePush.Apple;
+﻿using System.Net.Mail;
+using System.Net;
+using CorePush.Apple;
 using CorePush.Google;
 using Entities.Models;
 using Entities.RequestObject;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Repositories.Intefaces;
 using Services.Interfaces;
 using static Entities.ResponseObject.GoogleNotification;
+using Org.BouncyCastle.Bcpg;
 
 namespace Services.Implements
 {
@@ -24,7 +27,7 @@ namespace Services.Implements
 
         public async Task<bool> ReadedAll(ReadedNoti info)
         {
-            foreach(var id in info.NotiIds)
+            foreach (var id in info.NotiIds)
             {
                 var noti = _repositoryManager.Notification.FindByCondition(x => x.Id == id, false)
                     .FirstOrDefault();
@@ -101,7 +104,7 @@ namespace Services.Implements
         {
             var user = await _repositoryManager.User.FindByCondition(x => x.Id == userId, false).FirstOrDefaultAsync();
 
-            if(user == null)
+            if (user == null)
             {
                 throw new Exception("User not found");
             }
@@ -148,7 +151,7 @@ namespace Services.Implements
 
         public async Task<NotiResponseModel> SendNotification(List<int> userIds, string title, string message, NotificationType type, int referenceInfo)
         {
-            foreach(var userId in userIds)
+            foreach (var userId in userIds)
             {
                 var user = await _repositoryManager.User.FindByCondition(x => x.Id == userId, false).FirstOrDefaultAsync();
 
@@ -196,6 +199,157 @@ namespace Services.Implements
                 IsSuccess = true,
                 Message = "Send Success"
             };
+        }
+
+
+
+        public async Task<bool> SendTransactionDetailsEmail(Transaction transaction)
+        {
+            try
+            {
+                var user = await _repositoryManager.User.FindByCondition(x => x.Id == transaction.IdUser, false).FirstOrDefaultAsync();
+                string smtpServer = "smtp.gmail.com";
+                int smtpPort = 587;
+                string smtpUsername = "langtusayonly@gmail.com";
+                string smtpPassword = "idvb bbwu civw vbas";
+
+                using (SmtpClient smtpClient = new SmtpClient(smtpServer, smtpPort))
+                {
+                    smtpClient.UseDefaultCredentials = false;
+                    smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
+                    smtpClient.EnableSsl = true;
+
+                    string fromEmail = "langtusayonly@gmail.com";
+                    string subject = "Transaction Details";
+
+                    // Construct the email body with the Transaction details
+                    string body = await GetTransactionDetailsHtml(transaction);
+
+                    using (MailMessage mailMessage = new MailMessage(fromEmail, user.Email, subject, body))
+                    {
+                        mailMessage.IsBodyHtml = true;
+
+                        // Send the email
+                        smtpClient.Send(mailMessage);
+
+                        Console.WriteLine("Email sent successfully!");
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending email: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<string> GetTransactionDetailsHtml(Transaction transaction)
+        {
+            // HTML template for the email body
+            string htmlTemplate = @"
+                <!DOCTYPE html>
+                <html lang='en'>
+                <head>
+                    <meta charset='UTF-8'>
+                    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                    <title>Transaction Details</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                        }
+                        .email-container {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            padding: 20px;
+                            border: 1px solid #ccc;
+                            border-radius: 5px;
+                        }
+                        h2 {
+                            color: #3498db;
+                        }
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 20px;
+                        }
+                        th, td {
+                            padding: 10px;
+                            border: 1px solid #ddd;
+                            text-align: left;
+                        }
+                        th {
+                            background-color: #f2f2f2;
+                        }
+                    </style>
+                </head>
+                <body>
+                <h4>Xin chào {Fullname} !</h4>
+                    <p>Chúng xin chân thành cảm ơn bạn vì đã sử dụng dịch vụ của chúng tôi</p>
+                     <p>Chúng tôi xin gởi đến bạn chi tiết giao dịch có Id là :{TransactionId} </p>
+                    <div class='email-container'>
+                        <h2>Chi tiết giao dịch</h2>
+                        <table>                                                                                
+                            <tr>
+                                <td>Thời gian giao dịch</td>
+                                <td>{TransactionTime}</td>
+                            </tr>
+                            <tr>
+                                <td>Loại giao dịch</td>
+                                <td>{TransactionMethod}</td>
+                            </tr>                        
+                            <tr>
+                                <td>Số tiền</td>
+                                <td>{TransactionAmount}</td>
+                            </tr>
+                            <tr>
+                                <td>Trạnng thái</td>
+                                <td>{TransactionStatus}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </body>
+                </html>";
+
+            var transactionStatus = "";
+            switch (transaction.Status)
+            {
+                case (int)TransactionStatus.Processing:
+                    transactionStatus = "Đang xử lý";
+                    break;
+                case (int)TransactionStatus.PaymentSuccess:
+                    transactionStatus = "Thanh toán thành công";
+                    break;
+                case (int)TransactionStatus.PaymentFailure:
+                    transactionStatus = "Thanh toán thất bại";
+                    break;
+                case (int)TransactionStatus.Played:
+                    transactionStatus = "Đã chơi";
+                    break;
+                case (int)TransactionStatus.Reporting:
+                    transactionStatus = "Đang báo cáo";
+                    break;
+                case (int)TransactionStatus.ReportResolved:
+                    transactionStatus = "Báo cáo đã giải quyết";
+                    break;
+                default:
+                    transactionStatus = "Trạng thái không xác định";
+                    break;
+            }
+
+            // Replace placeholders with actual values
+            var user = await _repositoryManager.User.FindByCondition(x => x.Id == transaction.IdUser, false).FirstOrDefaultAsync();
+            htmlTemplate = htmlTemplate.Replace("{TransactionId}", transaction.Id.ToString());
+            htmlTemplate = htmlTemplate.Replace("{TransactionTime}", transaction.TimeTrans.ToString());
+            htmlTemplate = htmlTemplate.Replace("{TransactionMethod}", transaction.MethodTrans ?? "N/A");
+            htmlTemplate = htmlTemplate.Replace("{TransactionAmount}", transaction.MoneyTrans?.ToString("C") ?? "N/A");
+            htmlTemplate = htmlTemplate.Replace("{TransactionStatus}", transactionStatus.ToString());
+            htmlTemplate = htmlTemplate.Replace("{Fullname}", user.FullName.ToString() ?? "N/A");
+
+
+
+
+            return htmlTemplate;
         }
     }
 }

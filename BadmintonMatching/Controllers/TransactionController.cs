@@ -54,7 +54,7 @@ namespace BadmintonMatching.Controllers
                 //{
                 //    var jobId = BackgroundJob.Schedule(() => AutoTransferMoney(tran_id), )
                 //}
-                return Ok(new SuccessObject<object> { Message = "Update success", Data = true });
+                return Ok(new SuccessObject<object> { Message = "Cập nhật thành công", Data = true });
             }
             else
             {

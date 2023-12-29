@@ -93,5 +93,19 @@ namespace BadmintonMatching.Controllers
             return Ok(new SuccessObject<ReportIncomeModel> { Data = reportIncomeModel, Message = Message.SuccessMsg });
         }
 
+        [HttpGet]
+        [Route("{idReport}&{reportType}/report_detail")]
+        public async Task<IActionResult> ReportDetail(int idReport, int reportType)
+
+
+        {
+          
+            var reportDetail =await _reportServices.ReportDetail(idReport, reportType);
+            if(reportDetail == null)
+            {
+                 return Ok(new SuccessObject<object> { Data = null, Message = "Get report detail error" });
+            }
+            return Ok(new SuccessObject<ReportDetail> { Data = reportDetail, Message = Message.SuccessMsg });
+        }
     }
 }

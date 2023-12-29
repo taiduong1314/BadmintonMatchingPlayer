@@ -16,7 +16,6 @@ using System.Xml.Linq;
 using Accord.Statistics.Analysis;
 using Accord.Statistics.Filters;
 using Accord.IO;
-using System.Data;
 using Accord.Math;
 using Accord.MachineLearning;
 
@@ -39,13 +38,13 @@ namespace Services.Implements
     public class PostServices : IPostServices
     {
         private readonly IRepositoryManager _repositoryManager;
-    
+
 
         public PostServices(IRepositoryManager repositoryManager)
         {
             _repositoryManager = repositoryManager;
-            
-            
+
+
         }
 
         public async Task<string> HandleImg(string base64encodedstring)
@@ -108,7 +107,8 @@ namespace Services.Implements
                     ImageUrls = urls,
                     IdUserTo = user_id,
                     SlotsInfo = info.SlotsToString(),
-                    IdType = (int)PostType.MatchingPost
+                    IdType = (int)PostType.MatchingPost,
+                    Status = true
                 };
                 _repositoryManager.Post.Create(newPost);
                 _repositoryManager.SaveAsync().Wait();
@@ -199,7 +199,7 @@ namespace Services.Implements
                 {
                     returnList.Add(postOptional);
                 }
-            }         
+            }
             return returnList;
         }
         public async Task<List<PostOptional>> GetAllPost()
@@ -228,26 +228,26 @@ namespace Services.Implements
             for (var i = 0; i < res.Count(); i++)
             {
                 var cPost = res[i];
-                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).OrderByDescending(x=>x.SavedDate).Include(x => x.Slots).FirstOrDefault();
-                
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).OrderByDescending(x => x.SavedDate).Include(x => x.Slots).FirstOrDefault();
+
                 if (post != null)
                 {
-                    
+
                     GetPostOptional(post, ref cPost);
                 }
                 res[i] = cPost;
             }
 
-           var returnList =new List<PostOptional>();
-            foreach(var postOptional in res)
+            var returnList = new List<PostOptional>();
+            foreach (var postOptional in res)
             {
-                if(postOptional.QuantitySlot!=null && postOptional.QuantitySlot != 0) 
+                if (postOptional.QuantitySlot != null && postOptional.QuantitySlot != 0)
                 {
                     returnList.Add(postOptional);
                 }
             }
 
-            
+
 
             return returnList;
         }
@@ -255,7 +255,7 @@ namespace Services.Implements
         private bool IsPostValid(Post post)
         {
             var lastSlot = new SlotInfo(post.SlotsInfo.Split(";")[0]);
-         
+
 
             foreach (var slot in post.SlotsInfo.Split(";"))
             {
@@ -270,7 +270,7 @@ namespace Services.Implements
                         x.IdPost == post.Id, false).Count();
 
 
-                    if (slotInfo.AvailableSlot - joinSlot >= 0 )
+                    if (slotInfo.AvailableSlot - joinSlot >= 0)
                     {
                         if (slotInfo.StartTime > lastSlot.StartTime)
                         {
@@ -289,7 +289,7 @@ namespace Services.Implements
                         }
                     }
 
-                  
+
                 }
             }
             if (lastSlot.StartTime < DateTime.UtcNow.AddHours(-7))
@@ -332,7 +332,7 @@ namespace Services.Implements
 
                 };
                 DateTime slotDateTime = DateTime.ParseExact(slotInfor.Days + " " + slotInfor.StartTime, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                if (slotDateTime >= DateTime.UtcNow.AddHours(-7) && slotInfor.QuantitySlot>0 && slotInfor.QuantitySlot!=null)                               
+                if (slotDateTime >= DateTime.UtcNow.AddHours(-7) && slotInfor.QuantitySlot > 0 && slotInfor.QuantitySlot != null)
                 {
                     l_slotInfor.Add(slotInfor);
                 }
@@ -369,11 +369,12 @@ namespace Services.Implements
 
         public List<PostInfomation> GetManagedPost(int user_id)
         {
-            return _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true)
+            var listPost = _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true)
                 .OrderByDescending(x => x.SavedDate)
                 .Include(x => x.IdUserToNavigation)
                 .Include(x => x.Slots)
                 .Select(x => new PostInfomation(x)).ToList();
+            return listPost;
         }
 
         public List<PostInfomation> GetManagedPostAdmin(int user_id)
@@ -525,7 +526,7 @@ namespace Services.Implements
                             x.ContentSlot == info.StartTime.Value.ToString("dd/MM/yyyy") &&
                             x.IdPost == post.Id, false).Count();
 
-                        if(info.StartTime < firstInfo.StartTime)
+                        if (info.StartTime < firstInfo.StartTime)
                         {
                             firstInfo = info;
                         }
@@ -537,7 +538,7 @@ namespace Services.Implements
                     }
                 }
 
-                var isCancel = firstInfo.StartTime.Value.AddHours(-24) >= DateTime.UtcNow.AddHours(7) 
+                var isCancel = firstInfo.StartTime.Value.AddHours(-24) >= DateTime.UtcNow.AddHours(7)
                     && (item.Status == (int)TransactionStatus.Processing || item.Status == (int)TransactionStatus.PaymentSuccess);
                 var roomId = _repositoryManager.ChatRoom
                     .FindByCondition(x => x.Code == $"{post.Id}_{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}", false)
@@ -551,7 +552,7 @@ namespace Services.Implements
                     TransacionId = item.Id,
                     BookedInfos = bookedInfos,
                     PostId = post.Id,
-                    Status = ((TransactionStatus)item.Status).ToString(),
+                    Status = ((TransactionStatus    )item.Status).ToString(),
                     PostTitle = post.Title,
                     AvailableSlot = (finalInfo.AvailableSlot - joinedSlot).ToString(),
                     EndTime = finalInfo.EndTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
@@ -580,7 +581,7 @@ namespace Services.Implements
             {
                 var info = new SlotInfo(infoStr);
                 var room = await _repositoryManager.ChatRoom
-                    .FindByCondition(x => 
+                    .FindByCondition(x =>
                     x.Name == $"{info.StartTime.Value.ToString("dd/MM/yyyy")}" &&
                     x.Code == $"{post.Id}_{info.StartTime.Value.ToString("dd/MM/yyyy")}"
                     , false)
@@ -591,7 +592,7 @@ namespace Services.Implements
                     }).FirstOrDefaultAsync();
 
                 if (room != null)
-                res.Add(room);
+                    res.Add(room);
             }
             return res;
         }
@@ -633,7 +634,7 @@ namespace Services.Implements
         {
             var blogs = await _repositoryManager.Post
                 .FindByCondition(x => x.IdType == (int)PostType.Blog && !x.IsDeleted, false)
-                .Select(x => new BlogInList 
+                .Select(x => new BlogInList
                 {
                     Id = x.Id,
                     CreateTime = x.SavedDate.ToString("dd/MM/yyyy HH:mm"),
@@ -642,8 +643,8 @@ namespace Services.Implements
                     UserCreateName = x.IdUserToNavigation.FullName,
                     Summary = x.AddressSlot,
                     ImgUrl = x.ImgUrl,
-                   
-                })
+
+                }).OrderByDescending(x => x.CreateTime)
                 .ToListAsync();
 
             return blogs;
@@ -672,11 +673,11 @@ namespace Services.Implements
             return await _repositoryManager.Post.FindByCondition(x => x.Id == post_id, false).Select(x => x.IdUserTo.Value).FirstOrDefaultAsync();
         }
 
-        
+
         public async Task<bool> CheckPostInMonth(int user_id)
         {
             var cmonth = DateTime.UtcNow.Month;
-            var numberPostFree = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == (int)SettingType.NumberPostFree,false).FirstOrDefaultAsync();
+            var numberPostFree = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == (int)SettingType.NumberPostFree, false).FirstOrDefaultAsync();
             var listpost = await _repositoryManager.Post.FindByCondition(x => x.IdUserTo == user_id && x.SavedDate.Month == cmonth, false).ToListAsync();
             if (listpost.Count() >= numberPostFree.SettingAmount)
             {
@@ -693,8 +694,8 @@ namespace Services.Implements
                 var SettingBooking = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == ((int)SettingType.PostingSetting), false).FirstOrDefaultAsync();
                 var postingFree = SettingBooking.SettingAmount;
                 var userWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == userId, true).FirstOrDefaultAsync();
-              
-                if(userWallet.Balance- postingFree < 0)
+
+                if (userWallet.Balance - postingFree < 0)
                 {
                     return 0;
                 }
@@ -738,7 +739,7 @@ namespace Services.Implements
                     Status = (int)TransactionStatus.PaymentSuccess,
                 };
                 _repositoryManager.Transaction.Create(admintrans);
-               await _repositoryManager.SaveAsync();
+                await _repositoryManager.SaveAsync();
 
                 var adminTranHistory = new HistoryTransaction
                 {
@@ -768,7 +769,7 @@ namespace Services.Implements
                     });
                 }
 
-               
+
                 if (userWallet != null)
                 {
                     userWallet.Balance -= postingFree;
@@ -776,7 +777,7 @@ namespace Services.Implements
 
                     _repositoryManager.HistoryWallet.Create(new HistoryWallet
                     {
-                        Amount = "-"+postingFree.ToString(),
+                        Amount = "-" + postingFree.ToString(),
                         IdUser = userWallet.IdUser,
                         IdWallet = userWallet.Id,
                         Status = (int)HistoryWalletStatus.Success,
@@ -787,13 +788,14 @@ namespace Services.Implements
 
                 await _repositoryManager.SaveAsync();
                 return 1;
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 return -1;
             }
         }
 
-        public async Task<int> UpdateBoost(int userId)
+        public async Task<int> UpdateBoost(int userId, int idPost)
         {
             try
             {
@@ -802,9 +804,20 @@ namespace Services.Implements
                 var boostfee = SettingBooking.SettingAmount;
                 var userWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == userId, true).FirstOrDefaultAsync();
 
+                var post = await _repositoryManager.Post.FindByCondition(x => x.Id == idPost, false).FirstOrDefaultAsync();
+                if (post == null)
+                {
+                    return 2;
+                }
+                var checkPostIsValid = IsPostValid(post);
+
                 if (userWallet.Balance - boostfee < 0)
                 {
                     return 0;
+                }
+                if (!checkPostIsValid)
+                {
+                    return 2;
                 }
 
                 var userTrans = new Transaction
@@ -892,7 +905,8 @@ namespace Services.Implements
                         Type = "Thanh toán phí đẩy bài đăng"
                     });
                 }
-
+                post.SavedDate = DateTime.Now;
+                _repositoryManager.Post.Update(post);
                 await _repositoryManager.SaveAsync();
                 return 1;
             }
@@ -902,29 +916,27 @@ namespace Services.Implements
             }
         }
 
-        public async Task<bool> BoostPost(int idPost)
-        {
-            try
-            {
-                var post =await _repositoryManager.Post.FindByCondition(x => x.Id == idPost, false).FirstOrDefaultAsync();
-                if (post != null)
-                {
-                    post.SavedDate= DateTime.Now;
-                    _repositoryManager.Post.Update(post);
-                    await _repositoryManager.SaveAsync();
-                  
-                }
-            }
-            catch (Exception e)
-            {
+        //public async Task<bool> BoostPost(int idPost)
+        //{
+        //    try
+        //    {
+        //        var post =await _repositoryManager.Post.FindByCondition(x => x.Id == idPost, false).FirstOrDefaultAsync();
+        //        if (post != null)
+        //        {
 
-                return false;
-            }
 
-            return true;
-        }
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
 
-        public async Task<int> GetPostAiSuggest(int user_id)
+        //        return false;
+        //    }
+
+        //    return true;
+        //}
+
+        public async Task<List<int>> GetPostAiSuggest(int user_id)
         {
 
             var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, false).FirstOrDefaultAsync();
@@ -1032,22 +1044,87 @@ namespace Services.Implements
             var scaler = new Normalization();
             X = scaler.Apply(X);
 
-            var knn = new KNearestNeighbors(k: 1);
+            var knn = new KNearestNeighbors(k: 5);
             knn.Learn(X, y);
 
-            // Lưu KNN model đã được fit
-            // Tương tự như trên, C# không có một cách dễ dàng để serialize và deserialize các đối tượng như Python.
 
-            // Dự đoán giá trị Post_ID cho một user mới
             double[][] new_user = new double[][] { new double[] { district_part_index, playing_level_category, play_style_index } };
             double[][] new_user_scaled = scaler.Apply(new_user);
+            double[][] scores = knn.Scores(new_user_scaled);
+            int[] predicted_post_ids_knn = scores[0]
+              .Select((score, index) => (Score: score, Index: index))
+                .OrderByDescending(x => x.Score)
+                 .Take(knn.K)
+                    .Select(x => x.Index)
+                        .ToArray();
 
-            // Dự đoán giá trị Post_ID từ K-nearest neighbors
-            int[] predicted_post_id_knn = knn.Decide(new_user_scaled);
+            List<int> predictedPostIds = new List<int>();
+            foreach (int index in predicted_post_ids_knn)
+            {
+                int postId = postIdarr[index];
+                predictedPostIds.Add(postId);
+            }
 
-            int value = postIdarr[predicted_post_id_knn[0]];
-            return value;
+            return predictedPostIds;
 
         }
+
+        public async Task<bool> isValidPost(int postId)
+        {
+            var post =await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.Id == postId && x.IdType == (int)PostType.MatchingPost, true).FirstOrDefaultAsync();
+               
+            var lastSlot = new SlotInfo(post.SlotsInfo.Split(";")[0]);
+
+
+                foreach (var slot in post.SlotsInfo.Split(";"))
+                {
+                    if (slot != string.Empty)
+                    {
+                        var slotInfo = new SlotInfo(slot);
+
+                        var joinSlot = _repositoryManager.Slot
+                            .FindByCondition(x =>
+                            !x.IsDeleted &&
+                            x.ContentSlot == slotInfo.StartTime.Value.ToString("dd/MM/yyyy") &&
+                            x.IdPost == post.Id, false).Count();
+
+
+                        if (slotInfo.AvailableSlot - joinSlot > 0)
+                        {
+                            if (slotInfo.StartTime > lastSlot.StartTime)
+                            {
+                                lastSlot = slotInfo;
+                            }
+                        }
+                        else
+                        {
+                            if (slotInfo.AvailableSlot - joinSlot <= 0)
+                            {
+                               
+                            post.IsDeleted = true;
+                            _repositoryManager.Post.Update(post);
+                            await _repositoryManager.SaveAsync();
+                            return false;
+                        }
+                            if (slotInfo.StartTime > lastSlot.StartTime)
+                            {
+                                lastSlot = slotInfo;
+                            }
+                        }
+
+
+                    }
+                }
+                if (lastSlot.StartTime < DateTime.UtcNow.AddHours(-7))
+                {
+                    return false;
+                post.Status = true;
+                _repositoryManager.Post.Update(post);
+                await _repositoryManager.SaveAsync();
+
+            }
+                return true;
+            }
+        
     }
 }

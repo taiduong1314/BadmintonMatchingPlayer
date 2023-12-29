@@ -7,6 +7,7 @@ using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -64,7 +65,7 @@ namespace Services.Implements
                     IdUserFrom = tran.IdUser,
                     IdUserTo = tran.IdSlotNavigation.IdPostNavigation.IdUserTo,
                     reportContent = info.reportContent,
-                    ReportTitle  = info.ReportTitle,
+                    ReportTitle = info.ReportTitle,
                     Status = (int)ReportStatus.Pending,
                     TimeReport = DateTime.UtcNow.AddHours(7),
                 };
@@ -186,21 +187,21 @@ namespace Services.Implements
             return res;
         }
 
-        public ReportIncomeModel GetIncomeByInMonth(string month, string year) 
+        public ReportIncomeModel GetIncomeByInMonth(string month, string year)
         {
             var adminId = 1;
-            var listHistoryWallet =  _repositoryManager.HistoryWallet.FindByCondition(x => x.Time.Value.Month.ToString().Equals(month)
-            && x.Time.Value.Year.ToString().Equals(year) && x.IdUser== adminId, false)
+            var listHistoryWallet = _repositoryManager.HistoryWallet.FindByCondition(x => x.Time.Value.Month.ToString().Equals(month)
+            && x.Time.Value.Year.ToString().Equals(year) && x.IdUser == adminId, false)
                 .Select(x => new HistoryWalletModel
-            {
-                IdWallet = x.IdWallet,
-                Id = x.Id,
-                IdUser = x.IdUser,
-                Amount = x.Amount,
-                Status = ((HistoryWalletStatus)x.Status).ToString(),
-                Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
-                Type = x.Type
-            }).ToList();
+                {
+                    IdWallet = x.IdWallet,
+                    Id = x.Id,
+                    IdUser = x.IdUser,
+                    Amount = x.Amount,
+                    Status = ((HistoryWalletStatus)x.Status).ToString(),
+                    Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
+                    Type = x.Type
+                }).ToList();
             var total = listHistoryWallet.Sum(x => Convert.ToDecimal(x.Amount));
 
             var reportIncome = new ReportIncomeModel();
@@ -214,10 +215,10 @@ namespace Services.Implements
         public ReportIncomeModel GetIncomeByMonth(string startDate, string endDate)
         {
             var adminId = 1;
-            var dStartDate=DateTime.Parse(startDate);
+            var dStartDate = DateTime.Parse(startDate);
             var dEndDate = DateTime.Parse(endDate);
 
-            var listHistoryWallet = _repositoryManager.HistoryWallet.FindByCondition(x => x.Time>= dStartDate && x.Time<= dEndDate && x.IdUser == adminId, false)
+            var listHistoryWallet = _repositoryManager.HistoryWallet.FindByCondition(x => x.Time >= dStartDate && x.Time <= dEndDate && x.IdUser == adminId, false)
                 .Select(x => new HistoryWalletModel
                 {
                     IdWallet = x.IdWallet,
@@ -229,13 +230,71 @@ namespace Services.Implements
                     Type = x.Type
                 }).ToList();
 
-            var total = listHistoryWallet.Sum(x=> Convert.ToDecimal(x.Amount));
+            var total = listHistoryWallet.Sum(x => Convert.ToDecimal(x.Amount));
 
             var reportIncome = new ReportIncomeModel();
             reportIncome.historyWalletModels = listHistoryWallet;
             reportIncome.Total = total;
 
             return reportIncome;
+        }
+
+
+        public async Task<ReportDetail> ReportDetail(int idReport, int reportType)
+        {
+            try
+            {
+                var report = await _repositoryManager.Report.FindByCondition(x => x.Id == idReport, false).FirstOrDefaultAsync();
+                var userFrom = await _repositoryManager.User.FindByCondition(x => x.Id == report.IdUserFrom, false).FirstOrDefaultAsync();
+                var userTo = await _repositoryManager.User.FindByCondition(x => x.Id == report.IdUserTo, false).FirstOrDefaultAsync();
+                var reportDetail = new ReportDetail()
+                {
+                    ReportId = idReport,
+                    ContentReport = report.reportContent,
+                    ReportStatus = report.Status,
+                    UserReportId = report.IdUserTo,
+                    SendUserName = userFrom.FullName,
+                    reportUserName = userTo.FullName,
+                    ReportType = reportType,
+                    TitleReport=report.ReportTitle
+                };
+
+
+                switch (reportType)
+                {
+                    case (int)ReportCreateType.Post:
+                        {
+                            var post = await _repositoryManager.Post.FindByCondition(x => x.Id == report.IdPost, false).FirstOrDefaultAsync();
+
+                            reportDetail.reportPost.PostId = post.Id;
+                            reportDetail.reportPost.PostName = post.Title;
+                            reportDetail.reportPost.PostContent = post.ContentPost;
+                            reportDetail.reportPost.PostDate = post.SavedDate.ToString();
+                            reportDetail.reportPost.PostAddress = post.AddressSlot;
+                            reportDetail.reportPost.PostImage = post.ImgUrl;
+                            break;
+                        }
+
+                    case (int)ReportCreateType.Transaction:
+                        {
+                            var trans = await _repositoryManager.Transaction.FindByCondition(x => x.Id == report.IdTransaction, false).FirstOrDefaultAsync();
+
+                            reportDetail.reportTrans.TransId = trans.Id;
+                            reportDetail.reportTrans.TransDate = trans.TimeTrans.ToString();
+                            reportDetail.reportTrans.TransMoney = trans.MoneyTrans;
+                            break;
+                        }
+
+                }
+
+                return reportDetail;
+            }
+            catch (Exception e)
+            {
+
+            }
+            return new ReportDetail();
+
         }
     }
 }

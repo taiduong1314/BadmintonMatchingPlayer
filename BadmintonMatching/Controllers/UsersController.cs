@@ -1,4 +1,5 @@
-﻿using Entities.Models;
+﻿using System.Net.WebSockets;
+using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
@@ -103,7 +104,7 @@ namespace BadmintonMatching.Controllers
             {
                 _userServices.AddPlayingWay(user_id, info);
             }
-            return Ok(new SuccessObject<object> { Message = "Playing Way is saved" , Data = true });
+            return Ok(new SuccessObject<object> { Message = "Playing Way is saved", Data = true });
         }
 
         [HttpGet]
@@ -164,7 +165,7 @@ namespace BadmintonMatching.Controllers
 
             var success = _userServices.CheckRemoveVefToken(info);
 
-            return Ok(success ? new SuccessObject<object> { Message = "Verify Success", Data = true } 
+            return Ok(success ? new SuccessObject<object> { Message = "Verify Success", Data = true }
             : new SuccessObject<object> { Message = "Invalid token" });
         }
 
@@ -184,7 +185,7 @@ namespace BadmintonMatching.Controllers
 
             var success = _userServices.UpdatePassword(email, info);
 
-            return Ok(success ? new SuccessObject<object> { Message = "Update Success", Data = true } : new SuccessObject<object> { Message = "Update fail" });
+            return Ok(success ? new SuccessObject<object> { Message = "Cập nhật thành công", Data = true } : new SuccessObject<object> { Message = "Cập nhật thất bại" });
         }
 
         [HttpGet]
@@ -213,8 +214,8 @@ namespace BadmintonMatching.Controllers
 
             int commentId = _userServices.SaveComment(user_id, user_id_receive_comment, comment);
 
-            return Ok(commentId > 0 ? new SuccessObject<object> { Message = "Update Success", Data = true } 
-            : new SuccessObject<object> { Message = "Update fail" });
+            return Ok(commentId > 0 ? new SuccessObject<object> { Message = "Cập nhật thành công", Data = true }
+            : new SuccessObject<object> { Message = "Cập nhật thất bại" });
         }
 
         [HttpGet]
@@ -238,8 +239,8 @@ namespace BadmintonMatching.Controllers
         {
             bool updateSuccess = _userServices.BanUnband(user_id, user_effect);
 
-            return Ok(updateSuccess ? new SuccessObject<object> { Message = "Update Success", Data = true } 
-            : new SuccessObject<object> { Message = "Update fail" });
+            return Ok(updateSuccess ? new SuccessObject<object> { Message = "Cập nhật thành công", Data = true }
+            : new SuccessObject<object> { Message = "Cập nhật thất bại" });
         }
 
         [HttpGet]
@@ -247,9 +248,9 @@ namespace BadmintonMatching.Controllers
         [ProducesResponseType(typeof(SuccessObject<List<UserManaged>>), 200)]
         public IActionResult GetAllUserForManaged(int user_id)
         {
-            if (!_userServices.IsAdmin(user_id))
+            if (!_userServices.IsAdminAndStaff(user_id))
             {
-                return Ok(new SuccessObject<List<UserManaged?>> { Message = "Not admin for get" });
+                return Ok(new SuccessObject<List<UserManaged?>> { Message = "Không phải quản trị viên hoặc nhân viên để có được" });
             }
 
             var users = _userServices.GetUserForManaged();
@@ -396,7 +397,7 @@ namespace BadmintonMatching.Controllers
                 default:
                     {
                         var addTxt = res == 0 ? "Unsubcribe" : "Subcribe";
-                        if(res == 1)
+                        if (res == 1)
                         {
                             await _notificationServices.SendNotification(target_id, "Tương tác", "Bạn đã có một lượt đăng kí", NotificationType.User, user_id);
                         }
@@ -406,13 +407,31 @@ namespace BadmintonMatching.Controllers
         }
 
         [HttpPut]
+        [Route("{user_id}/check_sub/{usertarget_id}")]
+        public async Task<IActionResult> CheckSub(int user_id, int usertarget_id)
+        {
+            var checkSub = await _userServices.CheckSub(user_id, usertarget_id);
+
+            if (checkSub)
+            {
+
+                return Ok(new SuccessObject<object?> { Data = new { subed = true }, Message = "userId: " + user_id + "subed userId: " + usertarget_id });
+            }
+            return Ok(new SuccessObject<object?> { Message = "userId :" + user_id + "not sub userId: " + usertarget_id });
+        }
+
+
+
+
+
+        [HttpPut]
         [Route("{user_id}/setting_password")]
         public async Task<IActionResult> SettingPassword(int user_id, SettingPasswordRequest info)
         {
             var res = await _userServices.SettingPassword(user_id, info);
             if (res == 1)
             {
-                return Ok(new SuccessObject<object?> { Data = true, Message = $"Update success!" });
+                return Ok(new SuccessObject<object?> { Data = true, Message = $"Cập nhật thành công!" });
             }
             else if (res == 0)
             {
@@ -428,7 +447,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new SuccessObject<object?> { Message = "Update Fail" });
+                return Ok(new SuccessObject<object?> { Message = "Cập nhật thất bại" });
             }
         }
 
@@ -476,19 +495,13 @@ namespace BadmintonMatching.Controllers
 
                 var res = await _userServices.GetManagedProfile(user_id);
                 return Ok(new SuccessObject<ManagedDetailUser> { Data = res, Message = Message.SuccessMsg });
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Ok(new SuccessObject<object> { Message = ex.Message });
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="user_id"></param>
-        /// <param name="role_id">2: User, 3: Staff</param>
-        /// <param name="admin_id"></param>
-        /// <returns></returns>
         [HttpPut]
         [Route("{user_id}/to/{role_id}/by/{admin_id}")]
         public async Task<IActionResult> UpdateRole(int user_id, int role_id, int admin_id)
@@ -517,6 +530,18 @@ namespace BadmintonMatching.Controllers
         {
             await _notificationServices.SendNotification(user_id, "Nhắc nhở từ Admin", info.Message, NotificationType.User, user_id);
             return Ok(new SuccessObject<object> { Message = "Nhắc nhở thành công", Data = true });
+        }
+
+        [HttpPut]
+        [Route("updatePolicy/{user_id}")]
+        public async Task<IActionResult> UpdatePolicy(int user_id)
+        {
+            var isSuccess = await _userServices.UpdatePolicy(user_id);
+            if (!isSuccess)
+            {
+                return Ok(new SuccessObject<object> { Message = "Cập nhật chính sách thất bại ! " });
+            }
+            return Ok(new SuccessObject<object> { Data = new { user = user_id }, Message = Message.SuccessMsg });
         }
     }
 }

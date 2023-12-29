@@ -32,7 +32,7 @@ namespace BadmintonMatching.Controllers
                 }
                 else
                 {
-                    return Ok(new SuccessObject<object> { Data = true, Message = "Update fail" });
+                    return Ok(new SuccessObject<object> { Data = true, Message = "Cập nhật thất bại" });
                 }
                 
             }

@@ -17,5 +17,6 @@ namespace Services.Interfaces
         Task<List<Reports>> GetReportByType(ReportCreateType report_type);
         ReportIncomeModel GetIncomeByInMonth(string month,string year);
         ReportIncomeModel GetIncomeByMonth(string startDate,string endDate);
+        Task<ReportDetail> ReportDetail(int idReport, int reportType);
     }
 }

@@ -8,8 +8,8 @@ namespace Entities.Models
 {
     public enum SettingType
     {
-        BookingSetting = 1,
-        PostingSetting = 2,
+        PostingSetting = 1,
+        BookingSetting = 2,
         NumberPostFree = 3,
         BoostPost=4,
     }

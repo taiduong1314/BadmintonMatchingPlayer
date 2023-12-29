@@ -10,10 +10,12 @@ namespace Services.Implements
     public class SlotServices : ISlotServices
     {
         private readonly IRepositoryManager _repositoryManager;
+        
 
         public SlotServices(IRepositoryManager repositoryManager)
         {
             _repositoryManager = repositoryManager;
+           
         }
 
         public void Delete(List<int> lsSlot)

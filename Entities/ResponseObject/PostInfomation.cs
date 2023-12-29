@@ -16,7 +16,8 @@ namespace Entities.ResponseObject
             UserId = post.IdUserTo;
             UserImgUrl = post.IdUserToNavigation.ImgUrl;
             UserName = post.IdUserToNavigation.UserName;
-            
+            isDelete = post.IsDeleted;
+            status=post.Status;
 
             var finalInfo = new SlotInfo();
             int joinedSlot = 0;
@@ -49,6 +50,8 @@ namespace Entities.ResponseObject
         public string? PostImgUrl { get; set; }
         public string? UserImgUrl { get; set; }
         public string? Address { get; set; }
+        public bool? isDelete { get; set; }
+        public bool? status { get; set; }
         //public class AllSlot
         //{
         //    public int? NumberSlot { get; set; }

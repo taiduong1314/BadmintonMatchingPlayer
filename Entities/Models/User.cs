@@ -45,6 +45,7 @@
         public bool IsBanFromLogin { get; set; }
         public string? LogingingDevice { get; set; }
         public bool IsAndroidDevice { get; set; }
+        public bool? IsPolicy {  get; set; }
 
         public virtual Role? UserRoleNavigation { get; set; }
         public virtual ICollection<Post> Posts { get; set; }

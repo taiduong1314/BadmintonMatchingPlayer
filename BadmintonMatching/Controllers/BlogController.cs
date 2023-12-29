@@ -54,13 +54,13 @@ namespace BadmintonMatching.Controllers
         }
 
         [HttpGet]
-        [Route("{blog_id}/details/by/{user_id}")]
-        public async Task<IActionResult> GetBlogDetail(int user_id, int blog_id)
+        [Route("{blog_id}/details")]
+        public async Task<IActionResult> GetBlogDetail( int blog_id)
         {
             try
             {
                 var detail = await _postServices.GetBlogDetail(blog_id);
-                detail.CanDelete = await _userServices.IsStaff(user_id);
+                //detail.CanDelete = _userServices.IsAdminAndStaff(user_id);
                 return Ok(new SuccessObject<BlogDetail> { Data = detail, Message = Message.SuccessMsg});
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace BadmintonMatching.Controllers
         {
             try
             {
-                if (!await _userServices.IsStaff(user_id))
+                if (! _userServices.IsAdminAndStaff(user_id))
                 {
                     throw new Exception("Not staff to delete");
                 }

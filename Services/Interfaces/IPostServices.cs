@@ -25,8 +25,9 @@ namespace Services.Interfaces
         Task<int> GetUserId(int post_id);
         Task<bool> CheckPostInMonth(int user_id);
         Task<int> UpdateFreePosting(int userId);
-        Task<int> UpdateBoost(int userId);
-        Task<bool> BoostPost(int idPost);
-        Task<int> GetPostAiSuggest(int user_id);
+        Task<int> UpdateBoost(int userId, int idPost);
+        //Task<bool> BoostPost(int idPost);
+        Task<List<int>> GetPostAiSuggest(int user_id);
+        Task<bool> isValidPost(int postId);
     }
 }

@@ -347,6 +347,8 @@ namespace Entities
 
                 entity.Property(e => e.IsActive).HasColumnName("isActive");
 
+                entity.Property(e => e.IsPolicy).HasColumnName("isCheckPolicy");
+
                 entity.Property(e => e.PhoneNumber)
                     .HasMaxLength(10)
                     .HasColumnName("phoneNumber")

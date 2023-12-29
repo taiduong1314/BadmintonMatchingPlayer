@@ -190,9 +190,10 @@ namespace BadmintonMatching.Controllers
                     return Ok(new SuccessObject<object> { Message = "Not permission to delete" });
                 }
             }
+           
 
             var res = _postServices.DeletePost(post_id);
-            return Ok(res ? new SuccessObject<object> { Data = true, Message = Message.SuccessMsg } : new SuccessObject<object> { Message = "Update fail" });
+            return Ok(res ? new SuccessObject<object> { Data = true, Message = Message.SuccessMsg } : new SuccessObject<object> { Message = "Cập nhật thất bại" });
         }
         #endregion
 
@@ -269,24 +270,28 @@ namespace BadmintonMatching.Controllers
 
  
         [HttpPut]
-        [Route("{idPost}/create_boost_charge")]
-        public async Task<IActionResult> CheckAvailableWalletMoneyForBoost(int idPost)
+        [Route("{user_id}&{post_id}/create_boost_charge")]
+        public async Task<IActionResult> CheckAvailableWalletMoneyForBoost(int user_id,int post_id)
         {
 
-            var updateWalletCheck = await _postServices.UpdateBoost(idPost);
+            var updateWalletCheck = await _postServices.UpdateBoost(user_id, post_id);
              if (updateWalletCheck == -1)
             {
-                return Ok(new SuccessObject<object> { Message = $"Update Error" });
+                return Ok(new SuccessObject<object> { Message = $"Đẩy tin lỗi !" });
             }
             else if (updateWalletCheck == 0)
             {
-                return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+                return Ok(new SuccessObject<object> { Message = "Sô dư trong ví không đủ  !" });
+            }
+            else if (updateWalletCheck == 2)
+            {
+                return Ok(new SuccessObject<object> { Message = "Bài viết không còn hoạt động  !" });
             }
             return Ok(new SuccessObject<CreateChargerResponse>
             {
                 Data = new CreateChargerResponse
                 {
-                    idPost = idPost,
+                    isUser = user_id,
                 },
                 Message = Message.SuccessMsg
             });
@@ -294,29 +299,29 @@ namespace BadmintonMatching.Controllers
 
         [HttpGet]
         [Route("{user_id}/post_ai_suggestion")]
-        public IActionResult GetAiIdPost(int user_id)
+        public async Task<IActionResult> GetAiIdPost(int user_id)
         {
-            var res = _postServices.GetPostAiSuggest(user_id);
-            return Ok(new SuccessObject<object> { Data = new { PostId = res }, Message = Message.SuccessMsg });
+            var res =await _postServices.GetPostAiSuggest(user_id);
+            return Ok(new SuccessObject<List<int>> { Data = res, Message = Message.SuccessMsg });
         }
 
-        [HttpPut]
-        [Route("{postId}/boost_post")]
-        public async Task<IActionResult> BoostPost(int postId)
-        {
-            var isSeccess = await _postServices.BoostPost(postId);
-                if (!isSeccess)
-                {
-                    return Ok(new SuccessObject<object> { Message = "Boost post fail !" });
-               }
-            return Ok(new SuccessObject<CreateChargerResponse>
-            {
-                Data = new CreateChargerResponse()
-                {
-                    isUser = postId,
-                },
-                Message = Message.SuccessMsg
-            });
-        }
+        //[HttpPut]
+        //[Route("{postId}/boost_post")]
+        //public async Task<IActionResult> BoostPost(int postId)
+        //{
+        //    var isSeccess = await _postServices.BoostPost(postId);
+        //        if (!isSeccess)
+        //        {
+        //            return Ok(new SuccessObject<object> { Message = "Boost post fail !" });
+        //       }
+        //    return Ok(new SuccessObject<CreateChargerResponse>
+        //    {
+        //        Data = new CreateChargerResponse()
+        //        {
+        //            isUser = postId,
+        //        },
+        //        Message = Message.SuccessMsg
+        //    });
+        //}
     }
 }

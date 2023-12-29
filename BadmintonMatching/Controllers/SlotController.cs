@@ -1,6 +1,9 @@
 ﻿using Entities.RequestObject;
 using Entities.ResponseObject;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Repositories.Implements;
+using Repositories.Intefaces;
 using Services.Interfaces;
 
 namespace BadmintonMatching.Controllers
@@ -13,16 +16,25 @@ namespace BadmintonMatching.Controllers
         private readonly ITransactionServices _transactionRepository;
         private readonly IWalletServices _walletServices;
         private readonly IChatServices _chatServices;
+        private readonly INotificationServices _notificationServices;
+        private readonly IRepositoryManager _repositoryManager;
+        private readonly IPostServices  _postServices;
 
         public SlotController(ISlotServices slotServices,
             ITransactionServices transactionRepository,
             IWalletServices walletServices,
-            IChatServices chatServices)
+            IChatServices chatServices,
+            INotificationServices notificationServices,
+            IRepositoryManager repositoryManager,
+            IPostServices postServices)
         {
             _slotServices = slotServices;
             _transactionRepository = transactionRepository;
             _walletServices = walletServices;
             _chatServices = chatServices;
+            _notificationServices = notificationServices;
+            _repositoryManager = repositoryManager;
+            _postServices = postServices;
         }
 
         [HttpPost]
@@ -33,6 +45,7 @@ namespace BadmintonMatching.Controllers
             {
                 List<SlotReturnInfo> slotInfos = _slotServices.GetAvailable(info);
 
+               
                 var lsSlot = new List<int>();
                 var isDeleteSlot = false;
                 foreach (var item in slotInfos)
@@ -92,7 +105,9 @@ namespace BadmintonMatching.Controllers
                 }
 
                 var chatRoom = await _chatServices.GetChatRoom(tran.Id);
-
+                var trans = await _repositoryManager.Transaction.FindByCondition(x => x.Id == tran.Id, false).FirstOrDefaultAsync();
+                var check = await _notificationServices.SendTransactionDetailsEmail(trans);
+                var valid  =  await _postServices.isValidPost(info.PostId);
                 return Ok(new SuccessObject<SlotIncludeTransaction>
                 {
                     Data = new SlotIncludeTransaction
