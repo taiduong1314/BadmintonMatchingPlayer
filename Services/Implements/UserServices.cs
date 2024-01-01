@@ -911,7 +911,8 @@ namespace Services.Implements
                     {
                         Id = y.Id,
                         NumOfReport = y.Reports.Count(),
-                        PostTime = y.SavedDate.ToString("dd/MM/yyyy HH:mm")
+                        PostTime = y.SavedDate.ToString("dd/MM/yyyy HH:mm"),
+                        Title=y.Title
                     }).ToList()
                 })
                 .FirstOrDefaultAsync();
