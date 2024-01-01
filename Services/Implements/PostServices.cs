@@ -38,11 +38,14 @@ namespace Services.Implements
     public class PostServices : IPostServices
     {
         private readonly IRepositoryManager _repositoryManager;
+        private readonly IUserServices _userServices;
 
 
-        public PostServices(IRepositoryManager repositoryManager)
+        public PostServices(IRepositoryManager repositoryManager,
+                            IUserServices userServices)
         {
             _repositoryManager = repositoryManager;
+            _userServices= userServices;
 
 
         }
@@ -630,23 +633,40 @@ namespace Services.Implements
             return true;
         }
 
-        public async Task<List<BlogInList>> GetAllBlogs()
+        public async Task<List<BlogInList>> GetAllBlogs(int userId)
         {
+            if (_userServices.IsAdmin(userId))
+            {
+                var adminBlog = await _repositoryManager.Post
+                    .FindByCondition(x => x.IdType == (int)PostType.Blog && !x.IsDeleted, false)
+                    .Select(x => new BlogInList
+                    {
+                        Id = x.Id,
+                        CreateTime = x.SavedDate.ToString("dd/MM/yyyy hh:mm:ss tt"),
+                        ShortDescription = x.ContentPost.Substring(0, 100),
+                        Title = x.Title,
+                        UserCreateName = x.IdUserToNavigation.FullName,
+                        Summary = x.AddressSlot,
+                        ImgUrl = x.ImgUrl,
+
+                    })/*.OrderByDescending(x => x.CreateTime)*/
+                    .ToListAsync();
+                return adminBlog;
+            }
             var blogs = await _repositoryManager.Post
-                .FindByCondition(x => x.IdType == (int)PostType.Blog && !x.IsDeleted, false)
-                .Select(x => new BlogInList
-                {
-                    Id = x.Id,
-                    CreateTime = x.SavedDate.ToString("dd/MM/yyyy hh:mm:ss tt"),
-                    ShortDescription = x.ContentPost.Substring(0, 100),
-                    Title = x.Title,
-                    UserCreateName = x.IdUserToNavigation.FullName,
-                    Summary = x.AddressSlot,
-                    ImgUrl = x.ImgUrl,
+                    .FindByCondition(x => x.IdType == (int)PostType.Blog && !x.IsDeleted && x.IdUserTo==userId, false)
+                    .Select(x => new BlogInList
+                    {
+                        Id = x.Id,
+                        CreateTime = x.SavedDate.ToString("dd/MM/yyyy hh:mm:ss tt"),
+                        ShortDescription = x.ContentPost.Substring(0, 100),
+                        Title = x.Title,
+                        UserCreateName = x.IdUserToNavigation.FullName,
+                        Summary = x.AddressSlot,
+                        ImgUrl = x.ImgUrl,
 
-                })/*.OrderByDescending(x => x.CreateTime)*/
-                .ToListAsync();
-
+                    })/*.OrderByDescending(x => x.CreateTime)*/
+                    .ToListAsync();
             return blogs;
         }
 

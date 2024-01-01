@@ -47,9 +47,10 @@ namespace BadmintonMatching.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBlogs()
+        [Route("{userId}")]
+        public async Task<IActionResult> GetBlogs(int userId)
         {
-            var res = await _postServices.GetAllBlogs();
+            var res = await _postServices.GetAllBlogs(userId);
             return Ok(new SuccessObject<List<BlogInList>> { Data = res, Message = Message.SuccessMsg});
         }
 
