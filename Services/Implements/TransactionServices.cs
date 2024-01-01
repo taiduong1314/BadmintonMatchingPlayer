@@ -1,4 +1,5 @@
-﻿using CloudinaryDotNet.Actions;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
@@ -283,7 +284,7 @@ namespace Services.Implements
                             IdWallet = adminWallet.Id,
                             Status = (int)HistoryWalletStatus.Success,
                             Time = DateTime.UtcNow.AddHours(7),
-                            Type = "Nhận tiền hoa hồng book sân của đơn hàng :  "+ tran_id.ToString(),
+                            Type = "Nhận tiền hoa hồng đặt sân của đơn hàng :  "+ tran_id.ToString(),
                         });
                     }
 
@@ -346,5 +347,136 @@ namespace Services.Implements
                 await _repositoryManager.SaveAsync();
             }
         }
+
+        public async Task<int> CreateWithdrawRequest(CreateWithdrawRequest createWithdrawRequest)
+        {
+            if (createWithdrawRequest == null)
+            {
+                return 0;
+            }           
+            try
+            {
+                var res = new WithdrawDetail()
+                {
+                    IdUser = createWithdrawRequest.IdUser,
+                    Money = createWithdrawRequest.Money,
+                    BankName = createWithdrawRequest.BankName,
+                    BankNumber = createWithdrawRequest.BankNumber,
+                    AccountName = createWithdrawRequest.AccountName,
+                    CreateDate=DateTime.Now,
+                    Status=(int)WithdrawStatus.Watting
+                };
+                _repositoryManager.WithdrawDetail.Create(res);
+
+                var wallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == createWithdrawRequest.IdUser, true).FirstOrDefaultAsync();
+                if (wallet.Balance < createWithdrawRequest.Money)
+                {
+                    return -1;
+                }
+
+                if (wallet != null)
+                {
+                    wallet.Balance -= createWithdrawRequest.Money;
+
+                    _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                    {
+                        Amount = (-createWithdrawRequest.Money).ToString(),
+                        IdUser = createWithdrawRequest.IdUser,
+                        IdWallet = wallet.Id,
+                        Status = (int)HistoryWalletStatus.Success,
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = "Rút tiền"
+                    });
+                }
+
+                var usertrans = new Transaction
+                {
+                    Id = 0,
+                    DeadLine = null,
+                    IdUser = createWithdrawRequest.IdUser,
+                    MoneyTrans = createWithdrawRequest.Money,
+                    MethodTrans = "withdraw_money",
+                    TypeTrans = "withdraw_money",
+                    TimeTrans = DateTime.UtcNow.AddHours(7),
+                    Status = (int)TransactionStatus.Processing,
+                };
+                _repositoryManager.Transaction.Create(usertrans);
+                await  _repositoryManager.SaveAsync();
+                return res.Id;
+            }
+            catch (Exception e)
+            {
+
+                return 0;
+            }         
+        }
+
+        public async Task<int> UpdateRequestWithDrawStatus(int requestId)
+        {
+            var withdrawRequest = await _repositoryManager.WithdrawDetail.FindByCondition(x => x.Id == requestId, false).FirstOrDefaultAsync();
+            var withdrawTrans = await _repositoryManager.Transaction.FindByCondition(x => x.IdUser == withdrawRequest.IdUser, false).FirstOrDefaultAsync();
+            var adminId = 1; 
+            if (withdrawRequest == null)
+            {
+                return 0;
+            }
+            try
+            {
+                withdrawTrans.Status=(int)TransactionStatus.PaymentSuccess;
+                withdrawRequest.Status = (int)WithdrawStatus.Seccesss;
+                _repositoryManager.WithdrawDetail.Update(withdrawRequest);
+
+
+
+                var wallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == adminId, true).FirstOrDefaultAsync();
+                if (wallet.Balance < withdrawRequest.Money)
+                {
+                    return -1;
+                }
+                if (wallet != null)
+                {
+                    wallet.Balance -= withdrawRequest.Money;
+
+                    _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                    {
+                        Amount = (-withdrawRequest.Money).ToString(),
+                        IdUser = adminId,
+                        IdWallet = wallet.Id,
+                        Status = (int)HistoryWalletStatus.Success,
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = "Thanh toán yêu cầu rút tiền : "+requestId
+                    });
+                }
+                var adminTrans = new Transaction
+                {
+                    Id = 0,
+                    DeadLine = null,
+                    IdUser = adminId,
+                    MoneyTrans = withdrawRequest.Money,
+                    MethodTrans = "withdraw_money",
+                    TypeTrans = "withdraw_money",
+                    TimeTrans = DateTime.UtcNow.AddHours(7),
+                    Status = (int)TransactionStatus.PaymentSuccess,
+                };
+
+                _repositoryManager.Transaction.Create(adminTrans);
+
+
+                await _repositoryManager.SaveAsync();
+                return adminId;
+            }
+            catch (Exception e)
+            {
+
+                return 0;
+            }
+        }
+
+        public async Task<List<WithdrawDetail>> GetListWithRequest()
+        {
+           var withdrawRequest = await _repositoryManager.WithdrawDetail.FindAll(false).ToListAsync();
+           return withdrawRequest;
+        }
+
     }
 }

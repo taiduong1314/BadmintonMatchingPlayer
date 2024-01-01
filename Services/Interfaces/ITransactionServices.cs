@@ -20,5 +20,8 @@ namespace Services.Interfaces
         Task<Transaction> GetTransaction(int transaction_id);
         bool IsFromTwoPost(List<int>? idSlot);
         Task UpdateStatus(int tran_id, TransactionStatus tranStatus);
+        Task<int> CreateWithdrawRequest(CreateWithdrawRequest createWithdrawRequest);
+        Task<List<WithdrawDetail>> GetListWithRequest();
+        Task<int> UpdateRequestWithDrawStatus(int requestId);
     }
 }

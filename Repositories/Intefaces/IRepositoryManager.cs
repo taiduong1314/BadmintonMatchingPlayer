@@ -29,6 +29,7 @@ namespace Repositories.Intefaces
         INotificationRepository Notification { get; }
         IHangfireJobRepository HangfireJob { get; }
         ISettingRepository Setting { get; }
+        IWithdrawDetailRepository WithdrawDetail { get; }
         Task SaveAsync();
     }
 }

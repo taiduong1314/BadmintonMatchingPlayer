@@ -552,7 +552,7 @@ namespace Services.Implements
                     TransacionId = item.Id,
                     BookedInfos = bookedInfos,
                     PostId = post.Id,
-                    Status = ((TransactionStatus    )item.Status).ToString(),
+                    Status = ((TransactionStatus)item.Status).ToString(),
                     PostTitle = post.Title,
                     AvailableSlot = (finalInfo.AvailableSlot - joinedSlot).ToString(),
                     EndTime = finalInfo.EndTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
@@ -637,14 +637,14 @@ namespace Services.Implements
                 .Select(x => new BlogInList
                 {
                     Id = x.Id,
-                    CreateTime = x.SavedDate.ToString("dd/MM/yyyy HH:mm"),
+                    CreateTime = x.SavedDate.ToString("dd/MM/yyyy hh:mm:ss tt"),
                     ShortDescription = x.ContentPost.Substring(0, 100),
                     Title = x.Title,
                     UserCreateName = x.IdUserToNavigation.FullName,
                     Summary = x.AddressSlot,
                     ImgUrl = x.ImgUrl,
 
-                }).OrderByDescending(x => x.CreateTime)
+                })/*.OrderByDescending(x => x.CreateTime)*/
                 .ToListAsync();
 
             return blogs;
@@ -936,7 +936,7 @@ namespace Services.Implements
         //    return true;
         //}
 
-        public async Task<List<int>> GetPostAiSuggest(int user_id)
+        public async Task<List<PostOptional>> GetPostAiSuggest(int user_id)
         {
 
             var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, false).FirstOrDefaultAsync();
@@ -1058,73 +1058,96 @@ namespace Services.Implements
                     .Select(x => x.Index)
                         .ToArray();
 
-            List<int> predictedPostIds = new List<int>();
+            var returnList = new List<PostOptional>();
+
             foreach (int index in predicted_post_ids_knn)
             {
                 int postId = postIdarr[index];
-                predictedPostIds.Add(postId);
-            }
+                var optList = await _repositoryManager.Post.FindByCondition(x => x.Id == postId, true)
+               .OrderByDescending(x => x.SavedDate)
+               .Include(x => x.IdUserToNavigation)
+               .FirstOrDefaultAsync();
 
-            return predictedPostIds;
+                var cPost = new PostOptional
+                {
+                    IdPost = optList.Id,
+                    Title = optList.Title,
+                    AddressSlot = optList.AddressSlot,
+                    ContentPost = optList.ContentPost,
+                    ImgUrlPost = optList.ImgUrl,
+                    FullName = optList.IdUserToNavigation?.FullName,
+                    UserImgUrl = optList.IdUserToNavigation?.ImgUrl,
+                    HighlightUrl = optList.ImgUrl,
+                    UserId = optList.IdUserTo
+                };
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
+                GetPostOptional(post, ref cPost);
+                if (cPost.QuantitySlot != null && cPost.QuantitySlot != 0)
+                {
+                    returnList.Add(cPost);
+                }
+            }
+            return returnList;
+
 
         }
 
         public async Task<bool> isValidPost(int postId)
         {
-            var post =await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.Id == postId && x.IdType == (int)PostType.MatchingPost, true).FirstOrDefaultAsync();
-               
+            var post = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.Id == postId && x.IdType == (int)PostType.MatchingPost, true).FirstOrDefaultAsync();
+
             var lastSlot = new SlotInfo(post.SlotsInfo.Split(";")[0]);
 
 
-                foreach (var slot in post.SlotsInfo.Split(";"))
+            foreach (var slot in post.SlotsInfo.Split(";"))
+            {
+                if (slot != string.Empty)
                 {
-                    if (slot != string.Empty)
+                    var slotInfo = new SlotInfo(slot);
+
+                    var joinSlot = _repositoryManager.Slot
+                        .FindByCondition(x =>
+                        !x.IsDeleted &&
+                        x.ContentSlot == slotInfo.StartTime.Value.ToString("dd/MM/yyyy") &&
+                        x.IdPost == post.Id, false).Count();
+
+
+                    if (slotInfo.AvailableSlot - joinSlot > 0)
                     {
-                        var slotInfo = new SlotInfo(slot);
-
-                        var joinSlot = _repositoryManager.Slot
-                            .FindByCondition(x =>
-                            !x.IsDeleted &&
-                            x.ContentSlot == slotInfo.StartTime.Value.ToString("dd/MM/yyyy") &&
-                            x.IdPost == post.Id, false).Count();
-
-
-                        if (slotInfo.AvailableSlot - joinSlot > 0)
+                        if (slotInfo.StartTime > lastSlot.StartTime)
                         {
-                            if (slotInfo.StartTime > lastSlot.StartTime)
-                            {
-                                lastSlot = slotInfo;
-                            }
+                            lastSlot = slotInfo;
                         }
-                        else
+                    }
+                    else
+                    {
+                        if (slotInfo.AvailableSlot - joinSlot <= 0)
                         {
-                            if (slotInfo.AvailableSlot - joinSlot <= 0)
-                            {
-                               
+
                             post.IsDeleted = true;
                             _repositoryManager.Post.Update(post);
                             await _repositoryManager.SaveAsync();
                             return false;
                         }
-                            if (slotInfo.StartTime > lastSlot.StartTime)
-                            {
-                                lastSlot = slotInfo;
-                            }
+                        if (slotInfo.StartTime > lastSlot.StartTime)
+                        {
+                            lastSlot = slotInfo;
                         }
-
-
                     }
+
+
                 }
-                if (lastSlot.StartTime < DateTime.UtcNow.AddHours(-7))
-                {
-                    return false;
+            }
+            if (lastSlot.StartTime < DateTime.UtcNow.AddHours(-7))
+            {
+                return false;
                 post.Status = true;
                 _repositoryManager.Post.Update(post);
                 await _repositoryManager.SaveAsync();
 
             }
-                return true;
-            }
-        
+            return true;
+        }
+
     }
 }

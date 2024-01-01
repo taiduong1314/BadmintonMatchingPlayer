@@ -108,5 +108,52 @@ namespace BadmintonMatching.Controllers
                 return Ok(new SuccessObject<object> { Message = "Invalid transaction id" });
             }
         }
+
+
+        [HttpPut]
+        [Route("create_withdraw_request")]
+        public async Task<IActionResult> WithdawRequest(CreateWithdrawRequest createWithdrawRequest)
+        {
+            var transaction = await _transactionRepository.CreateWithdrawRequest(createWithdrawRequest);
+
+            if (transaction == 0 )
+            {
+                return Ok(new SuccessObject<object> { Message = "Tạo yêu cầu rút tiền thất bại !" });
+            }else if(transaction == -1)
+            {
+                return Ok(new SuccessObject<object> { Message = "Số tiền trong ví không đủ để rút !" });
+            }
+            return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = new { id=transaction} });
+        }
+
+        [HttpGet]
+        [Route("withdraw_request")]
+        public async Task<IActionResult> GetListWithdrawRequest()
+        {
+            var listRequest =await _transactionRepository.GetListWithRequest();
+            if (listRequest==null)
+            {
+                return Ok(new SuccessObject<List<WithdrawDetail?>> { Message = "Không có yêu cầu rút tiền nào !" });
+            }
+         
+            return Ok(new SuccessObject<List<WithdrawDetail>> { Data = listRequest, Message = Message.SuccessMsg });
+        }
+
+        [HttpPut]
+        [Route("{id_request}/accept_withdraw_request")]
+        public async Task<IActionResult> WithdawRequest(int id_request)
+        {
+            var transaction = await _transactionRepository.UpdateRequestWithDrawStatus(id_request);
+
+            if (transaction == 0)
+            {
+                return Ok(new SuccessObject<object> { Message = "Thanh toán thất bại !" });
+            }
+            else if (transaction == -1)
+            {
+                return Ok(new SuccessObject<object> { Message = "Số tiền trong ví không đủ để rút !" });
+            }
+            return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = new { id = transaction } });
+        }
     }
 }

@@ -11,12 +11,15 @@ namespace Entities.ResponseObject
     {
         public int? ReportId { get; set; }    
         public int? UserReportId { get; set; }
+        public int? UserSendId { get; set; }
         public string? SendUserName { get; set; }
         public int? ReportStatus {  get; set; }
         public string? reportUserName { get; set; }
         public int? ReportType { get; set; }
         public string? TitleReport { get; set; }
         public string? ContentReport { get; set; }
+        public bool ? IsBan { get; set; }
+
       
         
         public ReportPost reportPost { get; set; }=new ReportPost();
@@ -39,5 +42,6 @@ namespace Entities.ResponseObject
         public int TransId { get; set; }
         public string? TransDate { get; set; }
         public Decimal? TransMoney { get; set; }
+
     }
 }

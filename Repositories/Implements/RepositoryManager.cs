@@ -33,6 +33,7 @@ namespace Repositories.Implements
         private INotificationRepository _notification;
         private IHangfireJobRepository _hangfireJob;
         private ISettingRepository _Setting;
+        private IWithdrawDetailRepository _WithdrawDetail;
 
         public RepositoryManager(DataContext context)
         {
@@ -58,6 +59,7 @@ namespace Repositories.Implements
             _notification = new NotificationRepository(_context);
             _hangfireJob = new HangfireJobRepository(_context);
             _Setting = new SettingRepository(_context);
+            _WithdrawDetail=new WithdrawDetailRepository(_context);
         }
         public IHistoryTransactionRepository HistoryTransaction
         {
@@ -209,6 +211,13 @@ namespace Repositories.Implements
             }
         }
 
+        public IWithdrawDetailRepository WithdrawDetail
+        {
+            get
+            {
+                return _WithdrawDetail;
+            }
+        }
 
         public Task SaveAsync() => _context.SaveChangesAsync();
     }

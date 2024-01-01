@@ -35,6 +35,7 @@ namespace Entities
         public virtual DbSet<Messages> Messages { get; set; } = null!;
         public virtual DbSet<HangfireJob> ScheduledJob { get; set; } = null!;
         public virtual DbSet<Setting> Settings { get; set; } = null!;
+        public virtual DbSet<WithdrawDetail> WithdrawDetails { get; set; } = null!;
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -461,6 +462,18 @@ namespace Entities
                 entity.Property(e => e.SettingAmount).HasColumnName("settingAmount");
             });
 
+            modelBuilder.Entity<WithdrawDetail>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.IdUser).HasColumnName("idUserRequest");
+                entity.Property(e => e.Money).HasColumnName("price"); 
+                entity.Property(e => e.CreateDate).HasColumnName("createDate");
+                entity.Property(e => e.AcceptDate).HasColumnName("acceptDate");
+                entity.Property(e => e.Status).HasColumnName("status");
+                entity.Property(e => e.BankName).HasColumnName("bankName"); 
+                entity.Property(e => e.AccountName).HasColumnName("bankNumber");
+                entity.Property(e => e.BankNumber).HasColumnName("AccoutName");
+            });
 
 
             OnModelCreatingPartial(modelBuilder);

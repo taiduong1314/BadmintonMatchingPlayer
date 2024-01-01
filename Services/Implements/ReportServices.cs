@@ -59,11 +59,16 @@ namespace Services.Implements
             }
             else
             {
+                int? idUserTo=1;
+                if (tran.IdSlotNavigation != null)
+                {
+                    idUserTo = tran.IdSlotNavigation.IdPostNavigation.IdUserTo;
+                }
                 var report = new Report
                 {
                     IdTransaction = tran_id,
                     IdUserFrom = tran.IdUser,
-                    IdUserTo = tran.IdSlotNavigation.IdPostNavigation.IdUserTo,
+                    IdUserTo = idUserTo,
                     reportContent = info.reportContent,
                     ReportTitle = info.ReportTitle,
                     Status = (int)ReportStatus.Pending,
@@ -202,6 +207,8 @@ namespace Services.Implements
                     Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
                     Type = x.Type
                 }).ToList();
+
+       
             var total = listHistoryWallet.Sum(x => Convert.ToDecimal(x.Amount));
 
             var reportIncome = new ReportIncomeModel();
@@ -253,10 +260,13 @@ namespace Services.Implements
                     ContentReport = report.reportContent,
                     ReportStatus = report.Status,
                     UserReportId = report.IdUserTo,
+                    UserSendId=report.IdUserFrom,
                     SendUserName = userFrom.FullName,
                     reportUserName = userTo.FullName,
                     ReportType = reportType,
-                    TitleReport=report.ReportTitle
+                    TitleReport=report.ReportTitle,
+                    IsBan=userTo.IsBanFromLogin,
+                    
                 };
 
 
@@ -282,6 +292,8 @@ namespace Services.Implements
                             reportDetail.reportTrans.TransId = trans.Id;
                             reportDetail.reportTrans.TransDate = trans.TimeTrans.ToString();
                             reportDetail.reportTrans.TransMoney = trans.MoneyTrans;
+                            
+                            
                             break;
                         }
 

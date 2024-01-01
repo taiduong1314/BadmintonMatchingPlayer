@@ -288,6 +288,7 @@ namespace Services.Implements
         {
             var saveReport = new Report
             {
+                ReportTitle = report.Tittle,
                 reportContent = report.Content,
                 IdUserTo = user_id,
                 IdUserFrom = userreport_id,

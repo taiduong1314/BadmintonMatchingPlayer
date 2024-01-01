@@ -302,7 +302,7 @@ namespace BadmintonMatching.Controllers
         public async Task<IActionResult> GetAiIdPost(int user_id)
         {
             var res =await _postServices.GetPostAiSuggest(user_id);
-            return Ok(new SuccessObject<List<int>> { Data = res, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<PostOptional>> { Data = res, Message = Message.SuccessMsg });
         }
 
         //[HttpPut]
