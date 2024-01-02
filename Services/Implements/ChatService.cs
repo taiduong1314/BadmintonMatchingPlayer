@@ -1,7 +1,9 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
+using Repositories.Implements;
 using Repositories.Intefaces;
 using Services.Interfaces;
 using System;
@@ -165,9 +167,18 @@ namespace Services.Implements
             var userJoined = await _repositoryManager.ChatRoomUser
                             .FindByCondition(x => x.UserId == user_id && x.RoomId == room_id, false)
                             .FirstOrDefaultAsync();
+            var user = await _repositoryManager.User
+                            .FindByCondition(x => x.Id == user_id ,false)
+                            .FirstOrDefaultAsync();
 
             if (userJoined == null)
             {
+                var msg = new SendMessageRequest
+                {
+                    Message = user.FullName + " đã tham gia hội thoại.",
+                    RoomId = room_id,
+                };
+                await JoinOrleaveChat(msg);
                 _repositoryManager.ChatRoomUser.Create(new Entities.Models.UserChatRoom
                 {
                     RoomId = room_id,
@@ -184,9 +195,17 @@ namespace Services.Implements
             var userJoined = await _repositoryManager.ChatRoomUser
                 .FindByCondition(x => x.UserId == user_id && x.RoomId == room_id, false)
                 .FirstOrDefaultAsync();
-
+            var user = await _repositoryManager.User
+                           .FindByCondition(x => x.Id == user_id, false)
+                           .FirstOrDefaultAsync();
             if (userJoined != null)
             {
+                var msg = new SendMessageRequest
+                {
+                    Message = user.FullName + " đã rời hội thoại.",
+                    RoomId = room_id,
+                };
+                await JoinOrleaveChat(msg);
                 _repositoryManager.ChatRoomUser.Delete(userJoined);
                 await _repositoryManager.SaveAsync();
             }
@@ -214,5 +233,23 @@ namespace Services.Implements
             var res = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, false).FirstOrDefaultAsync();
             return res;
         }
+        public async Task JoinOrleaveChat(SendMessageRequest info)
+        {
+            var room = await _repositoryManager.ChatRoom.FindByCondition(x => x.Id == info.RoomId, true).FirstOrDefaultAsync();      
+            var msg = new Messages
+            {
+                Message = info.Message,
+                RoomId = info.RoomId,
+                SendTime = DateTime.UtcNow.AddHours(7),
+                UserId = 65
+            };
+            room.UpdateTime = DateTime.UtcNow.AddHours(7);
+            _repositoryManager.Message.Create(msg);
+            await _repositoryManager.SaveAsync();
+           
+        }
     }
+
+    
 }
+

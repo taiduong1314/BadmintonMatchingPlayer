@@ -18,5 +18,6 @@ namespace Services.Interfaces
         Task<bool> JoinRoom(int user_id, int room_id);
         Task<bool> LeaveRoom(int user_id, int room_id);
         Task<User> SendMessage(int user_id, SendMessageRequest info);
+        Task JoinOrleaveChat(SendMessageRequest info);
     }
 }

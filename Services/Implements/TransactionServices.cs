@@ -472,9 +472,21 @@ namespace Services.Implements
             }
         }
 
-        public async Task<List<WithdrawDetail>> GetListWithRequest()
+        public async Task<List<WithdrawDetailResponse>> GetListWithRequest()
         {
-           var withdrawRequest = await _repositoryManager.WithdrawDetail.FindAll(false).ToListAsync();
+           var withdrawRequest = await _repositoryManager.WithdrawDetail.FindAll(false).Select(x=>new WithdrawDetailResponse()
+           {
+               Id=x.Id,
+               IdUser=x.IdUser,
+               Money = x.Money,
+               CreateDate = x.CreateDate.ToString("dd/MM/yyyy HH:mm"),
+               AcceptDate = x.AcceptDate.ToString("dd/MM/yyyy HH:mm"),
+               Status=x.Status,
+               BankName=x.BankName,
+               AccountName=x.AccountName,
+               BankNumber=x.BankNumber,
+
+           }).ToListAsync();
            return withdrawRequest;
         }
 

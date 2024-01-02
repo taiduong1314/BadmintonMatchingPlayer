@@ -42,7 +42,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<List<PostInfomation?>> { Message = "Can't found user" });
+                return Ok(new SuccessObject<List<PostInfomation?>> { Message = "Không thể tìm thấy người dùng !" });
             }
             var res = _postServices.GetSuggestionPost(user_id);
             return Ok(new SuccessObject<List<PostInfomation>> { Data = res, Message = Message.SuccessMsg });
@@ -54,7 +54,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                Ok(new SuccessObject<object> { Message = "Can't found user" });
+                Ok(new SuccessObject<object> { Message = "Không thể tìm thấy người dùng !" });
             }
             var postId = await _postServices.CreatePost(user_id, info);
             if (postId == -1)
@@ -116,7 +116,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<List<PostInfomation?>> { Message = "Can't found user" });
+                return Ok(new SuccessObject<List<PostInfomation?>> { Message = "Không thể tìm thấy người dùng !" });
             }
 
             List<PostInfomation> res = new List<PostInfomation>();
@@ -181,18 +181,23 @@ namespace BadmintonMatching.Controllers
         #region Delete Post byAdmin
         [HttpPut]
         [Route("{admin_id}/delete/{post_id}")]
-        public IActionResult DeletePost(int post_id, int admin_id)
+        public async Task<IActionResult> DeletePost(int post_id, int admin_id)
         {
             if (!_userServices.IsAdmin(admin_id))
             {
                 if (!_userServices.IsPostOwner(admin_id, post_id))
                 {
-                    return Ok(new SuccessObject<object> { Message = "Not permission to delete" });
+                    return Ok(new SuccessObject<object> { Message = "Bạn không có quyền xóa" });
                 }
             }
-           
+          
+            var res =await _postServices.DeletePostAsync(post_id);
+            if (!res)
+            {
 
-            var res = _postServices.DeletePost(post_id);
+                return Ok(new SuccessObject<object> { Message = "Bài viết đã có người đặt chổ, bạn cần liên hệ với người đặt để xóa !" });
+            }
+
             return Ok(res ? new SuccessObject<object> { Data = true, Message = Message.SuccessMsg } : new SuccessObject<object> { Message = "Cập nhật thất bại" });
         }
         #endregion
@@ -248,7 +253,8 @@ namespace BadmintonMatching.Controllers
                 if (!enought)
                 {
                     return Ok(new SuccessObject<object> { Data = null, 
-                     Message = "The not limit for free posts has been exceeded for the month" });
+                     Message = "Bạn đã hết " + numberPostFee.ToString() + " lượt đăng bài miễn phí trong tháng này !"
+                    });
                 }
                 else
                 {
@@ -256,7 +262,7 @@ namespace BadmintonMatching.Controllers
                         Data = new CreateChargerResponse()
                         {
                            isUser = user_id,
-                        }, Message = "Bạn đã hết "+ numberPostFee.ToString()+ " lượt đăng bài miễn phí trong tháng này !"
+                        }, Message = Message.SuccessMsg
                     } );
 
                 }
@@ -264,7 +270,7 @@ namespace BadmintonMatching.Controllers
             }
             catch (NotImplementedException)
             {
-                return Ok(new SuccessObject<object> { Data = null, Message = "Invalid post" });
+                return Ok(new SuccessObject<object> { Data = null, Message = "Bài đăng không tồn tại" });
             }
         }
 

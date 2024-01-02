@@ -18,5 +18,6 @@ namespace Services.Interfaces
         ReportIncomeModel GetIncomeByInMonth(string month,string year);
         ReportIncomeModel GetIncomeByMonth(string startDate,string endDate);
         Task<ReportDetail> ReportDetail(int idReport, int reportType);
+        Task<bool> UpdateReportStatus(int idReport, int reportStatus);
     }
 }

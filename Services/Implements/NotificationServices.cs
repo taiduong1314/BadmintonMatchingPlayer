@@ -119,7 +119,7 @@ namespace Services.Implements
                 About = (int)type,
                 ReferenceInfo = referenceInfo
             };
-
+           
             _repositoryManager.Notification.Create(savedNoti);
             await _repositoryManager.SaveAsync();
 

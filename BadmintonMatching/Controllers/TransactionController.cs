@@ -133,10 +133,10 @@ namespace BadmintonMatching.Controllers
             var listRequest =await _transactionRepository.GetListWithRequest();
             if (listRequest==null)
             {
-                return Ok(new SuccessObject<List<WithdrawDetail?>> { Message = "Không có yêu cầu rút tiền nào !" });
+                return Ok(new SuccessObject<List<WithdrawDetailResponse?>> { Message = "Không có yêu cầu rút tiền nào !" });
             }
          
-            return Ok(new SuccessObject<List<WithdrawDetail>> { Data = listRequest, Message = Message.SuccessMsg });
+            return Ok(new SuccessObject<List<WithdrawDetailResponse>> { Data = listRequest, Message = Message.SuccessMsg });
         }
 
         [HttpPut]

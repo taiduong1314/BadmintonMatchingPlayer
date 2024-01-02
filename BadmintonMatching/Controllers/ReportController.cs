@@ -65,6 +65,22 @@ namespace BadmintonMatching.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("update_report_status/{id_report}&{report_status}")]
+        public async Task<IActionResult> CreateFromPost(int id_report, int report_status)
+        {
+            var report_id = await _reportServices.UpdateReportStatus(id_report, report_status);
+            if (report_id == false)
+            {
+                return Ok(new SuccessObject<object> { Message = "Báo cáo không tồn tại !" });
+            }
+            else
+            {
+                return Ok(new SuccessObject<object> { Data = new { ReportId = report_id }, Message = Message.SuccessMsg });
+            }
+        }
+
+
         [HttpGet]
         [Route("type/{report_type}")]
         public async Task<IActionResult> GetReportByType(int report_type)

@@ -146,13 +146,13 @@ namespace Services.Implements
 
 
 
-        public bool DeletePost(int post_id)
+        public async Task<bool> DeletePostAsync(int post_id)
         {
             var post = _repositoryManager.Post.FindByCondition(x => x.Id == post_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true).FirstOrDefault();
             if (post != null)
             {
                 post.IsDeleted = true;
-                _repositoryManager.SaveAsync();
+               await _repositoryManager.SaveAsync();
                 return true;
             }
             return false;
@@ -960,7 +960,10 @@ namespace Services.Implements
         {
 
             var user = await _repositoryManager.User.FindByCondition(x => x.Id == user_id, false).FirstOrDefaultAsync();
-
+            if (user == null)
+            {
+                return new List<PostOptional>();
+            }
             string playing_area_full = user.PlayingArea;
             int playing_level = user.PlayingLevel;
             string playing_way_raw = user.PlayingWay;
@@ -1037,7 +1040,30 @@ namespace Services.Implements
             int play_style_index = play_style_dict.TryGetValue(playing_style, out int styleIndex) ? styleIndex : -1;
 
 
-            var listpost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, false).Include(x => x.IdUserToNavigation).ToListAsync();
+           var allPost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, false).Include(x => x.IdUserToNavigation).ToListAsync();
+           var listpost = new List<Post>();
+            foreach (var optList in allPost)
+            {              
+                var cPost = new PostOptional
+                {
+                    IdPost = optList.Id,
+                    Title = optList.Title,
+                    AddressSlot = optList.AddressSlot,
+                    ContentPost = optList.ContentPost,
+                    ImgUrlPost = optList.ImgUrl,
+                    FullName = optList.IdUserToNavigation?.FullName,
+                    UserImgUrl = optList.IdUserToNavigation?.ImgUrl,
+                    HighlightUrl = optList.ImgUrl,
+                    UserId = optList.IdUserTo
+                };
+              
+                GetPostOptional(optList, ref cPost);
+                if (cPost.QuantitySlot != null && cPost.QuantitySlot != 0)
+                {
+                    listpost.Add(optList);
+                }
+            }
+
             var dataTable = new DataTable();
             dataTable.Columns.Add("district_part_post", typeof(int));
             dataTable.Columns.Add("playing_level_post", typeof(int));

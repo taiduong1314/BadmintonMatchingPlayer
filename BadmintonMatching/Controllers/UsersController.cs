@@ -262,11 +262,7 @@ namespace BadmintonMatching.Controllers
         [Route("{admin_id}/banded/{user_id}")]
         public IActionResult BanUnbanUser(int admin_id, int user_id)
         {
-            if (!_userServices.IsAdmin(admin_id))
-            {
-                return Ok(new SuccessObject<object> { Message = "Not admin for update" });
-            }
-
+            
             try
             {
                 bool isBanded = _userServices.BanUnbandLogin(user_id);

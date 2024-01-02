@@ -82,7 +82,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new SuccessObject<object> { Data = null, Message = "Fail to saved message" });
+                return Ok(new SuccessObject<object> { Data = null, Message = "Lưu tin nhắn thất bại !" });
             }
         }
 
@@ -92,15 +92,15 @@ namespace BadmintonMatching.Controllers
         {
             try
             {
-                if (!_userServices.IsAdmin(admin_id))
+                if (! await _userServices.IsStaff(admin_id))
                 {
-                    throw new Exception("Not admin to create");
+                    throw new Exception("Bạn không phải quản lí để tạo phòng !");
                 }
                 int roomId = await _chatServices.CreateRoom(admin_id, report_id);
 
                 if(roomId == 0)
                 {
-                    throw new Exception("Fail to create room");
+                    throw new Exception("Tạo phòng thất bại !");
                 }
 
                 return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = new { RoomId = roomId} });

@@ -293,13 +293,15 @@ namespace Services.Implements
                 IdUserTo = user_id,
                 IdUserFrom = userreport_id,
                 TimeReport = DateTime.UtcNow.AddHours(7),
+                Status = (int)ReportStatus.Pending
             };
             _repositoryManager.Report.Create(saveReport);
             _repositoryManager.SaveAsync().Wait();
             return saveReport.Id;
         }
 
-        
+
+
 
         public bool ExistUserId(int userId)
         {

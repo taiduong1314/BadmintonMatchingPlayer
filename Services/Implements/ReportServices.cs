@@ -1,6 +1,7 @@
 ﻿using Entities.Models;
 using Entities.RequestObject;
 using Entities.ResponseObject;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Repositories.Intefaces;
 using Services.Interfaces;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -307,6 +309,19 @@ namespace Services.Implements
             }
             return new ReportDetail();
 
+        }
+
+        public async Task<bool> UpdateReportStatus(int idReport, int reportStatus)
+        {
+            var report =await _repositoryManager.Report.FindByCondition(x => x.Id == idReport, false).FirstOrDefaultAsync();
+            if (report == null)
+            {
+                return false;
+            }
+            report.Status = reportStatus;
+            _repositoryManager.Report.Update(report);
+           await _repositoryManager.SaveAsync();
+            return true;
         }
     }
 }

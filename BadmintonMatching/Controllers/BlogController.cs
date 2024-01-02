@@ -81,7 +81,7 @@ namespace BadmintonMatching.Controllers
                     throw new Exception("Not staff to delete");
                 }
 
-                if (_postServices.DeletePost(blog_id))
+                if (await _postServices.DeletePostAsync(blog_id))
                 {
                     return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = true });
                 }
