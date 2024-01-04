@@ -106,7 +106,7 @@ namespace BadmintonMatching.Controllers
 
                 var chatRoom = await _chatServices.GetChatRoom(tran.Id);
                 var trans = await _repositoryManager.Transaction.FindByCondition(x => x.Id == tran.Id, false).FirstOrDefaultAsync();
-                var check = await _notificationServices.SendTransactionDetailsEmail(trans);
+                var check =  _notificationServices.TransactionDetailsEmail(trans);
                 var valid  =  await _postServices.isValidPost(info.PostId);
                 return Ok(new SuccessObject<SlotIncludeTransaction>
                 {

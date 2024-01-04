@@ -75,6 +75,27 @@ namespace BadmintonMatching.Controllers
 
         }
 
+
+        [HttpPut]
+        [Route("update_post/{post_id}")]
+        public async Task<IActionResult> UpdatePost(int post_id, NewPostInfo info)
+        {
+           
+            var res = await _postServices.UpdatePost(post_id, info); 
+            if (res == -1)
+            {
+                return Ok(new SuccessObject<object> { Message = "Bài đăng không tồn tại !" });
+            }   else if (res == 1)
+            {
+                return Ok(new SuccessObject<object> { Data=new {post_id},Message = "Bài đăng không tồn tại !" });
+            }     
+            else
+            {
+                return Ok(new SuccessObject<object> { Message = "Save fail" });
+            }
+        }
+
+
         [HttpPut]
         [Route("{user_id}/create_post_charge")]
         public async Task<IActionResult> CheckAvailableWalletMoney(int user_id)
@@ -247,13 +268,15 @@ namespace BadmintonMatching.Controllers
         {
             var setting = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == (int)SettingType.NumberPostFree,false).FirstOrDefaultAsync();
             var numberPostFee = (int)setting.SettingAmount.Value;
+            var free = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == (int)SettingType.PostingSetting, false).FirstOrDefaultAsync();
+           
             try
             {
                 bool enought = await _postServices.CheckPostInMonth(user_id);
                 if (!enought)
                 {
                     return Ok(new SuccessObject<object> { Data = null, 
-                     Message = "Bạn đã hết " + numberPostFee.ToString() + " lượt đăng bài miễn phí trong tháng này !"
+                     Message = "Bạn đã hết " + numberPostFee.ToString() + " lượt đăng bài miễn phí trong tháng này ! Phí đăng bài là: "+ free.SettingAmount
                     });
                 }
                 else

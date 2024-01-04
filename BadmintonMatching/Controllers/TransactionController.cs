@@ -141,17 +141,34 @@ namespace BadmintonMatching.Controllers
 
         [HttpPut]
         [Route("{id_request}/accept_withdraw_request")]
-        public async Task<IActionResult> WithdawRequest(int id_request)
+        public async Task<IActionResult> AcceptWithdawRequest(int id_request)
         {
-            var transaction = await _transactionRepository.UpdateRequestWithDrawStatus(id_request);
+            var transaction = await _transactionRepository.AcceptRequestWithDrawStatus(id_request);
 
             if (transaction == 0)
             {
-                return Ok(new SuccessObject<object> { Message = "Thanh toán thất bại !" });
+                return Ok(new SuccessObject<object> { Message = "Yêu cầu rút tiền không hợp lệ !" });
             }
             else if (transaction == -1)
             {
-                return Ok(new SuccessObject<object> { Message = "Số tiền trong ví không đủ để rút !" });
+                return Ok(new SuccessObject<object> { Message = "Thanh toán thất bại !" });
+            }
+            return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = new { id = transaction } });
+        }
+
+        [HttpPut]
+        [Route("{id_request}/denied_withdraw_request")]
+        public async Task<IActionResult> DeninWithdawRequest(int id_request)
+        {
+            var transaction = await _transactionRepository.DeniedRequestWithDrawStatus(id_request);
+
+            if (transaction == 0)
+            {
+                return Ok(new SuccessObject<object> { Message = "Từ chối yêu cầu thất bại !" });
+            }
+            else if (transaction == -1)
+            {
+                return Ok(new SuccessObject<object> { Message = "Hoàn tiền thất bại !" });
             }
             return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = new { id = transaction } });
         }

@@ -893,7 +893,7 @@ namespace Services.Implements
                     NotiDate = x.NotiDate.ToString("dd/MM/yyyy HH:mm"),
                     Title = x.Title,
                     ReferenceId = x.ReferenceInfo
-                }).ToListAsync();
+                }).OrderByDescending(x=>x.Id).ToListAsync();
 
             return noti;
         }

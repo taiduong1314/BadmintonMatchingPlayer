@@ -5,8 +5,8 @@ namespace Entities.RequestObject
     public class SendMessageRequest
     {
         [Required]
-        public string Message { get; set; }
+        public string? Message { get; set; }
         [Required]
-        public int RoomId { get; set; }
+        public int? RoomId { get; set; }
     }
 }

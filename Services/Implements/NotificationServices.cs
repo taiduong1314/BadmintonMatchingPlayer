@@ -203,11 +203,11 @@ namespace Services.Implements
 
 
 
-        public async Task<bool> SendTransactionDetailsEmail(Transaction transaction)
+        public bool TransactionDetailsEmail(Transaction transaction)
         {
             try
             {
-                var user = await _repositoryManager.User.FindByCondition(x => x.Id == transaction.IdUser, false).FirstOrDefaultAsync();
+                var user =  _repositoryManager.User.FindByCondition(x => x.Id == transaction.IdUser, false).FirstOrDefault();
                 string smtpServer = "smtp.gmail.com";
                 int smtpPort = 587;
                 string smtpUsername = "langtusayonly@gmail.com";
@@ -223,7 +223,7 @@ namespace Services.Implements
                     string subject = "Transaction Details";
 
                     // Construct the email body with the Transaction details
-                    string body = await GetTransactionDetailsHtml(transaction);
+                    string body =  GetTransactionDetailsHtml(transaction);
 
                     using (MailMessage mailMessage = new MailMessage(fromEmail, user.Email, subject, body))
                     {
@@ -244,7 +244,7 @@ namespace Services.Implements
             }
         }
 
-        public async Task<string> GetTransactionDetailsHtml(Transaction transaction)
+        public string GetTransactionDetailsHtml(Transaction transaction)
         {
             // HTML template for the email body
             string htmlTemplate = @"
@@ -338,7 +338,7 @@ namespace Services.Implements
             }
 
             // Replace placeholders with actual values
-            var user = await _repositoryManager.User.FindByCondition(x => x.Id == transaction.IdUser, false).FirstOrDefaultAsync();
+            var user =  _repositoryManager.User.FindByCondition(x => x.Id == transaction.IdUser, false).FirstOrDefault();
             htmlTemplate = htmlTemplate.Replace("{TransactionId}", transaction.Id.ToString());
             htmlTemplate = htmlTemplate.Replace("{TransactionTime}", transaction.TimeTrans.ToString());
             htmlTemplate = htmlTemplate.Replace("{TransactionMethod}", transaction.MethodTrans ?? "N/A");

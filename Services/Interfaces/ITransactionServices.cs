@@ -22,6 +22,7 @@ namespace Services.Interfaces
         Task UpdateStatus(int tran_id, TransactionStatus tranStatus);
         Task<int> CreateWithdrawRequest(CreateWithdrawRequest createWithdrawRequest);
         Task<List<WithdrawDetailResponse>> GetListWithRequest();
-        Task<int> UpdateRequestWithDrawStatus(int requestId);
+        Task<int> AcceptRequestWithDrawStatus(int requestId);
+        Task<int> DeniedRequestWithDrawStatus(int requestId);
     }
 }

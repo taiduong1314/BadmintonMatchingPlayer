@@ -18,6 +18,7 @@ using Accord.Statistics.Filters;
 using Accord.IO;
 using Accord.Math;
 using Accord.MachineLearning;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Services.Implements
 {
@@ -35,6 +36,7 @@ namespace Services.Implements
         public List<string> ContentSlots { get; set; }
     }
 
+
     public class PostServices : IPostServices
     {
         private readonly IRepositoryManager _repositoryManager;
@@ -45,7 +47,7 @@ namespace Services.Implements
                             IUserServices userServices)
         {
             _repositoryManager = repositoryManager;
-            _userServices= userServices;
+            _userServices = userServices;
 
 
         }
@@ -152,7 +154,7 @@ namespace Services.Implements
             if (post != null)
             {
                 post.IsDeleted = true;
-               await _repositoryManager.SaveAsync();
+                await _repositoryManager.SaveAsync();
                 return true;
             }
             return false;
@@ -654,7 +656,7 @@ namespace Services.Implements
                 return adminBlog;
             }
             var blogs = await _repositoryManager.Post
-                    .FindByCondition(x => x.IdType == (int)PostType.Blog && !x.IsDeleted && x.IdUserTo==userId, false)
+                    .FindByCondition(x => x.IdType == (int)PostType.Blog && !x.IsDeleted && x.IdUserTo == userId, false)
                     .Select(x => new BlogInList
                     {
                         Id = x.Id,
@@ -1040,10 +1042,10 @@ namespace Services.Implements
             int play_style_index = play_style_dict.TryGetValue(playing_style, out int styleIndex) ? styleIndex : -1;
 
 
-           var allPost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, false).Include(x => x.IdUserToNavigation).ToListAsync();
-           var listpost = new List<Post>();
+            var allPost = await _repositoryManager.Post.FindByCondition(x => !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, false).Include(x => x.IdUserToNavigation).ToListAsync();
+            var listpost = new List<Post>();
             foreach (var optList in allPost)
-            {              
+            {
                 var cPost = new PostOptional
                 {
                     IdPost = optList.Id,
@@ -1056,7 +1058,7 @@ namespace Services.Implements
                     HighlightUrl = optList.ImgUrl,
                     UserId = optList.IdUserTo
                 };
-              
+
                 GetPostOptional(optList, ref cPost);
                 if (cPost.QuantitySlot != null && cPost.QuantitySlot != 0)
                 {
@@ -1195,5 +1197,34 @@ namespace Services.Implements
             return true;
         }
 
+        public async Task<int> UpdatePost(int post_id, NewPostInfo info)
+        {
+
+
+            try
+            {
+                var isExistPost = await _repositoryManager.Post.FindByCondition(x => x.Id == post_id, false).FirstOrDefaultAsync();
+                if (isExistPost == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    isExistPost.CategorySlot = info.CategorySlot;
+                    isExistPost.LevelSlot = info.LevelSlot;
+                    isExistPost.Title = info.Title;
+                    isExistPost.AddressSlot = info.Address;
+                    isExistPost.CategorySlot = info.Description;
+                    isExistPost.SavedDate = DateTime.UtcNow.AddHours(7);
+                    _repositoryManager.Post.Update(isExistPost);
+                    _repositoryManager.SaveAsync().Wait();
+                }
+                return 1;
+            }
+            catch
+            {
+                return -1;
+            }
+        }
     }
 }

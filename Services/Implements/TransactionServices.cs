@@ -79,6 +79,36 @@ namespace Services.Implements
             if (transaction != null)
             {
                 _repositoryManager.Transaction.Delete(transaction);
+
+                var usertrans = new Transaction
+                {
+                    Id = 0,
+                    DeadLine = null,
+                    IdUser = transaction.IdUser,
+                    MoneyTrans = transaction.MoneyTrans,
+                    MethodTrans = "refund_trans",
+                    TypeTrans = "refund_trans",
+                    TimeTrans = DateTime.UtcNow.AddHours(7),
+                    Status = (int)TransactionStatus.PaymentSuccess,
+                };
+                _repositoryManager.Transaction.Create(usertrans);
+                await _repositoryManager.SaveAsync();
+
+                var userWallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == transaction.IdUser, true).FirstOrDefaultAsync();
+                if (userWallet != null)
+                {
+                    userWallet.Balance += transaction.MoneyTrans;
+                    _repositoryManager.HistoryWallet.Create(new HistoryWallet
+                    {
+                        Amount = transaction.MoneyTrans.ToString(),
+                        IdUser = transaction.IdUser,
+                        IdWallet = userWallet.Id,
+                        Status = (int)HistoryWalletStatus.Success,
+                        Time = DateTime.UtcNow.AddHours(7),
+                        Type = "Nhận tiền hoàn giao dịch: "+ transaction.Id
+                    });
+                }
+
                 await _repositoryManager.SaveAsync();
             }
         }
@@ -411,66 +441,97 @@ namespace Services.Implements
             }         
         }
 
-        public async Task<int> UpdateRequestWithDrawStatus(int requestId)
+        public async Task<int> DeniedRequestWithDrawStatus(int requestId)
         {
             var withdrawRequest = await _repositoryManager.WithdrawDetail.FindByCondition(x => x.Id == requestId, false).FirstOrDefaultAsync();
-            var withdrawTrans = await _repositoryManager.Transaction.FindByCondition(x => x.IdUser == withdrawRequest.IdUser, false).FirstOrDefaultAsync();
-            var adminId = 1; 
-            if (withdrawRequest == null)
+           
+            if (withdrawRequest  == null )
             {
                 return 0;
             }
             try
             {
-                withdrawTrans.Status=(int)TransactionStatus.PaymentSuccess;
-                withdrawRequest.Status = (int)WithdrawStatus.Seccesss;
+     
+                withdrawRequest.Status = (int)WithdrawStatus.Denied;
                 _repositoryManager.WithdrawDetail.Update(withdrawRequest);
+                await _repositoryManager.SaveAsync();
 
 
 
-                var wallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == adminId, true).FirstOrDefaultAsync();
-                if (wallet.Balance < withdrawRequest.Money)
-                {
-                    return -1;
-                }
+                var wallet = await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == withdrawRequest.IdUser, true).FirstOrDefaultAsync();          
                 if (wallet != null)
                 {
-                    wallet.Balance -= withdrawRequest.Money;
+                    wallet.Balance += withdrawRequest.Money;
 
                     _repositoryManager.HistoryWallet.Create(new HistoryWallet
                     {
-                        Amount = (-withdrawRequest.Money).ToString(),
-                        IdUser = adminId,
+                        Amount = (withdrawRequest.Money).ToString(),
+                        IdUser = withdrawRequest.IdUser,
                         IdWallet = wallet.Id,
                         Status = (int)HistoryWalletStatus.Success,
                         Time = DateTime.UtcNow.AddHours(7),
-                        Type = "Thanh toán yêu cầu rút tiền : "+requestId
+                        Type = "Hoàn tiền đã rút, yêu cầu rút tiền: "+requestId
                     });
                 }
-                var adminTrans = new Transaction
+                await _repositoryManager.SaveAsync();
+                var usertrans = new Transaction
                 {
                     Id = 0,
                     DeadLine = null,
-                    IdUser = adminId,
+                    IdUser = withdrawRequest.IdUser,
                     MoneyTrans = withdrawRequest.Money,
-                    MethodTrans = "withdraw_money",
-                    TypeTrans = "withdraw_money",
+                    MethodTrans = "refund_trans",
+                    TypeTrans = "refund_trans",
                     TimeTrans = DateTime.UtcNow.AddHours(7),
                     Status = (int)TransactionStatus.PaymentSuccess,
                 };
-
-                _repositoryManager.Transaction.Create(adminTrans);
-
-
+                _repositoryManager.Transaction.Create(usertrans);
                 await _repositoryManager.SaveAsync();
-                return adminId;
+                return 1;
             }
             catch (Exception e)
             {
 
-                return 0;
+                return -1;
             }
         }
+
+        public async Task<int> AcceptRequestWithDrawStatus(int requestId)
+        {
+            var withdrawRequest = await _repositoryManager.WithdrawDetail.FindByCondition(x => x.Id == requestId, false).FirstOrDefaultAsync();
+            var withdrawTrans = await _repositoryManager.Transaction.FindByCondition(x => x.IdUser == withdrawRequest.IdUser, false).FirstOrDefaultAsync();
+            if (withdrawRequest == null || withdrawTrans == null)
+            {
+                return 0;
+            }
+            try
+            {
+                withdrawTrans.Status = (int)TransactionStatus.PaymentSuccess;
+                withdrawRequest.Status = (int)WithdrawStatus.Seccesss;
+                _repositoryManager.WithdrawDetail.Update(withdrawRequest);
+                await _repositoryManager.SaveAsync();
+                return 1;
+            }
+            catch (Exception e)
+            {
+
+                return -1;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public async Task<List<WithdrawDetailResponse>> GetListWithRequest()
         {

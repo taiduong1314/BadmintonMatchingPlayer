@@ -107,7 +107,17 @@ namespace Services.Implements
                                 RoomId = room.RoomId,
                                 UserId = slot.IdUser
                             });
+
                             await _repositoryManager.SaveAsync();
+                            var user = await _repositoryManager.User
+                             .FindByCondition(x => x.Id == slot.IdUser, false)
+                             .FirstOrDefaultAsync();
+                            var msg = new SendMessageRequest
+                            {
+                                Message = user.FullName + " đã tham gia hội thoại.",
+                                RoomId = room.RoomId,
+                            };
+                            await JoinOrleaveChat(msg);
                         }
                     }
                     res.Add(room);
@@ -164,21 +174,16 @@ namespace Services.Implements
 
         public async Task<bool> JoinRoom(int user_id, int room_id)
         {
-            var userJoined = await _repositoryManager.ChatRoomUser
-                            .FindByCondition(x => x.UserId == user_id && x.RoomId == room_id, false)
-                            .FirstOrDefaultAsync();
+            
             var user = await _repositoryManager.User
                             .FindByCondition(x => x.Id == user_id ,false)
                             .FirstOrDefaultAsync();
-
+            var userJoined = await _repositoryManager.ChatRoomUser
+                           .FindByCondition(x => x.UserId == user_id && x.RoomId == room_id, false)
+                           .FirstOrDefaultAsync();
             if (userJoined == null)
             {
-                var msg = new SendMessageRequest
-                {
-                    Message = user.FullName + " đã tham gia hội thoại.",
-                    RoomId = room_id,
-                };
-                await JoinOrleaveChat(msg);
+                
                 _repositoryManager.ChatRoomUser.Create(new Entities.Models.UserChatRoom
                 {
                     RoomId = room_id,

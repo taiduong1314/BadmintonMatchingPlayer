@@ -8,6 +8,7 @@ namespace Services.Interfaces
     {
         Task<bool> CreateBlog(int user_id, NewBlogInfo info);
         Task<int> CreatePost(int user_id, NewPostInfo info);
+        Task<int> UpdatePost(int post_id, NewPostInfo info);
         Task<bool> DeletePostAsync(int post_id);
         Task<List<BlogInList>> GetAllBlogs(int userId);
         Task<List<PostOptional>> GetAllPost();

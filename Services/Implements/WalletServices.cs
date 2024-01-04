@@ -33,7 +33,7 @@ namespace Services.Implements
                     Status = ((HistoryWalletStatus)x.Status).ToString(),
                     Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
                     Type = x.Type
-                })
+                }).OrderByDescending(x=>x.Id)
                 .ToList();
 
             return histories;
@@ -85,7 +85,7 @@ namespace Services.Implements
         {
             try
             {
-                var userWallet =await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == userId,false).FirstOrDefaultAsync();
+                var userWallet =await _repositoryManager.Wallet.FindByCondition(x => x.IdUser == userId,false).OrderByDescending(x => x.Id).FirstOrDefaultAsync();
                 if( userWallet != null)
                 {
                     return userWallet;
