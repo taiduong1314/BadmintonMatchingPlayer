@@ -1092,7 +1092,7 @@ namespace Services.Implements
             var scaler = new Normalization();
             X = scaler.Apply(X);
 
-            var knn = new KNearestNeighbors(k: 5);
+            var knn = new KNearestNeighbors(k: 8);
             knn.Learn(X, y);
 
 

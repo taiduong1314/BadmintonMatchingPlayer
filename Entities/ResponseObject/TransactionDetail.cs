@@ -11,6 +11,7 @@ namespace Entities.ResponseObject
         public string? PayTime { get; set; }
         public string? Total { get; set; }
         public bool IsCancel { get; set; }
+        public double? CancelHour { get; set; }
         public TransactionStatus TranStatus { get; set; }
         public PostInTransaction? Post { get; set; }
     }

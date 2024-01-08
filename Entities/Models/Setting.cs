@@ -12,6 +12,7 @@ namespace Entities.Models
         BookingSetting = 2,
         NumberPostFree = 3,
         BoostPost=4,
+        CancelDate=5
     }
     public class Setting
     {

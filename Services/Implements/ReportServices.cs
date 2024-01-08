@@ -208,7 +208,7 @@ namespace Services.Implements
                     Status = ((HistoryWalletStatus)x.Status).ToString(),
                     Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
                     Type = x.Type
-                }).ToList();
+                }).OrderByDescending(x=>x.Time).ToList();
 
        
             var total = listHistoryWallet.Sum(x => Convert.ToDecimal(x.Amount));
@@ -237,7 +237,7 @@ namespace Services.Implements
                     Status = ((HistoryWalletStatus)x.Status).ToString(),
                     Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
                     Type = x.Type
-                }).ToList();
+                }).OrderByDescending(x => x.Time).ToList();
 
             var total = listHistoryWallet.Sum(x => Convert.ToDecimal(x.Amount));
 

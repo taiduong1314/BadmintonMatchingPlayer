@@ -120,6 +120,7 @@ namespace Services.Implements
 
         public async Task<TransactionDetail> GetDetail(int transaction_id)
         {
+            double dCancelDate = 0;
             var tran = await _repositoryManager.Transaction.FindByCondition(x => x.Id == transaction_id, false)
                 .Select(x => new TransactionDetail
                 {
@@ -136,8 +137,19 @@ namespace Services.Implements
                     TranStatus = (TransactionStatus)x.Status
                 }).FirstOrDefaultAsync();
 
-            tran.IsCancel = tran.Slots.Select(x => DateTime.ParseExact(x.PlayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture)).Min() > DateTime.Now
+            var setting = await _repositoryManager.Setting.FindByCondition(x => x.SettingId == (int)SettingType.CancelDate, false).FirstOrDefaultAsync();
+            if (setting != null )
+            {
+                 dCancelDate = Convert.ToDouble(setting.SettingAmount);
+
+                var minPlayDateTime = tran.Slots
+                    .Select(x => DateTime.ParseExact(x.PlayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture))
+                    .Min();
+                var minPlayDateTimeWithCancel = minPlayDateTime.AddHours(dCancelDate);
+                tran.IsCancel = minPlayDateTime < minPlayDateTimeWithCancel
                 && (tran.TranStatus == TransactionStatus.Processing || tran.TranStatus == TransactionStatus.PaymentSuccess);
+            }
+                
 
             if (tran != null && tran.Slots != null && tran.Slots[0] != null)
             {
@@ -171,7 +183,8 @@ namespace Services.Implements
                     }
                 }
             }
-            return tran != null ? tran : new TransactionDetail { Id = 0 };
+            tran.CancelHour = dCancelDate;
+            return tran != null ? tran : new TransactionDetail { Id = 0, };
         }
 
         public async Task<List<TransactionInfo>> GetOfUser(int user_id)
@@ -518,19 +531,6 @@ namespace Services.Implements
                 return -1;
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         public async Task<List<WithdrawDetailResponse>> GetListWithRequest()
