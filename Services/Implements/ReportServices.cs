@@ -208,13 +208,13 @@ namespace Services.Implements
                     Status = ((HistoryWalletStatus)x.Status).ToString(),
                     Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
                     Type = x.Type
-                }).OrderByDescending(x=>x.Time).ToList();
+                }).ToList();
 
        
             var total = listHistoryWallet.Sum(x => Convert.ToDecimal(x.Amount));
 
             var reportIncome = new ReportIncomeModel();
-            reportIncome.historyWalletModels = listHistoryWallet;
+            reportIncome.historyWalletModels = listHistoryWallet.OrderByDescending(x => x.Id).ToList(); ;
             reportIncome.Total = total;
 
             return reportIncome;
@@ -237,12 +237,12 @@ namespace Services.Implements
                     Status = ((HistoryWalletStatus)x.Status).ToString(),
                     Time = x.Time.Value.ToString("dd/MM/yyyy HH:mm"),
                     Type = x.Type
-                }).OrderByDescending(x => x.Time).ToList();
+                }).ToList();
 
             var total = listHistoryWallet.Sum(x => Convert.ToDecimal(x.Amount));
 
             var reportIncome = new ReportIncomeModel();
-            reportIncome.historyWalletModels = listHistoryWallet;
+            reportIncome.historyWalletModels = listHistoryWallet.OrderByDescending(x=>x.Id).ToList();
             reportIncome.Total = total;
 
             return reportIncome;
