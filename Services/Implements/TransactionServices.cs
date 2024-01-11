@@ -146,7 +146,7 @@ namespace Services.Implements
                     .Select(x => DateTime.ParseExact(x.PlayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture))
                     .Min();
                 var minPlayDateTimeWithCancel = minPlayDateTime.AddHours(dCancelDate);
-                tran.IsCancel = minPlayDateTime < minPlayDateTimeWithCancel
+                tran.IsCancel = (minPlayDateTime < minPlayDateTimeWithCancel && minPlayDateTime > DateTime.Now)
                 && (tran.TranStatus == TransactionStatus.Processing || tran.TranStatus == TransactionStatus.PaymentSuccess);
             }
                 
@@ -547,7 +547,7 @@ namespace Services.Implements
                AccountName=x.AccountName,
                BankNumber=x.BankNumber,
 
-           }).ToListAsync();
+           }).OrderByDescending(x => x.Id).ToListAsync();
            return withdrawRequest;
         }
 

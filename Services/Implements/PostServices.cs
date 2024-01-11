@@ -297,7 +297,8 @@ namespace Services.Implements
 
                 }
             }
-            if (lastSlot.StartTime < DateTime.UtcNow.AddHours(-7))
+
+            if (lastSlot.StartTime < DateTime.UtcNow)
             {
                 return false;
             }
