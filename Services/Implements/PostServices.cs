@@ -338,7 +338,7 @@ namespace Services.Implements
 
                 };
                 DateTime slotDateTime = DateTime.ParseExact(slotInfor.Days + " " + slotInfor.StartTime, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                if (slotDateTime >= DateTime.UtcNow.AddHours(-7) && slotInfor.QuantitySlot > 0 && slotInfor.QuantitySlot != null)
+                if (slotDateTime >= DateTime.Now && slotInfor.QuantitySlot > 0 && slotInfor.QuantitySlot != null)
                 {
                     l_slotInfor.Add(slotInfor);
                 }
