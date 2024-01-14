@@ -35,7 +35,7 @@ namespace BadmintonMatching.Controllers
 
             if (userInfo.Id == -1)
             {
-                return Ok(new SuccessObject<object> { Message = "UserId is banded by admin from login" });
+                return Ok(new SuccessObject<object> { Message = "Tài khoản của bạn đã bị khóa" });
             }
             else if (userInfo.Id == 0)
             {
