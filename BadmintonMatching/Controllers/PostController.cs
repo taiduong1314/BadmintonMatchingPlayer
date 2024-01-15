@@ -276,7 +276,8 @@ namespace BadmintonMatching.Controllers
                 if (!enought)
                 {
                     return Ok(new SuccessObject<object> { Data = null, 
-                     Message = "Bạn đã hết " + numberPostFee.ToString() + " lượt đăng bài miễn phí trong tháng này ! Phí đăng bài là: "+ free.SettingAmount
+
+                     Message = "Bạn đã hết " + numberPostFee.ToString() + " lượt đăng bài miễn phí trong tháng này ! Phí đăng bài là: "+ Convert.ToInt32(free.SettingAmount) + " VNĐ"
                     });
                 }
                 else
