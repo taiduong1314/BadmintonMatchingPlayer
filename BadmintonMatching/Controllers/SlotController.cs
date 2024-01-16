@@ -68,7 +68,7 @@ namespace BadmintonMatching.Controllers
                     _slotServices.Delete(lsSlot);
                     return Ok(new SuccessObject<SlotIncludeTransaction>
                     {
-                        Message = "Invalid num of available slot input"
+                        Message = "Số đầu vào vị trí có sẵn không hợp lệ !"
                     });
                 }
 
@@ -82,7 +82,7 @@ namespace BadmintonMatching.Controllers
                 if (tran == null)
                 {
                     _slotServices.Delete(lsSlot);
-                    return Ok(new SuccessObject<object> { Message = "Slot not found" });
+                    return Ok(new SuccessObject<object> { Message = "Không tìm thấy vị trí !" });
                 }
 
                 var newBalance = _walletServices.UpdateBalance(-tran.MoneyTrans.Value, createInfo.IdUser.Value, true);
@@ -92,11 +92,11 @@ namespace BadmintonMatching.Controllers
                     await _transactionRepository.DeleteTran(tran.Id);
                     if (newBalance == -1)
                     {
-                        return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+                        return Ok(new SuccessObject<object> { Message = "Số dư không đủ để thanh toán !" });
                     }
                     else if (newBalance == -2)
                     {
-                        return Ok(new SuccessObject<object> { Message = $"Wallet of user {createInfo.IdUser.Value} isn't found" });
+                        return Ok(new SuccessObject<object> { Message = $"Ví của người dùng {createInfo.IdUser.Value} không tìm thấy !" });
                     }
                 }
                 else
@@ -120,7 +120,7 @@ namespace BadmintonMatching.Controllers
             }
             catch (FieldAccessException)
             {
-                return Ok(new SuccessObject<object> { Message = "Can't subcript to your post" });
+                return Ok(new SuccessObject<object> { Message = "Không thể đăng ký bài viết của bạn !" });
             }
         }
     }

@@ -28,7 +28,7 @@ namespace BadmintonMatching.Controllers
               bool isSuccess=  _SettingService.UpdateSetting(SettingId, SettingAmount);
                 if (isSuccess)
                 {
-                    return Ok(new SuccessObject<object> { Data = true, Message = "Update sucesss !" });
+                    return Ok(new SuccessObject<object> { Data = true, Message = "Cập nhật thành công !" });
                 }
                 else
                 {

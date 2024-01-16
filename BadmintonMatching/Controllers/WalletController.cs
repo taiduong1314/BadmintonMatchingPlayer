@@ -30,11 +30,11 @@ namespace BadmintonMatching.Controllers
             var newBalance = _walletServices.UpdateBalance(updateWallet.Changes, user_id, false);
             if (newBalance == -1)
             {
-                return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+                return Ok(new SuccessObject<object> { Message = "Số dư không đủ để tahnh toán !" });
             }
             else if (newBalance == -2)
             {
-                return Ok(new SuccessObject<object> { Message = $"Wallet of user {user_id} isn't found" });
+                return Ok(new SuccessObject<object> { Message = $"Ví của người dùng {user_id} không tìm thấy !" });
             }
             else
             {
@@ -56,13 +56,13 @@ namespace BadmintonMatching.Controllers
             {
                 return new BadRequestObjectResult(new
                 {
-                    Message = "Can't create payment url at this time"
+                    Message = "Không thể tạo url thanh toán vào lúc này !"
                 });
             }
 
             return Ok(new SuccessObject<object>
             {
-                Message = "Create url successfully!",
+                Message = "Tạo url thành công!",
                 Data = responseUriVnPay
             });
         }
@@ -104,10 +104,10 @@ namespace BadmintonMatching.Controllers
 
             if(history.Count() == 0)
             {
-                return Ok(new SuccessObject<object> { Data = null, Message = "No history found" });
+                return Ok(new SuccessObject<object> { Data = null, Message = "Lịch sử không tồn tại !" });
             }
 
-            return Ok(new SuccessObject<List<HistoryWalletModel>> { Data = history, Message = "No history found" });
+            return Ok(new SuccessObject<List<HistoryWalletModel>> { Data = history, Message = "Không tìm thấy lịch sử !" });
         }
 
         [HttpGet]

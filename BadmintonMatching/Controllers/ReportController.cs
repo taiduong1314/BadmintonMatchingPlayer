@@ -29,7 +29,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsAdmin(admin_id))
             {
-                return Ok(new SuccessObject<List<Reports?>> { Message = "Not admin" });
+                return Ok(new SuccessObject<List<Reports?>> { Message = "Bạn không có quyền truy cập !" });
             }
             var reports = await _reportServices.GetByStatus((ReportStatus)status);
             return Ok(new SuccessObject<List<Reports>> { Data = reports, Message = Message.SuccessMsg });
@@ -42,7 +42,7 @@ namespace BadmintonMatching.Controllers
             var report_id = await _reportServices.CreateFromTransaction(tran_id, info);
             if (report_id == 0)
             {
-                return Ok(new SuccessObject<object> { Message = "Fail to create" });
+                return Ok(new SuccessObject<object> { Message = "Tạo giao dịch thất bại !" });
             }
             else
             {
@@ -57,7 +57,7 @@ namespace BadmintonMatching.Controllers
             var report_id = await _reportServices.CreateFromPost(user_id, post_id, info);
             if (report_id == 0)
             {
-                return Ok(new SuccessObject<object> { Message = "Fail to create" });
+                return Ok(new SuccessObject<object> { Message = "Tạo giao dịch thất bại !" });
             }
             else
             {
@@ -119,7 +119,7 @@ namespace BadmintonMatching.Controllers
             var reportDetail =await _reportServices.ReportDetail(idReport, reportType);
             if(reportDetail == null)
             {
-                 return Ok(new SuccessObject<object> { Data = null, Message = "Get report detail error" });
+                 return Ok(new SuccessObject<object> { Data = null, Message = "Lấy thông tin chi tiết báo cáo thất bại !" });
             }
             return Ok(new SuccessObject<ReportDetail> { Data = reportDetail, Message = Message.SuccessMsg });
         }

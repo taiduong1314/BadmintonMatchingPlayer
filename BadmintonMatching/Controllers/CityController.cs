@@ -31,7 +31,7 @@ namespace BadmintonMatching.Controllers
             {
                 return Ok(new SuccessObject<List<City?>>
                 {
-                    Message = "No cities found!"
+                    Message = "Không tìm thấy thành phố nào !"
                 });
             }
             return Ok(new SuccessObject<City> { Data = city, Message = Message.SuccessMsg});

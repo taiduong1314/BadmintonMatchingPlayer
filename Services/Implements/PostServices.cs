@@ -150,7 +150,19 @@ namespace Services.Implements
 
         public async Task<bool> DeletePostAsync(int post_id)
         {
-            var post = _repositoryManager.Post.FindByCondition(x => x.Id == post_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true).FirstOrDefault();
+            var post =await _repositoryManager.Post.FindByCondition(x => x.Id == post_id && !x.IsDeleted && x.IdType == (int)PostType.MatchingPost, true).FirstOrDefaultAsync();
+            if (post != null)
+            {
+                post.IsDeleted = true;
+                await _repositoryManager.SaveAsync();
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> DeleteBlogAsync(int post_id)
+        {
+            var post = await _repositoryManager.Post.FindByCondition(x => x.Id == post_id && !x.IsDeleted && x.IdType == (int)PostType.Blog, true).FirstOrDefaultAsync();
             if (post != null)
             {
                 post.IsDeleted = true;

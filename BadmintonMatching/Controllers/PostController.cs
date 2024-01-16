@@ -59,7 +59,7 @@ namespace BadmintonMatching.Controllers
             var postId = await _postServices.CreatePost(user_id, info);
             if (postId == -1)
             {
-                return Ok(new SuccessObject<object> { Message = "Invalid base64 string" });
+                return Ok(new SuccessObject<object> { Message = "Chuỗi base64 không hợp lệ !" });
             }
             else if (postId != 0)
             {
@@ -70,7 +70,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new SuccessObject<object> { Message = "Save fail" });
+                return Ok(new SuccessObject<object> { Message = "Lưu thất bại !" });
             }
 
         }
@@ -91,7 +91,7 @@ namespace BadmintonMatching.Controllers
             }     
             else
             {
-                return Ok(new SuccessObject<object> { Message = "Save fail" });
+                return Ok(new SuccessObject<object> { Message = "Lưu thất bại !" });
             }
         }
 
@@ -104,11 +104,11 @@ namespace BadmintonMatching.Controllers
             var updateWalletCheck = await _postServices.UpdateFreePosting(user_id);
             if (updateWalletCheck == 0)
             {
-                return Ok(new SuccessObject<object> { Message = "Balance not enough to charge" });
+                return Ok(new SuccessObject<object> { Message = "Số tiền trong ví không đủ  để thanh toán !" });
             }
             else if (updateWalletCheck == -1)
             {
-                return Ok(new SuccessObject<object> { Message = $"Update Error" });
+                return Ok(new SuccessObject<object> { Message = $"Thanh toán lỗi !" });
             }
             return Ok(new SuccessObject<CreateChargerResponse>
             {
@@ -234,7 +234,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new SuccessObject<List<JoinedPost>?> { Message = "Invalid request" });
+                return Ok(new SuccessObject<List<JoinedPost>?> { Message = "Yêu cầu không tồn tại !" });
             }
         }
 
@@ -249,7 +249,7 @@ namespace BadmintonMatching.Controllers
             }
             catch (NotImplementedException)
             {
-                return Ok(new SuccessObject<object> { Data = null, Message = "Invalid post" });
+                return Ok(new SuccessObject<object> { Data = null, Message = "Bài đăng không tồn tại !" });
             }
         }
 

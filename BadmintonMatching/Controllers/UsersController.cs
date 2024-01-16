@@ -68,13 +68,13 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't found user" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy người dùng !" });
             }
             if (info.ListArea != null)
             {
                 _userServices.AddPlayingArea(user_id, info);
             }
-            return Ok(new SuccessObject<object> { Message = "Playing Area is saved", Data = true });
+            return Ok(new SuccessObject<object> { Message = "Khu vực chơi đã được lưu !", Data = true });
         }
 
         [HttpPost]
@@ -83,13 +83,13 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't found user" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy người dùng !" });
             }
             if (info.Point > 0)
             {
                 _userServices.AddPlayingLevel(user_id, info);
             }
-            return Ok(new SuccessObject<object> { Message = "Playing Level is saved", Data = true });
+            return Ok(new SuccessObject<object> { Message = "Cấp độ chơi đã được lưu !", Data = true });
         }
 
         [HttpPost]
@@ -98,13 +98,13 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't found user" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy người dùng !" });
             }
             if (info.PlayingWays != null)
             {
                 _userServices.AddPlayingWay(user_id, info);
             }
-            return Ok(new SuccessObject<object> { Message = "Playing Way is saved", Data = true });
+            return Ok(new SuccessObject<object> { Message = "Cách chơi đã được lưu !", Data = true });
         }
 
         [HttpGet]
@@ -114,7 +114,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<List<UserSuggestion?>> { Message = "Can't found user" });
+                return Ok(new SuccessObject<List<UserSuggestion?>> { Message = "Không tìm thấy người dùng !" });
             }
             var areas = _userServices.GetUserAreas(user_id);
             var res = new List<UserSuggestion>();
@@ -147,11 +147,11 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsUserExist(email))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't found user" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy người dùng !" });
             }
 
             await _userServices.SendEmailAsync(email);
-            return Ok(new SuccessObject<object> { Data = true, Message = "Send mail success" });
+            return Ok(new SuccessObject<object> { Data = true, Message = "Gửi thư thành công !" });
         }
 
         [HttpPost]
@@ -160,13 +160,13 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsUserExist(info.Email))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't found user" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy người dùng !" });
             }
 
             var success = _userServices.CheckRemoveVefToken(info);
 
-            return Ok(success ? new SuccessObject<object> { Message = "Verify Success", Data = true }
-            : new SuccessObject<object> { Message = "Invalid token" });
+            return Ok(success ? new SuccessObject<object> { Message = "Xác minh thành công !", Data = true }
+            : new SuccessObject<object> { Message = "Mã không hợp lệ !" });
         }
 
         [HttpPut]
@@ -175,12 +175,12 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsUserExist(email))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't found user" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy người dùng !" });
             }
 
             if (info.NewPassword != info.ReEnterPassword)
             {
-                return Ok(new SuccessObject<object> { Message = "Password verify not matches" });
+                return Ok(new SuccessObject<object> { Message = "Xác minh mật khẩu không khớp  !" });
             }
 
             var success = _userServices.UpdatePassword(email, info);
@@ -195,7 +195,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<List<CommentInfos?>> { Message = "Can't found user" });
+                return Ok(new SuccessObject<List<CommentInfos?>> { Message = "Không tìm thấy người dùng !" });
             }
 
             var res = _userServices.GetComments(user_id);
@@ -209,7 +209,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id) || !_userServices.ExistUserId(user_id_receive_comment))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't found user" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy người dùng !" });
             }
 
             int commentId = _userServices.SaveComment(user_id, user_id_receive_comment, comment);
@@ -225,7 +225,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<List<BandedUsers?>> { Message = "Can't found user" });
+                return Ok(new SuccessObject<List<BandedUsers?>> { Message = "Không tìm thấy người dùng !" });
             }
 
             List<BandedUsers> bandedLs = _userServices.GetBandedUsers(user_id);
@@ -271,7 +271,7 @@ namespace BadmintonMatching.Controllers
             }
             catch (NotImplementedException)
             {
-                return Ok(new SuccessObject<object> { Message = "not found user_id" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy id người dùng !" });
             }
         }
 
@@ -281,7 +281,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.IsAdmin(admin_id))
             {
-                return Ok(new SuccessObject<List<UserReport?>> { Message = "Not admin for update" });
+                return Ok(new SuccessObject<List<UserReport?>> { Message = "Bạn không có quyền cập nhật !" });
             }
             List<UserReport> reports = _userServices.GetReports(user_id);
             return Ok(new SuccessObject<List<UserReport>> { Data = reports, Message = Message.SuccessMsg });
@@ -295,7 +295,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<UserProfile?> { Message = "Can't found user" });
+                return Ok(new SuccessObject<UserProfile?> { Message = "Không tìm thấy người dùng !" });
             }
             var res = _userServices.GetUserProfileSetting(user_id);
             res.Helpful = _userServices.GetHelpful(user_id);
@@ -351,7 +351,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id) || !_userServices.ExistUserId(userreport_id))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't found user" });
+                return Ok(new SuccessObject<object> { Message = "Không tìm thấy người dùng !" });
             }
 
             int commentId = _userServices.CreateReport(user_id, userreport_id, report);
@@ -368,7 +368,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<SelfProfile?> { Message = "Can't found user" });
+                return Ok(new SuccessObject<SelfProfile?> { Message = "Không tìm thấy người dùng !" });
             }
             var res = _userServices.GetSelfProfile(user_id);
             return Ok(new SuccessObject<SelfProfile> { Data = res, Message = Message.SuccessMsg });
@@ -384,11 +384,11 @@ namespace BadmintonMatching.Controllers
             {
                 case -2:
                     {
-                        return Ok(new SuccessObject<object?> { Message = "Can't found user" });
+                        return Ok(new SuccessObject<object?> { Message = "Không tìm thấy người dùng !" });
                     }
                 case -1:
                     {
-                        return Ok(new SuccessObject<object?> { Message = "Can't found target user" });
+                        return Ok(new SuccessObject<object?> { Message = "Không thể tìm thấy người dùng mục tiêu !" });
                     }
                 default:
                     {
@@ -431,15 +431,15 @@ namespace BadmintonMatching.Controllers
             }
             else if (res == 0)
             {
-                return Ok(new SuccessObject<object?> { Message = "Invalid old password" });
+                return Ok(new SuccessObject<object?> { Message = "Mật khẩu cũ không hợp lệ !" });
             }
             else if (res == -1)
             {
-                return Ok(new SuccessObject<object?> { Message = "Wrong re-input password" });
+                return Ok(new SuccessObject<object?> { Message = "Nhập lại mật khẩu sai !" });
             }
             else if (res == -2)
             {
-                return Ok(new SuccessObject<object?> { Message = "Invalid user" });
+                return Ok(new SuccessObject<object?> { Message = "Người dùng không tồn tại !" });
             }
             else
             {
@@ -467,7 +467,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new SuccessObject<object> { Message = "Fail to rating" });
+                return Ok(new SuccessObject<object> { Message = "Đánh giá thất bại !" });
             }
         }
 
@@ -487,7 +487,7 @@ namespace BadmintonMatching.Controllers
             try
             {
                 if (!_userServices.IsAdmin(admin_id))
-                    throw new Exception("Not admin to get");
+                    throw new Exception("Bạn không có quyền truy cập !");
 
                 var res = await _userServices.GetManagedProfile(user_id);
                 return Ok(new SuccessObject<ManagedDetailUser> { Data = res, Message = Message.SuccessMsg });
@@ -505,13 +505,13 @@ namespace BadmintonMatching.Controllers
             try
             {
                 if (!_userServices.IsAdmin(admin_id))
-                    throw new Exception("Not admin to get");
+                    throw new Exception("Bạn không có quyền truy cập !");
 
                 if (await _userServices.UpdateRole(user_id, (UserRole)role_id))
                     return Ok(new SuccessObject<object> { Data = true, Message = Message.SuccessMsg });
                 else
                 {
-                    throw new Exception("Fail to update");
+                    throw new Exception("Cập nhật thất bại !");
                 }
             }
             catch (Exception ex)

@@ -39,7 +39,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new SuccessObject<object> { Message = "Fail to join" });
+                return Ok(new SuccessObject<object> { Message = "Không thể tham gia !" });
             }
         }
 
@@ -55,7 +55,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new SuccessObject<List<JoinedChatRoom>> { Data = null, Message = "No chat room joined" });
+                return Ok(new SuccessObject<List<JoinedChatRoom>> { Data = null, Message = "Không có phòng trò chuyện nào được tham gia !" });
             }
         }
 

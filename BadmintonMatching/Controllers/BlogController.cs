@@ -28,7 +28,7 @@ namespace BadmintonMatching.Controllers
             {
                 if (! await _userServices.IsStaff(user_id))
                 {
-                    throw new Exception("Not staff to create");
+                    throw new Exception("Bạn không có quyền tạo tin tức !");
                 }
 
                 if(await _postServices.CreateBlog(user_id, info))
@@ -37,7 +37,7 @@ namespace BadmintonMatching.Controllers
                 }
                 else
                 {
-                    return Ok(new SuccessObject<object> { Message = "Create fail" });
+                    return Ok(new SuccessObject<object> { Message = "Tạo tin tức thất bại !" });
                 }
             }
             catch (Exception ex)
@@ -78,16 +78,16 @@ namespace BadmintonMatching.Controllers
             {
                 if (! _userServices.IsAdminAndStaff(user_id))
                 {
-                    throw new Exception("Not staff to delete");
+                    throw new Exception("Bạn không có quyền để xóa !");
                 }
 
-                if (await _postServices.DeletePostAsync(blog_id))
+                if (await _postServices.DeleteBlogAsync(blog_id))
                 {
                     return Ok(new SuccessObject<object> { Message = Message.SuccessMsg, Data = true });
                 }
                 else
                 {
-                    return Ok(new SuccessObject<object> { Message = "Delete fail" });
+                    return Ok(new SuccessObject<object> { Message = "Xóa tin tức thất bại !" });
                 }
             }
             catch (Exception ex)

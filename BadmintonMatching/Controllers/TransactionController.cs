@@ -27,12 +27,12 @@ namespace BadmintonMatching.Controllers
         {
             if (_transactionRepository.IsFromTwoPost(info.IdSlot))
             {
-                return Ok(new SuccessObject<object> { Message = "Can't create from slots of more than 1 post" });
+                return Ok(new SuccessObject<object> { Message = "Không thể tạo từ các vị trí có nhiều hơn 1 bài đăng !" });
             }
             var tranId = await _transactionRepository.CreateForBuySlot(info);
             if (tranId.Id == 0)
             {
-                return Ok(new SuccessObject<object>{ Message = "Create not success" });
+                return Ok(new SuccessObject<object>{ Message = "Tạo giao dịch thất bại !" });
             }
             else
             {
@@ -58,7 +58,7 @@ namespace BadmintonMatching.Controllers
             }
             else
             {
-                return Ok(new SuccessObject<object> { Message = "Invalid transaction" });
+                return Ok(new SuccessObject<object> { Message = "Giao dịch khôn tồn tại !" });
             }
         }
 
@@ -69,7 +69,7 @@ namespace BadmintonMatching.Controllers
         {
             if (!_userServices.ExistUserId(user_id))
             {
-                return Ok(new SuccessObject<List<TransactionInfo?>> { Message = "Invalid User" });
+                return Ok(new SuccessObject<List<TransactionInfo?>> { Message = "Người dùng không tồn tại !" });
             }
 
             var data = await _transactionRepository.GetOfUser(user_id);
@@ -100,12 +100,12 @@ namespace BadmintonMatching.Controllers
                 }
                 else
                 {
-                    return Ok(new SuccessObject<object> { Message = "Completed transaction not allow to delete" });
+                    return Ok(new SuccessObject<object> { Message = "Giao dịch đã hoàn tất không được phép xóa !" });
                 }
             }
             else
             {
-                return Ok(new SuccessObject<object> { Message = "Invalid transaction id" });
+                return Ok(new SuccessObject<object> { Message = "Giao dịch khôn tồn tại ! id" });
             }
         }
 
