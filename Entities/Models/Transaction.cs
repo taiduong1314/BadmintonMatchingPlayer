@@ -19,7 +19,7 @@
             Slots = new HashSet<Slot>();
             ScheduledJob = new HashSet<HangfireJob>();
         }
-
+       
         public int Id { get; set; }
         public int? IdUser { get; set; }
         public DateTime? TimeTrans { get; set; }

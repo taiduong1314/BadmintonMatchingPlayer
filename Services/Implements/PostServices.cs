@@ -562,7 +562,8 @@ namespace Services.Implements
                     .FindByCondition(x => x.Code == $"{post.Id}_{finalInfo.StartTime.Value.ToString("dd/MM/yyyy")}", false)
                     .Select(x => x.Id).FirstOrDefault();
 
-
+                Dictionary<TransactionStatus, string> vietnameseStatus = CreateVietnameseStatusDictionary();
+                string vietnameseTranslation = vietnameseStatus[(TransactionStatus)item.Status];
                 res.Add(new JoinedPost
                 {
                     AreaName = post.AddressSlot,
@@ -570,7 +571,7 @@ namespace Services.Implements
                     TransacionId = item.Id,
                     BookedInfos = bookedInfos,
                     PostId = post.Id,
-                    Status = ((TransactionStatus)item.Status).ToString(),
+                    Status = vietnameseTranslation,
                     PostTitle = post.Title,
                     AvailableSlot = (finalInfo.AvailableSlot - joinedSlot).ToString(),
                     EndTime = finalInfo.EndTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
@@ -584,7 +585,20 @@ namespace Services.Implements
             }
             return res;
         }
+        public static Dictionary<TransactionStatus, string> CreateVietnameseStatusDictionary()
+        {
+            Dictionary<TransactionStatus, string> vietnameseStatus = new Dictionary<TransactionStatus, string>
+        {
+            { TransactionStatus.Processing, "Đang xử lý" },
+            { TransactionStatus.PaymentSuccess, "Thanh toán thành công" },
+            { TransactionStatus.PaymentFailure, "Thanh toán thất bại" },
+            { TransactionStatus.Played, "Đã chơi" },
+            { TransactionStatus.Reporting, "Đang báo cáo" },
+            { TransactionStatus.ReportResolved, "Báo cáo đã giải quyết" }
+        };
 
+            return vietnameseStatus;
+        }
         public async Task<List<Room>> GetChatRooms(int post_id)
         {
             var post = await _repositoryManager.Post.FindByCondition(x => x.Id == post_id && x.IdType == (int)PostType.MatchingPost, false).FirstOrDefaultAsync();
