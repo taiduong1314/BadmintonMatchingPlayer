@@ -164,6 +164,7 @@ namespace Services.Implements
                     {
                         Address = slot.IdPostNavigation.AddressSlot,
                         Id = slot.IdPostNavigation.Id,
+                        UserId=slot.IdPostNavigation.IdUserTo,
                         ImageUrls = slot.IdPostNavigation.ImageUrls.Split(";").ToList(),
                         Title = slot.IdPostNavigation.Title,
                         TitleImage = slot.IdPostNavigation.ImgUrl,

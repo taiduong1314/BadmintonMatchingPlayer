@@ -201,7 +201,7 @@ namespace Services.Implements
             for (var i = 0; i < res.Count(); i++)
             {
                 var cPost = res[i];
-                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).Include(x => x.Slots).FirstOrDefault();
+                var post = _repositoryManager.Post.FindByCondition(x => x.Id == cPost.IdPost, false).OrderByDescending(x=>x.SavedDate).Include(x => x.Slots).FirstOrDefault();
                 if (post != null)
                 {
                     GetPostOptional(post, ref cPost);
@@ -263,7 +263,7 @@ namespace Services.Implements
                     returnList.Add(postOptional);
                 }
             }
-
+      
 
 
             return returnList;
@@ -563,7 +563,7 @@ namespace Services.Implements
                     .Select(x => x.Id).FirstOrDefault();
 
                 Dictionary<TransactionStatus, string> vietnameseStatus = CreateVietnameseStatusDictionary();
-                string vietnameseTranslation = vietnameseStatus[(TransactionStatus)item.Status];
+
                 res.Add(new JoinedPost
                 {
                     AreaName = post.AddressSlot,
@@ -571,7 +571,7 @@ namespace Services.Implements
                     TransacionId = item.Id,
                     BookedInfos = bookedInfos,
                     PostId = post.Id,
-                    Status = vietnameseTranslation,
+                    Status = vietnameseStatus[(TransactionStatus)item.Status],
                     PostTitle = post.Title,
                     AvailableSlot = (finalInfo.AvailableSlot - joinedSlot).ToString(),
                     EndTime = finalInfo.EndTime.Value.ToString("dd/MM/yyyy hh:mm:ss tt"),
@@ -954,7 +954,7 @@ namespace Services.Implements
                         Type = "Thanh toán phí đẩy bài đăng"
                     });
                 }
-                post.SavedDate = DateTime.Now;
+                post.SavedDate = DateTime.Now.AddHours(7);
                 _repositoryManager.Post.Update(post);
                 await _repositoryManager.SaveAsync();
                 return 1;
